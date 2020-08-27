@@ -5,8 +5,10 @@ import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Message;
 
 public class Player {
-	public final Member member;
+	public Member member;
+	public long mid;
 	public Player(Member member) {
+		this.mid=member.getId();
 		this.member = member;
 	}
 	public void sendPrivate(String str) {

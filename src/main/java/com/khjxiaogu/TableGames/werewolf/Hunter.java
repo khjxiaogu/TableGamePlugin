@@ -10,11 +10,12 @@ import net.mamoe.mirai.message.data.PlainText;
 public class Hunter extends Innocent {
 	@Override
 	public boolean onDiePending(DiedReason dir) {
+		super.StartTurn();
 		dr=dir;
 		if(dir!=DiedReason.Poison) {
 			this.sendPrivate(wereWolfGame.getAliveList());
 			super.sendPrivate("猎人，你死了，你可以选择暴露并开枪打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
-			Utils.registerListener(super.member,(msg,type)->{
+			Utils.registerListener(super.mid,(msg,type)->{
 				if(dir==DiedReason.Vote&&type==MsgType.AT) {
 					Utils.releaseListener(member.getId());
 					wereWolfGame.skipWait();
@@ -37,6 +38,7 @@ public class Hunter extends Innocent {
 							super.sendPrivate("选择的qq号或者游戏号码是你自己，请重新输入");
 							return;
 						}
+						this.EndTurn();
 						Utils.releaseListener(super.member.getId());
 						if(dir==DiedReason.Vote)
 							Utils.registerListener(super.member, (msgx,typex)->{
@@ -48,9 +50,11 @@ public class Hunter extends Innocent {
 						super.sendPrivate("你杀死了"+p.getMemberString());
 						super.sendPublic(new PlainText("死亡，身份是猎人，同时带走了").plus(p.getAt()));
 						if(dir==DiedReason.Vote)
-							wereWolfGame.hunterKillForce(p);
-						else
-							wereWolfGame.hunterKill(p);
+							wereWolfGame.scheduler.execute(()->p.onDied(DiedReason.Hunter));
+						else {
+							p.isDead=true;
+							wereWolfGame.kill(p,DiedReason.Hunter);
+						}
 					}catch(Throwable t) {
 						super.sendPrivate("发生错误，正确格式为：“杀死 qq号或者游戏号码”！");
 					}
@@ -62,7 +66,10 @@ public class Hunter extends Innocent {
 		}
 		return false;
 	}
-
+	@Override
+	public void onTurn() {
+		onDiePending(dr);
+	}
 	@Override
 	public void onDied(DiedReason dir) {
 		dr=dir;
@@ -79,6 +86,10 @@ public class Hunter extends Innocent {
 
 	public Hunter(WereWolfGame wereWolfGame, Member member) {
 		super(wereWolfGame, member);
+	}
+	@Override
+	public int getTurn() {
+		return 3;
 	}
 	@Override
 	public String getRole() {

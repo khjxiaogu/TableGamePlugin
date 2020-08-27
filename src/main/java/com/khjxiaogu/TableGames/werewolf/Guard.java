@@ -12,15 +12,11 @@ public class Guard extends Innocent {
 	}
 
 	@Override
-	public void onGameStart() {
-		sendPrivate("您的身份是：守卫。");
-	}
-
-	@Override
-	public boolean onGuardTurn() {
+	public void onTurn() {
+		super.StartTurn();
 		this.sendPrivate(wereWolfGame.getAliveList());
-		super.sendPrivate("守卫，你可以保护一个人包括自己免于死亡，不能连续两次保护同一个人，请私聊选择保护的人，你有30秒的考虑时间\n格式：“保护 qq号或者游戏号码”\n如：“保护 1”");
-		Utils.registerListener(super.member,(msg,type)->{
+		super.sendPrivate("守卫，你可以保护一个人包括自己免于死亡，不能连续两次保护同一个人，请私聊选择保护的人，你有60秒的考虑时间\n格式：“保护 qq号或者游戏号码”\n如：“保护 1”");
+		Utils.registerListener(super.mid,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("保护")) {
@@ -39,16 +35,20 @@ public class Guard extends Innocent {
 						super.sendPrivate("选择的qq号或者游戏号码上次已经被保护，请重新输入");
 						return;
 					}
+					this.EndTurn();
 					Utils.releaseListener(super.member.getId());
 					p.isGuarded=true;
-					wereWolfGame.tokill.remove(p);
 					super.sendPrivate(p.getMemberString()+"获得了保护！");
 				}catch(Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“保护 qq号或者游戏号码”！");
 				}
 			}
 		});
-		return true;
+	}
+
+	@Override
+	public int getTurn() {
+		return 2;
 	}
 
 	@Override

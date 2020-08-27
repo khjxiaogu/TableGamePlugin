@@ -2,9 +2,13 @@ package com.khjxiaogu.TableGames;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.khjxiaogu.TableGames.werewolf.Innocent;
 
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
@@ -17,6 +21,7 @@ public abstract class PreserveInfo<T extends Game>{
 	public PreserveInfo(Group g) {
 		group=g;
 	}
+	static Map<Long,Class<? extends Innocent>> lastJobs=new HashMap<>();
 	protected abstract int getSuitMembers();
 	protected abstract int getMinMembers();
 	protected abstract int getMaxMembers();
@@ -27,6 +32,11 @@ public abstract class PreserveInfo<T extends Game>{
 		if(topreserve.size()>=getMaxMembers()) {
 			group.sendMessage(getName()+"当前已经满人！");
 			return;
+		}
+		try {
+			m.getBot().getFriend(m.getId());
+		}catch(Exception e) {
+			m.sendMessage("为了保证游戏流畅进行，请加我好友。");
 		}
 		if(topreserve.add(m)) {
 			m.sendMessage("预定成功");
@@ -99,12 +109,17 @@ public abstract class PreserveInfo<T extends Game>{
 	}
 	public boolean startGame() {
 		if(topreserve.isEmpty())return false;
+		System.out.println("starting game");
+		this.group.sendMessage("尝试开始游戏中...");
 		topreserve.removeIf(m->Utils.hasMember(m.getId()));
 		Game gm=Utils.createGame(getGameClass(),group,topreserve.size());
 		List<Member> mems=new ArrayList<>(topreserve);
 		topreserve.clear();
 		Collections.shuffle(mems);
+		Collections.shuffle(mems);
+		Collections.shuffle(mems);
 		mems.removeIf(m->gm.addMember(m));
+		this.group.sendMessage("游戏已经开始...");
 		return true;
 	}
 }

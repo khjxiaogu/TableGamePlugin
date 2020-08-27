@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+
+
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.undercover.UnderCoverGame;
 import com.khjxiaogu.TableGames.undercover.UnderCoverPreserve;
@@ -39,6 +42,10 @@ public class TableGames extends PluginBase {
 			Utils.createGame(gameClass,event.getGroup(),Integer.parseInt(command[1]));
 			event.getGroup().sendMessage(name+"游戏已经创建，请 @我 报名 来报名。");
 		});
+		privcmd.put("定制"+name, (event,command)->{
+			Utils.createGame(gameClass,event.getGroup(),Arrays.copyOfRange(command,1,command.length));
+			event.getGroup().sendMessage(name+"游戏已经创建，请 @我 报名 来报名。");
+		});
 	}
 	static {
 		makeGame("狼人杀",WereWolfPreserve.class,WereWolfGame.class);
@@ -59,6 +66,7 @@ public class TableGames extends PluginBase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		this.getEventListener().subscribeAlways(net.mamoe.mirai.event.events.NewFriendRequestEvent.class,event->event.accept());
 		this.getEventListener().subscribeAlways(GroupMessageEvent.class, event -> {
 			if(event.getGroup().getBotAsMember().getPermission()==MemberPermission.MEMBER)return;
 			At at = event.getMessage().first(At.Key);
@@ -97,4 +105,5 @@ public class TableGames extends PluginBase {
 		this.getEventListener().subscribeAlways(TempMessageEvent.class, event -> {Utils.dispatch(event.getSender().getId(),MsgType.PRIVATE,event.getMessage());});
 		this.getEventListener().subscribeAlways(FriendMessageEvent.class, event -> {Utils.dispatch(event.getSender().getId(),MsgType.PRIVATE,event.getMessage());});
 	}
+
 }

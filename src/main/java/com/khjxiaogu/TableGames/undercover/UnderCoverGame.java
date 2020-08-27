@@ -44,6 +44,12 @@ public class UnderCoverGame extends Game {
 		doFinalize();
 		main.stop();
 	}
+	@Override
+	protected void doFinalize() {
+		for(Innocent in:innos)
+			Utils.RemoveMember(in.member.getId());
+		super.doFinalize();
+	}
 	public Innocent getPlayerById(long id) {
 		for(Innocent p:innos) {
 			if(p.member.getId()==id)
@@ -99,7 +105,6 @@ public class UnderCoverGame extends Game {
 				});
 				try {Thread.sleep(60000);} catch (InterruptedException e) {}
 				Utils.releaseListener(in.member.getId());
-				
 			}
 			vu.clear();
 			for(Innocent in:innos) {
@@ -164,6 +169,10 @@ public class UnderCoverGame extends Game {
 	@Override
 	public boolean isAlive() {
 		return !isEnded;
+	}
+	@Override
+	public boolean onReAttach(Long c) {
+		return false;
 	}
 
 }

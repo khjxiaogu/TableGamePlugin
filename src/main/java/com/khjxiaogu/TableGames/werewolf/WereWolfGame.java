@@ -24,7 +24,10 @@ public class WereWolfGame extends Game {
 		Vote("驱逐"),
 		Wolf("杀死"),
 		Poison("毒死"),
-		Hunter("射死");
+		Hunter("射死"),
+		Knight("单挑死"),
+		Explode("自爆死"),
+		Knight_s("以死谢罪");
 		String desc;
 
 		private DiedReason(String desc) {
@@ -47,6 +50,8 @@ public class WereWolfGame extends Game {
 	boolean canDayVote=false;
 	boolean isEnded=false;
 	boolean sameTurn=false;
+	Innocent cursed=null;
+	Innocent lastCursed=null;
 	Object waitLock=new Object();
 	VoteUtil<Innocent> vu=new VoteUtil<>();
 	int num=0;
@@ -58,21 +63,43 @@ public class WereWolfGame extends Game {
 		if(godcount>5)godcount=5;
 		int wolfcount=(int)Math.ceil((cplayer-godcount)/2.0);
 		int innocount=cplayer-godcount-wolfcount;
+		if(innocount<wolfcount) {
+			--innocount;
+			roles.add(OldMan.class);
+		}
 		while(--wolfcount>=0)
 			roles.add(Wolf.class);
 		while(--innocount>=0)
 			roles.add(Innocent.class);
+		Collections.shuffle(roles);
 		List<Class<? extends Innocent>> exroles=new ArrayList<>();
 		exroles.add(Guard.class);
 		exroles.add(Hunter.class);
 		exroles.add(Idoit.class);
 		exroles.add(Predictor.class);
 		exroles.add(Witch.class);
+		exroles.add(Crow.class);
+		exroles.add(Knight.class);
 		Collections.shuffle(exroles);
 		while(--godcount>=0)
-		roles.add(exroles.remove(0));
+			roles.add(exroles.remove(0));
+		Collections.shuffle(roles);
 		Collections.shuffle(roles);
 	}
+	@SuppressWarnings("unchecked")
+	public WereWolfGame(Group g,String... args) {
+		super(g,args.length,8);
+		for(String s:args) {
+			try {
+				roles.add((Class<? extends Innocent>) Class.forName("com.khjxiaogu.TableGames.werewolf."+s));
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		Collections.shuffle(roles);
+	}
+	//game control
 	@Override
 	protected void doFinalize() {
 		vu.clear();
@@ -82,17 +109,28 @@ public class WereWolfGame extends Game {
 		}
 		super.doFinalize();
 	}
-	void removeAllListeners() {
-		for(Innocent p:playerlist) {
-			Utils.releaseListener(p.member.getId());
+	@Override
+	public String getName() {
+		return "狼人杀";
+	}
+	@Override
+	public boolean isAlive() {
+		return !isEnded;
+	}
+	@Override
+	public boolean onReAttach(Long c) {
+		for(Innocent in:playerlist) {
+			if(in.onReattach(c))
+				return true;
 		}
+		return false;
 	}
 	public String getAliveList(){
 		StringBuilder sb=new StringBuilder("存活：\n");
 		for(Innocent p:playerlist) {
 			if(!p.isDead) {
-			sb.append(p.getMemberString());
-			sb.append("\n");
+				sb.append(p.getMemberString());
+				sb.append("\n");
 			}
 		}
 		return sb.toString();
@@ -136,8 +174,7 @@ public class WereWolfGame extends Game {
 		roles.clear();
 		scheduler.execute(()->gameStart());
 	}
-
-	
+	//wait utils
 	public void startWait(long millis) {
 		try {
 			synchronized(waitLock){
@@ -166,6 +203,13 @@ public class WereWolfGame extends Game {
 			wt=null;
 		}
 	}
+	//game logic
+	void removeAllListeners() {
+		for(Innocent p:playerlist) {
+			p.EndTurn();
+			Utils.releaseListener(p.member.getId());
+		}
+	}
 	public Innocent getPlayerById(long id) {
 		int i=0;
 		for(Innocent p:playerlist) {
@@ -177,12 +221,12 @@ public class WereWolfGame extends Game {
 	}
 
 	public void WolfVote(Innocent src,Innocent id) {
-		if(vote(src,id))
+		if(vu.vote(src,id))
 			skipWait();
 	}
 	public void DayVote(Innocent src,Innocent id) {
 		if(canDayVote)
-			if(vote(src,id))
+			if(vu.vote(src,id))
 				skipWait();
 	}
 	public void NoVote(Innocent src) {
@@ -190,28 +234,18 @@ public class WereWolfGame extends Game {
 		if(vu.finished()) 
 			skipWait();
 	}
-	public boolean vote(Innocent src,Innocent id) {
-		return vu.vote(src, id);
+	void kill(Innocent p,DiedReason r) {
+		tokill.put(p,r);
 	}
-	
-	public void witchKill(Innocent p) {
-		if(!p.isGuarded)
-			tokill.put(p,DiedReason.Poison);
-	}
-	public void hunterKill(Innocent p) {
-		p.isDead=true;
-		tokill.put(p,DiedReason.Hunter);
-	}
-	public void hunterKillForce(Innocent p) {
-		p.onDied(DiedReason.Hunter);
-	}
-	public void witchProtect(Innocent p) {
-		p.isDead=false;
-		tokill.remove(p);
+	/**
+	 * @param isMute  
+	 */
+	private void muteAll(boolean isMute) {
+		group.getSettings().setMuteAll(isMute);
 	}
 	//开始游戏流程
 	public void gameStart() {
-		group.getSettings().setMuteAll(false);
+		muteAll(true);
 		StringBuilder sb=new StringBuilder("玩家列表：\n");
 		for(Innocent p:playerlist) {
 			p.onGameStart();
@@ -220,65 +254,48 @@ public class WereWolfGame extends Game {
 		}
 		this.sendPublicMessage(sb.toString());
 		onDawn();
-		
 	}
 	//混合循环
 	public void onDawn() {
+		lastCursed=cursed;
+		cursed=null;
+		isDayTime=false;
 		vu.clear();
 		removeAllListeners();
 		onWolfTurn();
 	}
 	public void onWolfTurn() {
 		sendPublicMessage("天黑了，所有人闭眼，狼人请睁眼，请私聊投票选择你们要杀的人。");
-		group.getSettings().setMuteAll(true);
-		vu.clear();
+		muteAll(true);
 		for(Innocent p:playerlist) {
 			if(p.isDead)continue;
 			p.onWolfTurn();
 		}
-		wt=Thread.currentThread();
 		startWait(120000);
 		removeAllListeners();
-		wolfKill(vu.getMostVoted().get(0));
+		wolfKill(vu.getForceMostVoted().get(0));
 	}
 	public void wolfKill(Innocent p) {
 		vu.clear();
-		if(p!=null&&!p.isGuarded)
+		if(p instanceof OldMan&&!((OldMan) p).lifeUsed) {
+			((OldMan) p).lifeUsed=true;
+		}else if(p!=null)
 			tokill.put(p,DiedReason.Wolf);
-		this.sendPublicMessage("狼人请闭眼，预言家请睁眼，请私聊发你要查验的人。");
+		this.sendPublicMessage("狼人请闭眼，有夜间技能的玩家请睁眼，请私聊选择你们的技能。");
 		for(Innocent p2:playerlist) {
 			if(p2.isDead)continue;
-			p2.onPredictorTurn();
+			p2.onTurn(2);
 		}
-		startWait(30000);
+		startWait(60000);
 		removeAllListeners();
-		scheduler.execute(()->predictorEndTurn());
-	}
-	public void predictorEndTurn() {
-		this.sendPublicMessage("预言家请闭眼，守卫请睁眼，请私聊选择你要保护的对象。");
-		for(Innocent p2:playerlist) {
-			if(p2.isDead)continue;
-			p2.onGuardTurn();
-		}
-		startWait(30000);
-		removeAllListeners();
-		scheduler.execute(()->guardEndTurn());
-	}
-	public void guardEndTurn() {
-		this.sendPublicMessage("守卫请闭眼，女巫请睁眼，你有一瓶毒药，一瓶解药，今晚死亡的是……，请私聊输入你的操作。");
-		for(Innocent p2:playerlist) {
-			if(p2.isDead)continue;
-			p2.onWitchTurn();
-		}
-		startWait(30000);
-		removeAllListeners();
-		scheduler.execute(()->witchEndTurn());
-	}
-	public void witchEndTurn() {
 		scheduler.execute(()->onDiePending());
 	}
 	public void onDiePending() {
-		this.sendPublicMessage("女巫请闭眼，猎人请睁眼，你的开枪状态是……");
+		this.sendPublicMessage("有夜间技能的玩家请闭眼，猎人请睁眼，你的开枪状态是……");
+		tokill.entrySet().removeIf(in->{
+			Innocent ip=in.getKey();
+			return ip.isGuarded^ip.isSavedByWitch;
+		});
 		Set<Entry<Innocent, DiedReason>> rs=new HashSet<>(tokill.entrySet());
 		for(Entry<Innocent, DiedReason> p:rs) {
 			p.getKey().onDiePending(p.getValue());
@@ -287,8 +304,18 @@ public class WereWolfGame extends Game {
 		removeAllListeners();
 		scheduler.execute(()->onDayTime());
 	}
+	Boolean isDaySkipped=false;
+	boolean isDayTime=false;
+	public void skipDay() {
+		synchronized(isDaySkipped) {
+			if(isDayTime) {
+				isDaySkipped=true;
+			}
+		}
+		skipWait();
+	}
 	public void onDayTime() {
-		group.getSettings().setMuteAll(false);
+		muteAll(false);
 		if(!tokill.isEmpty()) {
 			StringBuilder sb=new StringBuilder("天亮了，昨晚的死者是：\n");
 			for(Innocent p:tokill.keySet()) {
@@ -309,20 +336,43 @@ public class WereWolfGame extends Game {
 		for(Innocent p:playerlist) {
 			if(!p.isDead) {
 				p.onTurnStart();
-				p.onDayTime();
 			}
 		}
-		group.getSettings().setMuteAll(true);
+		isDayTime=true;
+		for(Innocent p:playerlist) {
+			if(!p.isDead) {
+				p.onDayTime();
+				boolean needSkip=false;
+				synchronized(isDaySkipped) {
+					if(isDaySkipped) {
+						isDaySkipped=false;
+						canDayVote=false;
+						needSkip=true;
+						isDayTime=false;
+					}
+				}
+				if(needSkip) {
+					if(VictoryPending())return;
+					scheduler.execute(()->onDawn());
+					return;
+				}
+			}
+		}
+		muteAll(true);
 		this.sendPublicMessage("请在两分钟内在私聊中完成投票！");
 		for(Innocent p:playerlist) {
 			if(!p.isDead) {
 				p.vote();
 			}
 		}
+		if(cursed!=null)
+			vu.vote(cursed);
 		vu.hintVote(scheduler);
 		canDayVote=true;
 		startWait(120000);
 		removeAllListeners();
+		if(cursed!=null)
+			this.sendPublicMessage(cursed.getMemberString()+"被乌鸦诅咒了。");
 		voteKill(vu.getMostVoted());
 	};
 	public void voteKill(List<Innocent> ps) {
@@ -333,7 +383,7 @@ public class WereWolfGame extends Game {
 				this.sendPublicMessage("同票，请做最终陈述。");
 				MessageChainBuilder mcb=new MessageChainBuilder();
 				mcb.append("开始投票，请在两分钟内投给以下人物其中之一：\n");
-				group.getSettings().setMuteAll(false);
+				muteAll(false);
 				for(Innocent p:ps) {
 					mcb.add(p.getAt());
 					mcb.add("\n");
@@ -341,12 +391,14 @@ public class WereWolfGame extends Game {
 				}
 				mcb.add("请在两分钟内在私聊中完成投票！");
 				this.sendPublicMessage(mcb.asMessageChain());
-				group.getSettings().setMuteAll(true);
+				muteAll(true);
 				for(Innocent p:playerlist) {
 					if(!p.isDead) {
 						p.vote();
 					}
 				}
+				if(cursed!=null)
+					vu.vote(cursed);
 				vu.hintVote(scheduler);
 				scheduler.execute(()->{
 					startWait(120000);
@@ -363,11 +415,14 @@ public class WereWolfGame extends Game {
 			this.sendPublicMessage("无人出局");
 		else {
 			Innocent p=ps.get(0);
-			p.isDead=true;
-			group.getSettings().setMuteAll(false);
-			p.onDied(DiedReason.Vote);
+			this.kill(p, DiedReason.Vote);
+			muteAll(false);
+			for(Entry<Innocent, DiedReason> pe:tokill.entrySet()) {
+				pe.getKey().onDied(pe.getValue());
+			}
 			if(VictoryPending())return;
 		}
+		tokill.clear();
 		canDayVote=false;
 		onDawn();
 	}
@@ -378,9 +433,17 @@ public class WereWolfGame extends Game {
 		int wolfs=0;
 		for(Innocent p:playerlist) {
 			if(p.isDead)continue;
-			if(p instanceof Wolf)wolfs++;
-			else innos++;
 			total++;
+			if(p instanceof Wolf) {
+				wolfs++;
+				continue;
+			}
+			innos++;
+			if(p instanceof Hunter)innos++;
+			else if(p instanceof Witch&&((Witch) p).hasPoison)innos++;
+			else if(p instanceof Crow)innos++;
+			else if(p instanceof Knight&&((Knight) p).hasSkill)innos++;
+			else if(p instanceof Idoit&&!((Idoit) p).canVote)innos--;
 		}
 		boolean ends=false;
 		String status=null;
@@ -393,17 +456,18 @@ public class WereWolfGame extends Game {
 		}else if(total==0){
 			status=("游戏结束！同归于尽\n");
 			ends=true;
-		}else if(total==2&&wolfs>0) {
+		}else if((wolfs>=innos)) {
 			status=("游戏结束！狼人获胜\n");
 			ends=true;
 		}
 		if(ends) {
+			removeAllListeners();
 			MessageChainBuilder mc=new MessageChainBuilder();
 			mc.add(status);
 			mc.add("游戏身份：\n");
 			for(Innocent p:playerlist) {
 				mc.add(p.getMemberString());
-				mc.add("的身份为 "+p.getRole()+DiedReason.getString(p.dr)+"\n");
+				mc.add("的身份为 "+p.getRole()+" "+DiedReason.getString(p.dr)+"\n");
 				String nc=p.member.getNameCard();
 				if(nc.indexOf('|')!=-1) {
 					nc=nc.split("\\|")[1];
@@ -413,19 +477,12 @@ public class WereWolfGame extends Game {
 				if(p.isDead)p.member.unmute();
 				}catch(Throwable t) {}
 			}
-			group.getSettings().setMuteAll(false);
+			muteAll(false);
 			this.sendPublicMessage(mc.asMessageChain());
 			doFinalize();
 		}
 		isEnded=ends;
 		return ends;
 	}
-	@Override
-	public String getName() {
-		return "狼人杀";
-	}
-	@Override
-	public boolean isAlive() {
-		return !isEnded;
-	}
+
 }

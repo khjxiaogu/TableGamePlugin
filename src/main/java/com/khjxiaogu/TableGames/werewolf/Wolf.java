@@ -1,6 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
 import com.khjxiaogu.TableGames.Utils;
 
 import net.mamoe.mirai.contact.Member;
@@ -11,9 +12,40 @@ public class Wolf extends Innocent {
 	public Wolf(WereWolfGame wereWolfGame, Member member) {
 		super(wereWolfGame, member);
 	}
-
+	@Override
+	public void onTurnStart() {
+		super.onTurnStart();
+		onTurn();
+	}
+	@Override
+	public void onTurn() {
+		super.StartTurn();
+		super.sendPrivate("狼人，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”\n");
+	}
+	@Override
+	public void doDaySkillPending(String s) {
+		if(isDead)return;
+		if(s.startsWith("自爆"))
+		try {
+			super.sendPublic("是狼人，自爆了，进入黑夜。");
+			this.onDied(DiedReason.Explode);
+			wereWolfGame.skipDay();
+		} catch (Throwable t) {
+			super.sendPrivate("发生错误！");
+		}
+	}
+	@Override
+	public void addDaySkillListener() {
+		Utils.registerListener(mid,(msgx,typex)->{
+			if(typex==MsgType.PRIVATE) {
+				String content=Utils.getPlainText(msgx);
+				this.doDaySkillPending(content);
+			}
+		});
+	}
 	@Override
 	public void onWolfTurn() {
+		this.StartTurn();
 		this.sendPrivate(wereWolfGame.getAliveList());
 		super.sendPrivate("请私聊选择要杀的人，你有2分钟的考虑时间\n也可以通过“#要说的话”来给所有在场狼人发送信息\n投票之后“#要说的话”就会失效。\n格式：“投票 qq号或者游戏号码”\n如：“投票 1”");
 		wereWolfGame.vu.addToVote(this);
@@ -32,6 +64,7 @@ public class Wolf extends Innocent {
 						super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
 						return;
 					}
+					this.EndTurn();
 					Utils.releaseListener(super.member.getId());
 					Utils.registerListener(super.member, (msgx,typex)->{
 						if(typex==MsgType.PRIVATE)
@@ -70,9 +103,14 @@ public class Wolf extends Innocent {
 				if(!w.equals(this))
 					sb.append(w.getMemberString()+"\n");
 		}
-		sb.append("请和他们联系。");
+		sb.append("你可以直接和他们联系，也可以通过狼人频道联系。");
 		super.sendPrivate(sb.toString());
 	}
+	@Override
+	public int getTurn() {
+		return 1;
+	}
+
 	@Override
 	public String getRole() {
 		return "狼人";

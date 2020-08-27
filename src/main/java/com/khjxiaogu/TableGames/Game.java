@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.Message;
@@ -42,6 +43,7 @@ public abstract class Game {
 			} catch (InterruptedException e) {}
 		}
 	}
+	public abstract boolean onReAttach(Long id);
 	public void sendPublicMessage(Message msg) {
 		group.sendMessage(msg);
 	}

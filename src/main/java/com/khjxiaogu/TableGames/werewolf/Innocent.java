@@ -15,6 +15,9 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 	boolean isGuarded = false;
 	boolean lastIsGuarded = false;
 	boolean showRoleWhenDie = false;
+	boolean isCurrentTurn=false;
+	boolean isVoteTurn=false;
+	boolean isSavedByWitch=false;
 	DiedReason dr = null;
 
 	public Innocent(WereWolfGame wereWolfGame, Member member) {
@@ -30,27 +33,35 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 	}
 
 	public void onTurnStart() {
-		if (lastIsGuarded) {
-			lastIsGuarded = false;
-		}
+		isSavedByWitch=false;
+		lastIsGuarded = false;
 		if (isGuarded) {
 			lastIsGuarded = true;
 			isGuarded = false;
 		}
+		addDaySkillListener();
 	}
-
+	public void addDaySkillListener() {
+	}
 	public void onDayTime() {
 		sendPublic("你有五分钟时间进行陈述。\n可以随时@我结束你的讲话。");
 		Utils.registerListener(member, (msg, type) -> {
 			if (type == MsgType.AT) {
 				Utils.releaseListener(member.getId());
+				addDaySkillListener();
 				wereWolfGame.skipWait();
+			}else if(type==MsgType.PRIVATE) {
+				doDaySkillPending(Utils.getPlainText(msg));
 			}
 		});
 		wereWolfGame.startWait(300000);
 	};
 
+	public void doDaySkillPending(String plainText) {
+	}
+
 	public void vote() {
+		isVoteTurn=true;
 		this.sendPrivate(wereWolfGame.getAliveList());
 		super.sendPrivate("请私聊投票要驱逐的人，你有2分钟的考虑时间\n格式：“投票 qq号或者游戏号码”\n如：“投票 1”\n弃票请输入“弃权”");
 		wereWolfGame.vu.addToVote(this);
@@ -58,11 +69,12 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 			if (type == MsgType.PRIVATE) {
 				String content = Utils.getPlainText(msg);
 				if (content.startsWith("弃权")) {
+					isVoteTurn=false;
 					Utils.releaseListener(member.getId());
 					this.sendPublic("已弃权。");
 					this.sendPrivate("你已弃权");
 					wereWolfGame.NoVote(this);
-				}
+				}else
 				if (content.startsWith("投票")) {
 					try {
 						Long qq = Long.parseLong(Utils.removeLeadings("投票", content).replace('号', ' ').trim());
@@ -75,6 +87,7 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 							super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
 							return;
 						}
+						isVoteTurn=false;
 						Utils.releaseListener(super.member.getId());
 						super.sendPrivate("已投票给 " + p.getMemberString());
 						super.sendPublic("已投票给 " + p.getMemberString());
@@ -98,17 +111,6 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 	public void onWolfTurn() {
 	};
 
-	public boolean onPredictorTurn() {
-		return false;
-	};
-
-	public boolean onGuardTurn() {
-		return false;
-	};
-
-	public boolean onWitchTurn() {
-		return false;
-	};
 
 	public boolean onDiePending(DiedReason dir) {
 		dr = dir;
@@ -135,8 +137,34 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 			tryMute();
 		}
 	}
-
+	public void StartTurn() {
+		isCurrentTurn=true;
+	}
+	public void EndTurn() {
+		isCurrentTurn=false;
+	}
+	public boolean onReattach(Long m) {
+		if(m==mid) {
+			member.sendMessage("重置成功!");
+			if(this.isCurrentTurn)
+				onTurn();
+			if(this.isVoteTurn)
+				vote();
+			return true;
+		}
+		return false;
+	}
+	public void onTurn(int turnnumber) {
+		if(getTurn()==turnnumber)
+			onTurn();
+	}
+	public void onTurn() {
+		
+	}
 	public String getRole() {
 		return "平民";
+	}
+	public int getTurn() {
+		return 0;
 	}
 }

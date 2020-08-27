@@ -13,7 +13,8 @@ public class Predictor extends Innocent{
 	}
 
 	@Override
-	public boolean onPredictorTurn() {
+	public void onTurn() {
+		super.StartTurn();
 		this.sendPrivate(wereWolfGame.getAliveList());
 		super.sendPrivate("预言家，你可以查验一个人是否为狼人，请私聊选择查验的人，你有30秒的考虑时间\n格式：“查验 qq号或者游戏号码”\n如：“查验 1”");
 		Utils.registerListener(super.member,(msg,type)->{
@@ -31,22 +32,18 @@ public class Predictor extends Innocent{
 						super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
 						return;
 					}
+					this.EndTurn();
 					Utils.releaseListener(super.member.getId());
-					if(p instanceof Wolf)
-						super.sendPrivate(p.getMemberString()+"是个狼人");
-					else
-						super.sendPrivate(p.getMemberString()+"不是狼人");
+					super.sendPrivate(p.getMemberString()+"是"+p.getRole());
 				}catch(Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“查验 qq号或者游戏号码”！");
 				}
 			}
 		});
-		return true;
 	}
-
 	@Override
-	public void onGameStart() {
-		sendPrivate("您的身份是：预言家。");
+	public int getTurn() {
+		return 2;
 	}
 	@Override
 	public String getRole() {

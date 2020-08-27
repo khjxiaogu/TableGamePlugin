@@ -1,6 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
 import com.khjxiaogu.TableGames.Utils;
 
 import net.mamoe.mirai.contact.Member;
@@ -14,15 +15,11 @@ public class Witch extends Innocent {
 	}
 	
 	@Override
-	public void onGameStart() {
-		sendPrivate("您的身份是：女巫。");
-	}
-
-	@Override
-	public boolean onWitchTurn() {
+	public void onTurn() {
+		super.StartTurn();
 		if(!hasHeal&&!hasPoison) {
 			super.sendPrivate("女巫，你没有药了。");
-			return false;
+			return;
 		}
 		this.sendPrivate(wereWolfGame.getAliveList());
 		StringBuilder sb=new StringBuilder("女巫，你有");
@@ -59,8 +56,9 @@ public class Witch extends Innocent {
 						super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
 						return;
 					}
+					this.EndTurn();
 					Utils.releaseListener(super.member.getId());
-					wereWolfGame.witchKill(p);
+					wereWolfGame.kill(p,DiedReason.Poison);
 					hasPoison=false;
 					super.sendPrivate("毒死了"+p.getMemberString());
 				}catch(Throwable t) {
@@ -86,8 +84,9 @@ public class Witch extends Innocent {
 						super.sendPrivate("你今晚无法自救！");
 						return;
 					}
+					this.EndTurn();
 					Utils.releaseListener(super.member.getId());
-					wereWolfGame.witchProtect(p);
+					p.isSavedByWitch=true;
 					hasHeal=false;
 					super.sendPrivate("救活了"+p.getMemberString());
 				}catch(Throwable t) {
@@ -95,10 +94,15 @@ public class Witch extends Innocent {
 				}
 			}else if(content.startsWith("放弃")) {
 				super.sendPrivate("你放弃了使用药。");
+				this.EndTurn();
 				Utils.releaseListener(super.member.getId());
 			}
 		});
-		return true;
+		return;
+	}
+	@Override
+	public int getTurn() {
+		return 2;
 	}
 	@Override
 	public String getRole() {

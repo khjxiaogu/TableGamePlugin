@@ -43,7 +43,7 @@ public class Utils {
 		System.out.println(removeLeadings("保护","保护 1号"));
 	}
 	static Map<Group,Game> gs=new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<Long,Utils.MessageListenerWrapper> mls=new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<Long,MessageListenerWrapper> mls=new ConcurrentHashMap<>();
 	static Map<Group,Map<Class<? extends PreserveInfo<?>>,PreserveInfo<?>>> ps=new ConcurrentHashMap<>();
 	@SuppressWarnings("unchecked")
 	public static <T extends PreserveInfo<?>> T getPreserve(Group g,Class<T> type) {
@@ -68,6 +68,9 @@ public class Utils {
 	public static void registerListener(Long id,Group g,MessageListener ml) {
 		mls.put(id,new Utils.MessageListenerWrapper(ml,g));
 	}
+	public static void registerListener(Long id,MessageListener ml) {
+		mls.put(id,new Utils.MessageListenerWrapper(ml,null));
+	}
 	public static void registerListener(Member m,MessageListener ml) {
 		mls.put(m.getId(),new Utils.MessageListenerWrapper(ml,m.getGroup()));
 	}
@@ -76,30 +79,39 @@ public class Utils {
 	}
 	public static Set<Long> ingame=Collections.newSetFromMap(new ConcurrentHashMap<>());
 	public static boolean tryAddMember(Long id) {
-		return ingame.add(id);
+	//	return ingame.add(id);
+		return true;
 	}
 	public static boolean hasMember(Long id) {
-		return ingame.contains(id);
+		//return ingame.contains(id);
+		return false;
 	}
 	public static void RemoveMember(Long id) {
 		ingame.remove(id);
 	}
 	public static boolean dispatch(Long id,MsgType type,MessageChain msg) {
-		synchronized(mls) {
-			Utils.MessageListenerWrapper ml=mls.get(id);
-			if(ml==null||!ml.isValid)return false;
-			ml.handle(msg, type);
+		if(Utils.getPlainText(msg).startsWith("重置")) {
+			for(Game g:gs.values()) {
+				if(g.isAlive())
+					if(g.onReAttach(id))
+						break;
+			}
 			return true;
 		}
+		Utils.MessageListenerWrapper ml=mls.get(id);
+		System.out.println("dispatching "+id);
+		if(ml==null||!ml.isValid)return false;
+		ml.handle(msg, type);
+		System.out.println("dispatched "+id);
+		return true;
 	}
 	public static boolean dispatch(Long id,Group g,MsgType type,MessageChain msg) {
-		synchronized(mls) {
-			Utils.MessageListenerWrapper ml=mls.get(id);
-			if(ml==null||!ml.isValid)return false;
-			if(type!=MsgType.PRIVATE&&!g.equals(ml.from))return false;
-			ml.handle(msg, type);
-			return true;
-		}
+		Utils.MessageListenerWrapper ml=mls.get(id);
+		if(ml==null||!ml.isValid)return false;
+		if(type!=MsgType.PRIVATE&&!g.equals(ml.from))return false;
+		System.out.println("dispatching msg to "+id);
+		ml.handle(msg, type);
+		return true;
 	}
 	public static void InvalidListeners() {
 		mls.values().iterator().forEachRemaining(a->a.isValid=false);
@@ -119,6 +131,24 @@ public class Utils {
 			T ng=null;
 			try {
 				ng = gameClass.getConstructor(Group.class,int.class).newInstance(gp,count);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			gs.put(gp,ng);
+			return ng;
+		}
+	}
+	public static <T extends Game> T createGame(Class<T> gameClass,Group gp,String... args) {
+		Game g=gs.get(gp);
+		synchronized(gs) {
+			if(g!=null&&g.isAlive()) {
+				g.forceStop();
+			}
+			T ng=null;
+			try {
+				ng = gameClass.getConstructor(Group.class,String[].class).newInstance(gp,args);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				// TODO Auto-generated catch block
