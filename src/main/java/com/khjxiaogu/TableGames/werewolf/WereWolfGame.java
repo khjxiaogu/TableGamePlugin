@@ -431,6 +431,8 @@ public class WereWolfGame extends Game {
 		int total=0;
 		int innos=0;
 		int wolfs=0;
+		if(!canDayVote&&cursed!=null)
+			innos++;
 		for(Innocent p:playerlist) {
 			if(p.isDead)continue;
 			total++;

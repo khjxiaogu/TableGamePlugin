@@ -96,7 +96,7 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 					} catch (Throwable t) {
 						super.sendPrivate("发生错误，正确格式为：“投票 qq号或者游戏号码”！");
 					}
-				}
+				}else doDaySkillPending(content);
 			}
 		});
 	}

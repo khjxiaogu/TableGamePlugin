@@ -17,17 +17,15 @@ import net.mamoe.mirai.message.data.MessageChainBuilder;
 public class UnderCoverGame extends Game {
 	
 	boolean isEnded;
-	List<Innocent> innos=Collections.synchronizedList(new ArrayList<>());
+	List<UCPlayer> innos=Collections.synchronizedList(new ArrayList<>());
 	int spycount=1;
 	Integer cplayer;
-	WordPair wp;
 	Thread main=new Thread(()->gameMain());
-	VoteUtil<Innocent> vu=new VoteUtil<>();
+	VoteUtil<UCPlayer> vu=new VoteUtil<>();
 	List<Boolean> wds=Collections.synchronizedList(new ArrayList<>());
 	public UnderCoverGame(Group group, int cplayer) {
 		super(group, cplayer,2);
 		this.cplayer=cplayer;
-		wp=UnderCoverTextLibrary.getRandomPair();
 		wds.add(true);
 		if(cplayer>7) {
 			spycount=2;
@@ -46,12 +44,12 @@ public class UnderCoverGame extends Game {
 	}
 	@Override
 	protected void doFinalize() {
-		for(Innocent in:innos)
+		for(UCPlayer in:innos)
 			Utils.RemoveMember(in.member.getId());
 		super.doFinalize();
 	}
-	public Innocent getPlayerById(long id) {
-		for(Innocent p:innos) {
+	public UCPlayer getPlayerById(long id) {
+		for(UCPlayer p:innos) {
 			if(p.member.getId()==id)
 				return p;
 		}
@@ -70,9 +68,9 @@ public class UnderCoverGame extends Game {
 		synchronized(wds) {
 			if(wds.size()<=0)return false;
 			if(wds.remove(0)) {
-				innos.add(new Innocent(mem,wp.getSecond(),true));
+				innos.add(new UCPlayer(mem,true));
 			}else {
-				innos.add(new Innocent(mem,wp.getFirst(),false));
+				innos.add(new UCPlayer(mem,false));
 			}
 			if(wds.size()==0) {
 				startGame();
@@ -92,11 +90,16 @@ public class UnderCoverGame extends Game {
 		startGame();
 	}
 	public void gameMain() {
-		for(Innocent in:innos) {
-			in.onGameStart();
-		}
-		while(true) {			
-			for(Innocent in:innos) {
+		boolean changeWordNeeded=true;
+		while(true) {
+			if(changeWordNeeded) {
+				changeWordNeeded=false;
+				for(UCPlayer in:innos) {
+					in.onGameStart(UnderCoverTextLibrary.getRandomPair());
+				}
+			}else
+				changeWordNeeded=true;
+			for(UCPlayer in:innos) {
 				if(in.isDead)continue;
 				in.sendPublic("请在1分钟内描述你的词语，可以随时@我结束描述");
 				Utils.registerListener(in.member.getId(),group,(msg,type)->{
@@ -107,7 +110,7 @@ public class UnderCoverGame extends Game {
 				Utils.releaseListener(in.member.getId());
 			}
 			vu.clear();
-			for(Innocent in:innos) {
+			for(UCPlayer in:innos) {
 				if(in.isDead)continue;
 				vu.addToVote(in);
 				Utils.registerListener(in.member.getId(),group,(msg,type)->{
@@ -115,7 +118,7 @@ public class UnderCoverGame extends Game {
 					if(at==null)return;
 					String content=Utils.getPlainText(msg);
 					if(content.startsWith("投票")) {
-						Innocent p=getPlayerById(at.getTarget());
+						UCPlayer p=getPlayerById(at.getTarget());
 						if(p==null) {
 							in.sendPublic("选择的玩家非游戏玩家，请重新输入");
 							return;
@@ -130,7 +133,7 @@ public class UnderCoverGame extends Game {
 			this.sendPublicMessage("开始投票，请在两分钟内输入“投票 @要投的人”进行投票。");
 			vu.hintVote(scheduler);
 			try {Thread.sleep(120000);;} catch (InterruptedException e) {}
-			List<Innocent> vtd=vu.getMostVoted();
+			List<UCPlayer> vtd=vu.getMostVoted();
 			vu.clear();
 			if(vtd.size()!=1) {
 				this.sendPublicMessage("同票，进入下一轮描述");
@@ -140,7 +143,7 @@ public class UnderCoverGame extends Game {
 			}
 			boolean hasSpy=false;
 			int left=0;
-			for(Innocent in:innos) {
+			for(UCPlayer in:innos) {
 				Utils.releaseListener(in.member.getId());
 				if(!in.isDead) {
 					left++;
