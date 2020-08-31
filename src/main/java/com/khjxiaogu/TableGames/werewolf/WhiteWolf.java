@@ -5,7 +5,7 @@ import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
 import net.mamoe.mirai.contact.Member;
 
-public class WhiteWolf extends WereWolf {
+public class WhiteWolf extends Werewolf {
 
 	public WhiteWolf(WerewolfGame werewolfGame, Member member) {
 		super(werewolfGame, member);

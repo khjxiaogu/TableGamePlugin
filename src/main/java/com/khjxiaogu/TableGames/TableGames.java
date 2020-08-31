@@ -32,7 +32,7 @@ import com.khjxiaogu.TableGames.werewolf.WerewolfGame;
 import com.khjxiaogu.TableGames.werewolf.WerewolfPreserve;
 import com.khjxiaogu.TableGames.werewolf.WhiteWolf;
 import com.khjxiaogu.TableGames.werewolf.Witch;
-import com.khjxiaogu.TableGames.werewolf.WereWolf;
+import com.khjxiaogu.TableGames.werewolf.Werewolf;
 import com.khjxiaogu.TableGames.werewolf.WolfKiller;
 
 import net.mamoe.mirai.console.plugins.PluginBase;

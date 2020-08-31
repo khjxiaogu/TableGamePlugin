@@ -15,7 +15,7 @@ public class HiddenWolf extends Villager {
 		super.sendPrivate("您的身份是："+getRole());
 		StringBuilder sb=new StringBuilder("其他狼人身份是：\n");
 		for(Villager w:game.playerlist) {
-			if(w instanceof WereWolf)
+			if(w instanceof Werewolf)
 				if(!w.equals(this))
 					sb.append(w.getMemberString()+"\n");
 		}
@@ -24,7 +24,7 @@ public class HiddenWolf extends Villager {
 	@Override
 	public void onWolfTurn() {
 		for(Villager inno:game.playerlist) {
-			if(inno instanceof WereWolf&&!inno.isDead)
+			if(inno instanceof Werewolf&&!inno.isDead)
 				return;
 		}
 		this.StartTurn();

@@ -80,7 +80,7 @@ public class WerewolfGame extends Game {
 		caraMap.put("老流氓",Tramp.class);
 		caraMap.put("白狼王",WhiteWolf.class);
 		caraMap.put("女巫",Witch.class);
-		caraMap.put("狼人",WereWolf.class);
+		caraMap.put("狼人",Werewolf.class);
 		caraMap.put("隐狼",HiddenWolf.class);
 		caraMap.put("猎魔人",WolfKiller.class);
 	}
@@ -118,7 +118,7 @@ public class WerewolfGame extends Game {
 			}
 		}
 		while(--wolfcount>=0)
-			roles.add(WereWolf.class);
+			roles.add(Werewolf.class);
 		if(innocount>=3) {
 			roles.add(Tramp.class);
 			--innocount;

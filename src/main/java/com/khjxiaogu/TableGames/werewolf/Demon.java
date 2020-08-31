@@ -53,7 +53,7 @@ public class Demon extends Villager {
 	@Override
 	public void onWolfTurn() {
 		for(Villager inno:game.playerlist) {
-			if(inno instanceof WereWolf&&!inno.isDead)
+			if(inno instanceof Werewolf&&!inno.isDead)
 				return;
 		}
 		this.StartTurn();

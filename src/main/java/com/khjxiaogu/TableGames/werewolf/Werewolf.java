@@ -6,9 +6,9 @@ import com.khjxiaogu.TableGames.Utils;
 
 import net.mamoe.mirai.contact.Member;
 
-public class WereWolf extends Villager {
+public class Werewolf extends Villager {
 
-	public WereWolf(WerewolfGame werewolfGame, Member member) {
+	public Werewolf(WerewolfGame werewolfGame, Member member) {
 		super(werewolfGame, member);
 	}
 	@Override
@@ -75,7 +75,7 @@ public class WereWolf extends Villager {
 						if(contentx.startsWith("#")) {
 							String tosend=this.getMemberString()+":"+Utils.removeLeadings("#",contentx);
 							for(Villager w:game.playerlist) {
-								if(w instanceof WereWolf&&!w.isDead&&!w.equals(this))
+								if(w instanceof Werewolf&&!w.isDead&&!w.equals(this))
 										w.sendPrivate(tosend);
 							}
 						}
@@ -88,7 +88,7 @@ public class WereWolf extends Villager {
 			}else if(content.startsWith("#")) {
 				String tosend=this.getMemberString()+":"+Utils.removeLeadings("#",content);
 				for(Villager w:game.playerlist) {
-					if(w instanceof WereWolf&&!w.isDead&&!w.equals(this))
+					if(w instanceof Werewolf&&!w.isDead&&!w.equals(this))
 							w.sendPrivate(tosend);
 				}
 			}
@@ -101,7 +101,7 @@ public class WereWolf extends Villager {
 		super.sendPrivate("您的身份是："+getRole());
 		StringBuilder sb=new StringBuilder("其他狼人身份是：\n");
 		for(Villager w:game.playerlist) {
-			if(w instanceof WereWolf)
+			if(w instanceof Werewolf)
 				if(!w.equals(this))
 					sb.append(w.getMemberString()+"\n");
 		}
