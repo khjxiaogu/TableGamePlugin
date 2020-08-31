@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.khjxiaogu.TableGames.werewolf.Innocent;
+import com.khjxiaogu.TableGames.werewolf.Villager;
 
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
@@ -21,7 +21,7 @@ public abstract class PreserveInfo<T extends Game>{
 	public PreserveInfo(Group g) {
 		group=g;
 	}
-	static Map<Long,Class<? extends Innocent>> lastJobs=new HashMap<>();
+	static Map<Long,Class<? extends Villager>> lastJobs=new HashMap<>();
 	protected abstract int getSuitMembers();
 	protected abstract int getMinMembers();
 	protected abstract int getMaxMembers();
@@ -83,9 +83,11 @@ public abstract class PreserveInfo<T extends Game>{
 				acceled=true;
 				Thread.sleep(60000);
 			} catch (InterruptedException e) {}
+			if(Utils.hasActiveGame(group))
+				group.sendMessage(getName()+"不能开始，因为有其他游戏正在运行，将在本次游戏结束后两分钟内开始……");
 			while(Utils.hasActiveGame(group)) {
 				if(topreserve.size()<getMinMembers())return;
-				group.sendMessage(getName()+"不能开始，因为有其他游戏正在运行，推迟2分钟……");
+				
 				try {Thread.sleep(120000);} catch (InterruptedException e) {}
 			}
 			if(topreserve.size()<getMinMembers())return;

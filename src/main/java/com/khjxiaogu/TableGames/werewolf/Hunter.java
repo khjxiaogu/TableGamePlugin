@@ -3,29 +3,31 @@ package com.khjxiaogu.TableGames.werewolf;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.Utils;
 import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
+import com.khjxiaogu.TableGames.werewolf.WereWolfGame.WaitReason;
 
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.PlainText;
 
-public class Hunter extends Innocent {
+public class Hunter extends Villager {
+	
 	@Override
 	public boolean onDiePending(DiedReason dir) {
 		super.StartTurn();
 		dr=dir;
 		if(dir!=DiedReason.Poison) {
-			this.sendPrivate(wereWolfGame.getAliveList());
+			this.sendPrivate(game.getAliveList());
 			super.sendPrivate("猎人，你死了，你可以选择暴露并开枪打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
 			Utils.registerListener(super.mid,(msg,type)->{
-				if(dir==DiedReason.Vote&&type==MsgType.AT) {
+				if((dir==DiedReason.Vote||dir==DiedReason.Explode)&&type==MsgType.AT) {
 					Utils.releaseListener(member.getId());
-					wereWolfGame.skipWait();
+					game.skipWait(WaitReason.DieWord);
 				}
 				if(type!=MsgType.PRIVATE)return;
 				String content=Utils.getPlainText(msg);
 				if(content.startsWith("杀死")) {
 					try {
 						Long qq=Long.parseLong(Utils.removeLeadings("杀死",content).replace('号', ' ').trim());
-						Innocent p=wereWolfGame.getPlayerById(qq);
+						Villager p=game.getPlayerById(qq);
 						if(p==null) {
 							super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
 							return;
@@ -40,20 +42,20 @@ public class Hunter extends Innocent {
 						}
 						this.EndTurn();
 						Utils.releaseListener(super.member.getId());
-						if(dir==DiedReason.Vote)
+						if(dir==DiedReason.Vote||dir==DiedReason.Explode)
 							Utils.registerListener(super.member, (msgx,typex)->{
 								if(typex==MsgType.AT) {
 									Utils.releaseListener(member.getId());
-									wereWolfGame.skipWait();
+									game.skipWait(WaitReason.DieWord);
 								}
 							});
 						super.sendPrivate("你杀死了"+p.getMemberString());
 						super.sendPublic(new PlainText("死亡，身份是猎人，同时带走了").plus(p.getAt()));
-						if(dir==DiedReason.Vote)
-							wereWolfGame.scheduler.execute(()->p.onDied(DiedReason.Hunter));
+						if(dir==DiedReason.Vote||dir==DiedReason.Explode)
+							game.scheduler.execute(()->p.onDied(DiedReason.Hunter));
 						else {
 							p.isDead=true;
-							wereWolfGame.kill(p,DiedReason.Hunter);
+							game.kill(p,DiedReason.Hunter);
 						}
 					}catch(Throwable t) {
 						super.sendPrivate("发生错误，正确格式为：“杀死 qq号或者游戏号码”！");
@@ -71,19 +73,9 @@ public class Hunter extends Innocent {
 		onDiePending(dr);
 	}
 	@Override
-	public void onDied(DiedReason dir) {
-		dr=dir;
-		if(dir==DiedReason.Vote){
-			isDead=true;
-			sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时@我结束你的讲话。");
-			this.onDiePending(dir);
-			wereWolfGame.startWait(300000);
-			sendPublic("说完了。");
-			super.tryMute();
-		}else
-			super.onDied(dir);
+	public Fraction getFraction() {
+		return Fraction.God;
 	}
-
 	public Hunter(WereWolfGame wereWolfGame, Member member) {
 		super(wereWolfGame, member);
 	}

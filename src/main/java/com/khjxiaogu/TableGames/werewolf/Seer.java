@@ -6,24 +6,24 @@ import com.khjxiaogu.TableGames.Utils;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.PlainText;
 
-public class Predictor extends Innocent{
+public class Seer extends Villager{
 
-	public Predictor(WereWolfGame wereWolfGame, Member member) {
+	public Seer(WereWolfGame wereWolfGame, Member member) {
 		super(wereWolfGame, member);
 	}
 
 	@Override
 	public void onTurn() {
 		super.StartTurn();
-		this.sendPrivate(wereWolfGame.getAliveList());
-		super.sendPrivate("预言家，你可以查验一个人是否为狼人，请私聊选择查验的人，你有30秒的考虑时间\n格式：“查验 qq号或者游戏号码”\n如：“查验 1”");
+		this.sendPrivate(game.getAliveList());
+		super.sendPrivate("预言家，你可以查验一个人是否为狼人，请私聊选择查验的人，你有一分钟的考虑时间\n格式：“查验 qq号或者游戏号码”\n如：“查验 1”");
 		Utils.registerListener(super.member,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("查验")) {
 				try {
 					Long qq=Long.parseLong(Utils.removeLeadings("查验",content).replace('号', ' ').trim());
-					Innocent p=wereWolfGame.getPlayerById(qq);
+					Villager p=game.getPlayerById(qq);
 					if(p==null) {
 						super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
 						return;
@@ -34,7 +34,7 @@ public class Predictor extends Innocent{
 					}
 					this.EndTurn();
 					Utils.releaseListener(super.member.getId());
-					super.sendPrivate(p.getMemberString()+"是"+p.getRole());
+					super.sendPrivate(p.getMemberString()+"是"+p.getPredictorRole());
 				}catch(Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“查验 qq号或者游戏号码”！");
 				}
@@ -44,6 +44,10 @@ public class Predictor extends Innocent{
 	@Override
 	public int getTurn() {
 		return 2;
+	}
+	@Override
+	public Fraction getFraction() {
+		return Fraction.God;
 	}
 	@Override
 	public String getRole() {

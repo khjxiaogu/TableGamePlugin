@@ -3,14 +3,13 @@ package com.khjxiaogu.TableGames.werewolf;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.Utils;
 import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
+import com.khjxiaogu.TableGames.werewolf.WereWolfGame.WaitReason;
 
 import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.At;
-import net.mamoe.mirai.message.data.PlainText;
 
-public class Innocent extends com.khjxiaogu.TableGames.Player {
+public class Villager extends com.khjxiaogu.TableGames.Player {
 
-	WereWolfGame wereWolfGame;
+	WereWolfGame game;
 	boolean isDead = false;
 	boolean isGuarded = false;
 	boolean lastIsGuarded = false;
@@ -18,11 +17,13 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 	boolean isCurrentTurn=false;
 	boolean isVoteTurn=false;
 	boolean isSavedByWitch=false;
+	boolean isDemonChecked=false;
+	boolean isSheriff=false;
 	DiedReason dr = null;
 
-	public Innocent(WereWolfGame wereWolfGame, Member member) {
+	public Villager(WereWolfGame wereWolfGame, Member member) {
 		super(member);
-		this.wereWolfGame = wereWolfGame;
+		this.game = wereWolfGame;
 		isDead = false;
 		isGuarded = false;
 		lastIsGuarded = false;
@@ -49,12 +50,12 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 			if (type == MsgType.AT) {
 				Utils.releaseListener(member.getId());
 				addDaySkillListener();
-				wereWolfGame.skipWait();
+				game.skipWait(WaitReason.State);
 			}else if(type==MsgType.PRIVATE) {
 				doDaySkillPending(Utils.getPlainText(msg));
 			}
 		});
-		wereWolfGame.startWait(300000);
+		game.startWait(300000,WaitReason.State);
 	};
 
 	public void doDaySkillPending(String plainText) {
@@ -62,9 +63,9 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 
 	public void vote() {
 		isVoteTurn=true;
-		this.sendPrivate(wereWolfGame.getAliveList());
+		this.sendPrivate(game.getAliveList());
 		super.sendPrivate("请私聊投票要驱逐的人，你有2分钟的考虑时间\n格式：“投票 qq号或者游戏号码”\n如：“投票 1”\n弃票请输入“弃权”");
-		wereWolfGame.vu.addToVote(this);
+		game.vu.addToVote(this);
 		Utils.registerListener(member, (msg, type) -> {
 			if (type == MsgType.PRIVATE) {
 				String content = Utils.getPlainText(msg);
@@ -73,12 +74,12 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 					Utils.releaseListener(member.getId());
 					this.sendPublic("已弃权。");
 					this.sendPrivate("你已弃权");
-					wereWolfGame.NoVote(this);
+					game.NoVote(this);
 				}else
 				if (content.startsWith("投票")) {
 					try {
 						Long qq = Long.parseLong(Utils.removeLeadings("投票", content).replace('号', ' ').trim());
-						Innocent p = wereWolfGame.getPlayerById(qq);
+						Villager p = game.getPlayerById(qq);
 						if (p == null) {
 							super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
 							return;
@@ -91,7 +92,7 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 						Utils.releaseListener(super.member.getId());
 						super.sendPrivate("已投票给 " + p.getMemberString());
 						super.sendPublic("已投票给 " + p.getMemberString());
-						wereWolfGame.DayVote(this, p);
+						game.DayVote(this, p);
 						
 					} catch (Throwable t) {
 						super.sendPrivate("发生错误，正确格式为：“投票 qq号或者游戏号码”！");
@@ -111,24 +112,64 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 	public void onWolfTurn() {
 	};
 
-
+	public boolean shouldSurvive(DiedReason dir) {
+		if(dir==DiedReason.Hunt)
+			return isGuarded;
+		return isGuarded^isSavedByWitch;
+	}
 	public boolean onDiePending(DiedReason dir) {
 		dr = dir;
 		return false;
 	};
-
+	public void onSelectSheriff() {
+		super.sendPrivate("当前是警长竞选环节，如果要竞选警长，请发送“竞选”，否则请发送“放弃”");
+		Utils.registerListener(super.member,(msg,type)->{
+			if(type!=MsgType.PRIVATE)return;
+			String content=Utils.getPlainText(msg);
+			if(content.startsWith("竞选")) {
+				super.sendPrivate("你参加了竞选。");
+				Utils.releaseListener(super.member.getId());
+				game.sherifflist.add(this);
+			}else if(content.startsWith("放弃")) {
+				super.sendPrivate("你放弃了竞选。");
+				Utils.releaseListener(super.member.getId());
+			}
+		});
+		return;
+	}
+	public void onSheriffState() {
+		sendPublic("你有五分钟时间进行竞选发言。\n可以随时@我结束你的讲话。");
+		Utils.registerListener(member, (msg, type) -> {
+			if (type == MsgType.AT) {
+				Utils.releaseListener(member.getId());
+				game.skipWait(WaitReason.State);
+			}
+		});
+		game.startWait(300000,WaitReason.State);
+	};
+	public void onSheriffVote() {
+		sendPublic("你有五分钟时间进行竞选发言。\n可以随时@我结束你的讲话。");
+		Utils.registerListener(member, (msg, type) -> {
+			if (type == MsgType.AT) {
+				Utils.releaseListener(member.getId());
+				game.skipWait(WaitReason.State);
+			}
+		});
+		game.startWait(300000,WaitReason.State);
+	};
 	public void onDied(DiedReason dir) {
 		dr = dir;
-		if (wereWolfGame.isFirstNight || dir == DiedReason.Vote) {
+		if (game.isFirstNight || dir == DiedReason.Vote||dir==DiedReason.Explode) {
 			isDead = true;
 			sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时@我结束你的讲话。");
-			Utils.registerListener(member, (msg, type) -> {
-				if (type == MsgType.AT) {
-					Utils.releaseListener(member.getId());
-					wereWolfGame.skipWait();
-				}
-			});
-			wereWolfGame.startWait(300000);
+			if(!this.onDiePending(dir))
+				Utils.registerListener(member, (msg, type) -> {
+					if (type == MsgType.AT) {
+						Utils.releaseListener(member.getId());
+						game.skipWait(WaitReason.DieWord);
+					}
+				});
+			game.startWait(300000,WaitReason.DieWord);
 			sendPublic("说完了。");
 			tryMute();
 		} else {
@@ -163,6 +204,15 @@ public class Innocent extends com.khjxiaogu.TableGames.Player {
 	}
 	public String getRole() {
 		return "平民";
+	}
+	public Fraction getFraction() {
+		return Fraction.Innocent;
+	}
+	public double getTicketCount() {
+		return isSheriff?1.5:1;
+	}
+	public String getPredictorRole() {
+		return getRole();
 	}
 	public int getTurn() {
 		return 0;

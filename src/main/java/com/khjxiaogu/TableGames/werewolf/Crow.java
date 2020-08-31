@@ -5,7 +5,7 @@ import com.khjxiaogu.TableGames.MessageListener.MsgType;
 
 import net.mamoe.mirai.contact.Member;
 
-public class Crow extends Innocent {
+public class Crow extends Villager {
 
 	public Crow(WereWolfGame wereWolfGame, Member member) {
 		super(wereWolfGame, member);
@@ -13,8 +13,8 @@ public class Crow extends Innocent {
 	@Override
 	public void onTurn() {
 		super.StartTurn();
-		Innocent last=wereWolfGame.lastCursed;
-		this.sendPrivate(wereWolfGame.getAliveList());
+		Villager last=game.lastCursed;
+		this.sendPrivate(game.getAliveList());
 		super.sendPrivate("你可以诅咒一个人，让他在明天的投票之中被额外投一票。\n请私聊选择诅咒的人，你有60秒的考虑时间。\n格式：“诅咒 qq号或者游戏号码”\n也可以放弃，格式：“放弃”");
 		Utils.registerListener(super.mid,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
@@ -22,7 +22,7 @@ public class Crow extends Innocent {
 			if(content.startsWith("诅咒")) {
 				try {
 					Long qq=Long.parseLong(Utils.removeLeadings("诅咒",content).replace('号', ' ').trim());
-					Innocent p=wereWolfGame.getPlayerById(qq);
+					Villager p=game.getPlayerById(qq);
 					if(p==null) {
 						super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
 						return;
@@ -37,7 +37,7 @@ public class Crow extends Innocent {
 					}
 					this.EndTurn();
 					Utils.releaseListener(super.member.getId());
-					wereWolfGame.cursed=p;
+					game.cursed=p;
 					super.sendPrivate(p.getMemberString()+"获得了诅咒！");
 				}catch(Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“诅咒 qq号或者游戏号码”！");
@@ -54,7 +54,10 @@ public class Crow extends Innocent {
 	public int getTurn() {
 		return 2;
 	}
-
+	@Override
+	public Fraction getFraction() {
+		return Fraction.God;
+	}
 	@Override
 	public String getRole() {
 		return "乌鸦";

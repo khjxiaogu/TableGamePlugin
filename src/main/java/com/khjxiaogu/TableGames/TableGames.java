@@ -4,20 +4,39 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
-
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.undercover.UnderCoverGame;
 import com.khjxiaogu.TableGames.undercover.UnderCoverPreserve;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary;
+import com.khjxiaogu.TableGames.werewolf.Crow;
+import com.khjxiaogu.TableGames.werewolf.Demon;
+import com.khjxiaogu.TableGames.werewolf.GraveKeeper;
+import com.khjxiaogu.TableGames.werewolf.Defender;
+import com.khjxiaogu.TableGames.werewolf.Hunter;
+import com.khjxiaogu.TableGames.werewolf.Idiot;
+import com.khjxiaogu.TableGames.werewolf.Villager;
+import com.khjxiaogu.TableGames.werewolf.Knight;
+import com.khjxiaogu.TableGames.werewolf.Elder;
+import com.khjxiaogu.TableGames.werewolf.Seer;
+import com.khjxiaogu.TableGames.werewolf.Tramp;
 import com.khjxiaogu.TableGames.werewolf.WereWolfGame;
 import com.khjxiaogu.TableGames.werewolf.WereWolfPreserve;
+import com.khjxiaogu.TableGames.werewolf.WhiteWolf;
+import com.khjxiaogu.TableGames.werewolf.Witch;
+import com.khjxiaogu.TableGames.werewolf.WereWolf;
+import com.khjxiaogu.TableGames.werewolf.WolfKiller;
 
 import net.mamoe.mirai.console.plugins.PluginBase;
+import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.MemberPermission;
 import net.mamoe.mirai.message.FriendMessageEvent;
 import net.mamoe.mirai.message.GroupMessageEvent;
@@ -47,7 +66,43 @@ public class TableGames extends PluginBase {
 			event.getGroup().sendMessage(name+"游戏已经创建，请 @我 报名 来报名。");
 		});
 	}
+
 	static {
+		Random ckr=new SecureRandom();
+		List<String> cards=new ArrayList<>();
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("长老");
+		cards.add("老流氓");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("石像鬼");
+		cards.add("白狼王");
+		cards.add("白痴");
+		cards.add("预言家");
+		cards.add("猎人");
+		cards.add("女巫");
+		cards.add("守卫");
+		cards.add("乌鸦");
+		cards.add("骑士");
+		cards.add("守墓人");
+		cards.add("守卫");
+		cards.add("猎魔人");
+		normcmd.put("狼人杀抽卡",(event,args)->{
+			event.getGroup().sendMessage(new At((Member)event.getSender()).plus(cards.get(ckr.nextInt(cards.size()))));
+		});
 		makeGame("狼人杀",WereWolfPreserve.class,WereWolfGame.class);
 		makeGame("谁是卧底",UnderCoverPreserve.class,UnderCoverGame.class);
 	}

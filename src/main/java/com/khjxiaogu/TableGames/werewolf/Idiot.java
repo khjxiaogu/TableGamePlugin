@@ -4,8 +4,8 @@ import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
 
 import net.mamoe.mirai.contact.Member;
 
-public class Idoit extends Innocent {
-	public Idoit(WereWolfGame wereWolfGame, Member member) {
+public class Idiot extends Villager {
+	public Idiot(WereWolfGame wereWolfGame, Member member) {
 		super(wereWolfGame, member);
 	}
 	boolean canVote=true;
@@ -24,6 +24,10 @@ public class Idoit extends Innocent {
 			canVote=false;
 			sendPublic("被驱逐了，身份是白痴。");
 		}
+	}
+	@Override
+	public Fraction getFraction() {
+		return Fraction.God;
 	}
 	@Override
 	public String getRole() {

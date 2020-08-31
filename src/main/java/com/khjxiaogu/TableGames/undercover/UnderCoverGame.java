@@ -65,6 +65,7 @@ public class UnderCoverGame extends Game {
 			this.sendPublicMessage(new At(mem).plus("你已参加其他游戏！"));
 			return true;
 		}
+		mem.sendMessage("报名成功！");
 		synchronized(wds) {
 			if(wds.size()<=0)return false;
 			if(wds.remove(0)) {
@@ -94,8 +95,10 @@ public class UnderCoverGame extends Game {
 		while(true) {
 			if(changeWordNeeded) {
 				changeWordNeeded=false;
+				WordPair wp=UnderCoverTextLibrary.getRandomPair();
 				for(UCPlayer in:innos) {
-					in.onGameStart(UnderCoverTextLibrary.getRandomPair());
+					if(!in.isDead)
+						in.onGameStart(wp);
 				}
 			}else
 				changeWordNeeded=true;
@@ -127,10 +130,16 @@ public class UnderCoverGame extends Game {
 						in.sendPublic(new MessageChainBuilder().append("已经投票给").append(at).asMessageChain());
 						if(vu.vote(in,p))
 							main.interrupt();
+					}else if(type==MsgType.AT&&content.startsWith("弃权")) {
+						Utils.releaseListener(in.member.getId());
+						in.sendPublic("已弃权");
+						vu.giveUp(in);
+						if(vu.finished())
+							main.interrupt();
 					}
 				});
 			}
-			this.sendPublicMessage("开始投票，请在两分钟内输入“投票 @要投的人”进行投票。");
+			this.sendPublicMessage("开始投票，请在两分钟内输入“投票 @要投的人”进行投票，或者 @我 弃权 弃票");
 			vu.hintVote(scheduler);
 			try {Thread.sleep(120000);;} catch (InterruptedException e) {}
 			List<UCPlayer> vtd=vu.getMostVoted();

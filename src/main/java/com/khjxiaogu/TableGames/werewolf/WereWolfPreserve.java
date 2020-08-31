@@ -22,7 +22,7 @@ public class WereWolfPreserve extends PreserveInfo<WereWolfGame> {
 
 	@Override
 	protected int getMaxMembers() {
-		return 12;
+		return 18;
 	}
 
 	@Override

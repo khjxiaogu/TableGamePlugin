@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutorService;
 
 
 public class VoteUtil<T extends Player> {
-	public Map<T,Integer> voted=new ConcurrentHashMap<>(); 
+	public Map<T,Double> voted=new ConcurrentHashMap<>(); 
 	public Set<T> tovote=Collections.newSetFromMap(new ConcurrentHashMap<>());
 	boolean isEnded=true;
 	Thread hintThread;
@@ -25,8 +25,6 @@ public class VoteUtil<T extends Player> {
 			giveups=0;
 			votenum=tovote.size();
 		}
-	}
-	public static void main(String[] args) {
 	}
 	public void hintVote(ExecutorService scheduler) {
 		scheduler.execute(()->{
@@ -73,35 +71,38 @@ public class VoteUtil<T extends Player> {
 			}
 		}
 	}
-	public boolean vote(T src,T id) {
+	public boolean vote(T src,T id,double ticket) {
 		synchronized(voted){
 			if(!tovote.remove(src))return false;
-			int vnum=voted.getOrDefault(id,0);
-			voted.put(id,vnum+1);
+			double vnum=voted.getOrDefault(id,0D);
+			voted.put(id,vnum+ticket);
 			if(tovote.size()==0) 
 				return true;
 			return false;
 		}
 	}
+	public boolean vote(T src,T id) {
+		return vote(src,id,1D);
+	}
 	public void vote(T id) {
 		synchronized(voted){
-			int vnum=voted.getOrDefault(id,0);
+			double vnum=voted.getOrDefault(id,0D);
 			voted.put(id,vnum+1);
 			votenum++;
 		}
 	}
 	public List<T> getMostVoted() {
 		synchronized(voted){
-			int lastmax=0;
-			for(Map.Entry<T,Integer> p:voted.entrySet()) {
+			double lastmax=0;
+			for(Map.Entry<T,Double> p:voted.entrySet()) {
 				if(p.getValue()>lastmax) {
 					lastmax=p.getValue();
 				}
 			}
 			List<T> vpl=new ArrayList<>();
-			if(lastmax==1)
+			if(lastmax<=1)
 				return vpl;
-			for(Map.Entry<T,Integer> p:voted.entrySet()) {
+			for(Map.Entry<T,Double> p:voted.entrySet()) {
 				if(p.getValue()==lastmax)
 					vpl.add(p.getKey());
 			}
@@ -110,14 +111,14 @@ public class VoteUtil<T extends Player> {
 	}
 	public List<T> getForceMostVoted() {
 		synchronized(voted){
-			int lastmax=0;
-			for(Map.Entry<T,Integer> p:voted.entrySet()) {
+			double lastmax=0;
+			for(Map.Entry<T,Double> p:voted.entrySet()) {
 				if(p.getValue()>lastmax) {
 					lastmax=p.getValue();
 				}
 			}
 			List<T> vpl=new ArrayList<>();
-			for(Map.Entry<T,Integer> p:voted.entrySet()) {
+			for(Map.Entry<T,Double> p:voted.entrySet()) {
 				if(p.getValue()==lastmax)
 					vpl.add(p.getKey());
 			}
