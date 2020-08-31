@@ -8,8 +8,8 @@ import net.mamoe.mirai.message.data.PlainText;
 
 public class Seer extends Villager{
 
-	public Seer(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public Seer(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 
 	@Override

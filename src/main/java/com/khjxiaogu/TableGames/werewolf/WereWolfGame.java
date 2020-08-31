@@ -20,7 +20,7 @@ import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 
-public class WereWolfGame extends Game {
+public class WerewolfGame extends Game {
 	public enum DiedReason{
 		Vote("被驱逐"),
 		Wolf("被杀死"),
@@ -95,7 +95,7 @@ public class WereWolfGame extends Game {
 	int num=0;
 	Thread[] wt=new Thread[5];
 	public List<Class<? extends Villager>> roles=Collections.synchronizedList(new ArrayList<>());
-	public WereWolfGame(Group g,int cplayer) {
+	public WerewolfGame(Group g,int cplayer) {
 		super(g,cplayer,8);
 		int godcount=(int) Math.ceil(cplayer/3.0);
 		if(godcount>5)godcount=5;
@@ -143,7 +143,7 @@ public class WereWolfGame extends Game {
 		Collections.shuffle(roles);
 		Collections.shuffle(roles);
 	}
-	public WereWolfGame(Group g,String... args) {
+	public WerewolfGame(Group g,String... args) {
 		super(g,args.length,8);
 		for(String s:args) {
 				roles.add(caraMap.getOrDefault(s,Villager.class));
@@ -199,7 +199,7 @@ public class WereWolfGame extends Game {
 		if(roles.size()>0) {
 			try {
 				Villager cp;
-				playerlist.add(cp=roles.remove(0).getConstructor(WereWolfGame.class,Member.class).newInstance(this,mem));
+				playerlist.add(cp=roles.remove(0).getConstructor(WerewolfGame.class,Member.class).newInstance(this,mem));
 				int min=playerlist.indexOf(cp);
 				cp.sendPrivate("已经报名");
 				String nc=cp.member.getNameCard();

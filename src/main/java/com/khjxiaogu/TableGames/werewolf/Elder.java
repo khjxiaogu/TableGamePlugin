@@ -4,8 +4,8 @@ import net.mamoe.mirai.contact.Member;
 
 public class Elder extends Villager {
 	boolean lifeUsed=false;
-	public Elder(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public Elder(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 	@Override
 	public void onGameStart() {

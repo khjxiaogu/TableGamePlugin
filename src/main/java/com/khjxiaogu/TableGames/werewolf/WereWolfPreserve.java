@@ -4,9 +4,9 @@ import com.khjxiaogu.TableGames.PreserveInfo;
 
 import net.mamoe.mirai.contact.Group;
 
-public class WereWolfPreserve extends PreserveInfo<WereWolfGame> {
+public class WerewolfPreserve extends PreserveInfo<WerewolfGame> {
 
-	public WereWolfPreserve(Group g) {
+	public WerewolfPreserve(Group g) {
 		super(g);
 	}
 
@@ -26,8 +26,8 @@ public class WereWolfPreserve extends PreserveInfo<WereWolfGame> {
 	}
 
 	@Override
-	protected Class<WereWolfGame> getGameClass() {
-		return WereWolfGame.class;
+	protected Class<WerewolfGame> getGameClass() {
+		return WerewolfGame.class;
 	}
 
 	@Override

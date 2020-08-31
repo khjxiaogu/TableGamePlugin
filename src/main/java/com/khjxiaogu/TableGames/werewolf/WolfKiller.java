@@ -2,14 +2,14 @@ package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.Utils;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
 import net.mamoe.mirai.contact.Member;
 
 public class WolfKiller extends Villager {
 
-	public WolfKiller(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public WolfKiller(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 	private Villager lastkill;
 	@Override

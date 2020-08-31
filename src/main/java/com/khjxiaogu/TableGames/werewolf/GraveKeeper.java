@@ -4,8 +4,8 @@ import net.mamoe.mirai.contact.Member;
 
 public class GraveKeeper extends Villager{
 
-	public GraveKeeper(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public GraveKeeper(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 
 	@Override

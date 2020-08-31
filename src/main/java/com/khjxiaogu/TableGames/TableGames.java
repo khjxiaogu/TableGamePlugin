@@ -28,8 +28,8 @@ import com.khjxiaogu.TableGames.werewolf.Knight;
 import com.khjxiaogu.TableGames.werewolf.Elder;
 import com.khjxiaogu.TableGames.werewolf.Seer;
 import com.khjxiaogu.TableGames.werewolf.Tramp;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame;
-import com.khjxiaogu.TableGames.werewolf.WereWolfPreserve;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame;
+import com.khjxiaogu.TableGames.werewolf.WerewolfPreserve;
 import com.khjxiaogu.TableGames.werewolf.WhiteWolf;
 import com.khjxiaogu.TableGames.werewolf.Witch;
 import com.khjxiaogu.TableGames.werewolf.WereWolf;
@@ -103,7 +103,7 @@ public class TableGames extends PluginBase {
 		normcmd.put("狼人杀抽卡",(event,args)->{
 			event.getGroup().sendMessage(new At((Member)event.getSender()).plus(cards.get(ckr.nextInt(cards.size()))));
 		});
-		makeGame("狼人杀",WereWolfPreserve.class,WereWolfGame.class);
+		makeGame("狼人杀",WerewolfPreserve.class,WerewolfGame.class);
 		makeGame("谁是卧底",UnderCoverPreserve.class,UnderCoverGame.class);
 	}
 	public void onEnable() {

@@ -2,14 +2,14 @@ package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.Utils;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.WaitReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 
 import net.mamoe.mirai.contact.Member;
 
 public class Villager extends com.khjxiaogu.TableGames.Player {
 
-	WereWolfGame game;
+	WerewolfGame game;
 	boolean isDead = false;
 	boolean isGuarded = false;
 	boolean lastIsGuarded = false;
@@ -21,9 +21,9 @@ public class Villager extends com.khjxiaogu.TableGames.Player {
 	boolean isSheriff=false;
 	DiedReason dr = null;
 
-	public Villager(WereWolfGame wereWolfGame, Member member) {
+	public Villager(WerewolfGame werewolfGame, Member member) {
 		super(member);
-		this.game = wereWolfGame;
+		this.game = werewolfGame;
 		isDead = false;
 		isGuarded = false;
 		lastIsGuarded = false;

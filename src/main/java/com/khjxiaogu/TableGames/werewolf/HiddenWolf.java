@@ -7,8 +7,8 @@ import net.mamoe.mirai.contact.Member;
 
 public class HiddenWolf extends Villager {
 
-	public HiddenWolf(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public HiddenWolf(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 	@Override
 	public void onGameStart() {

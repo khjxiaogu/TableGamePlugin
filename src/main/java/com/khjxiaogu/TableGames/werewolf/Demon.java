@@ -7,8 +7,8 @@ import net.mamoe.mirai.contact.Member;
 
 public class Demon extends Villager {
 
-	public Demon(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public Demon(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 
 	@Override

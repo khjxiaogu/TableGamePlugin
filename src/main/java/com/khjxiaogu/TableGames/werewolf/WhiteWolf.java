@@ -1,14 +1,14 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.Utils;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
 import net.mamoe.mirai.contact.Member;
 
 public class WhiteWolf extends WereWolf {
 
-	public WhiteWolf(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public WhiteWolf(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 	@Override
 	public void onTurn() {

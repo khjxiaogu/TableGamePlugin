@@ -1,15 +1,15 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.Utils;
 
 import net.mamoe.mirai.contact.Member;
 
 public class WereWolf extends Villager {
 
-	public WereWolf(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public WereWolf(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 	@Override
 	public void onTurnStart() {

@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
 import net.mamoe.mirai.contact.Member;
 
 public class Idiot extends Villager {
-	public Idiot(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public Idiot(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 	boolean canVote=true;
 	@Override

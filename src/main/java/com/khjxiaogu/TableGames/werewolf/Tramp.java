@@ -2,15 +2,15 @@ package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.Utils;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.WaitReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 
 import net.mamoe.mirai.contact.Member;
 
 public class Tramp extends Villager {
 
-	public Tramp(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public Tramp(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 
 	@Override

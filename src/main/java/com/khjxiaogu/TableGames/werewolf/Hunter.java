@@ -2,8 +2,8 @@ package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.Utils;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.WaitReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.PlainText;
@@ -76,8 +76,8 @@ public class Hunter extends Villager {
 	public Fraction getFraction() {
 		return Fraction.God;
 	}
-	public Hunter(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public Hunter(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 	@Override
 	public int getTurn() {

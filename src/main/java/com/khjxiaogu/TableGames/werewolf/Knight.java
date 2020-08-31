@@ -2,8 +2,8 @@ package com.khjxiaogu.TableGames.werewolf;
 
 
 import com.khjxiaogu.TableGames.Utils;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.DiedReason;
-import com.khjxiaogu.TableGames.werewolf.WereWolfGame.WaitReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 
 import net.mamoe.mirai.contact.Member;
@@ -71,8 +71,8 @@ public class Knight extends Villager {
 				}
 			});
 	}
-	public Knight(WereWolfGame wereWolfGame, Member member) {
-		super(wereWolfGame, member);
+	public Knight(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
 	}
 
 }
