@@ -108,7 +108,7 @@ public class Utils {
 	public static boolean dispatch(Long id,Group g,MsgType type,MessageChain msg) {
 		Utils.MessageListenerWrapper ml=mls.get(id);
 		if(ml==null||!ml.isValid)return false;
-		if(type!=MsgType.PRIVATE&&!g.equals(ml.from))return false;
+		if(!(g.equals(ml.from)||ml.from==null))return false;
 		System.out.println("dispatching msg to "+id);
 		ml.handle(msg, type);
 		return true;

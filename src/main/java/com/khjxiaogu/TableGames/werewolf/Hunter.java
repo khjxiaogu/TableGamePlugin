@@ -9,16 +9,17 @@ import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.PlainText;
 
 public class Hunter extends Villager {
-	
+	boolean hasGun=true;
 	@Override
 	public boolean onDiePending(DiedReason dir) {
 		super.StartTurn();
 		dr=dir;
+		if(!hasGun)return false;
 		if(dir!=DiedReason.Poison) {
 			this.sendPrivate(game.getAliveList());
 			super.sendPrivate("猎人，你死了，你可以选择暴露并开枪打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
 			Utils.registerListener(super.mid,(msg,type)->{
-				if((dir==DiedReason.Vote||dir==DiedReason.Explode)&&type==MsgType.AT) {
+				if((dir==DiedReason.Vote||dir==DiedReason.Explode||game.isFirstNight)&&type==MsgType.AT) {
 					Utils.releaseListener(member.getId());
 					game.skipWait(WaitReason.DieWord);
 				}
@@ -49,6 +50,7 @@ public class Hunter extends Villager {
 									game.skipWait(WaitReason.DieWord);
 								}
 							});
+						hasGun=false;
 						super.sendPrivate("你杀死了"+p.getMemberString());
 						super.sendPublic(new PlainText("死亡，身份是猎人，同时带走了").plus(p.getAt()));
 						if(dir==DiedReason.Vote||dir==DiedReason.Explode)

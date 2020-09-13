@@ -29,6 +29,7 @@ public class Werewolf extends Villager {
 			super.sendPublic("是狼人，自爆了，进入黑夜。");
 			game.scheduler.execute(()->{
 				game.removeAllListeners();
+				game.preSkipDay();
 				this.onDied(DiedReason.Explode);
 				game.skipDay();
 			});
@@ -69,7 +70,7 @@ public class Werewolf extends Villager {
 					this.EndTurn();
 					Utils.releaseListener(super.member.getId());
 					Utils.registerListener(super.member, (msgx,typex)->{
-						if(typex==MsgType.PRIVATE)
+						if(typex!=MsgType.PRIVATE)
 							return;
 						String contentx=Utils.getPlainText(msgx);
 						if(contentx.startsWith("#")) {

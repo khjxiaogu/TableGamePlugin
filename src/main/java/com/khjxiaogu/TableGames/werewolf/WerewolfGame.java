@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+
 import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.Utils;
 import com.khjxiaogu.TableGames.VoteUtil;
@@ -94,6 +96,8 @@ public class WerewolfGame extends Game {
 	VoteUtil<Villager> vu=new VoteUtil<>();
 	int num=0;
 	Thread[] wt=new Thread[5];
+	boolean[] sc=new boolean[5];
+	Runnable next;
 	public List<Class<? extends Villager>> roles=Collections.synchronizedList(new ArrayList<>());
 	public WerewolfGame(Group g,int cplayer) {
 		super(g,cplayer,8);
@@ -143,6 +147,10 @@ public class WerewolfGame extends Game {
 		Collections.shuffle(roles);
 		Collections.shuffle(roles);
 	}
+	public void executeNext() {
+		if(next!=null)
+			scheduler.execute(next);
+	}
 	public WerewolfGame(Group g,String... args) {
 		super(g,args.length,8);
 		for(String s:args) {
@@ -159,6 +167,14 @@ public class WerewolfGame extends Game {
 			Utils.RemoveMember(p.member.getId());
 		}
 		super.doFinalize();
+	}
+	@Override
+	public void forceStop() {
+		terminateWait(WaitReason.State);
+		terminateWait(WaitReason.Vote);
+		terminateWait(WaitReason.DieWord);
+		terminateWait(WaitReason.Generic);
+		super.forceStop();
 	}
 	@Override
 	public String getName() {
@@ -230,22 +246,35 @@ public class WerewolfGame extends Game {
 		try {
 			synchronized(waitLock){
 				wt[lr.getId()]=Thread.currentThread();
+				sc[lr.getId()]=false;
 			}
 			try {
 				Thread.sleep(millis);
 			} catch (InterruptedException e) {
 			}
-			synchronized(waitLock){
-				wt[lr.getId()]=null;
-			}
 		}catch(Throwable T) {}finally {
-			wt[lr.getId()]=null;
+			synchronized(waitLock) {
+				wt[lr.getId()]=null;
+				if(sc[lr.getId()]!=false) {
+					sc[lr.getId()]=false;
+					throw new RuntimeException();
+				}
+			}
 		}
 	}
 	public void skipWait(WaitReason lr) {
 		synchronized(waitLock){
-			if(wt[lr.getId()]!=null&&wt[lr.getId()].getState()==State.TIMED_WAITING)
+			if(wt[lr.getId()]!=null)
 				wt[lr.getId()].interrupt();
+			wt[lr.getId()]=null;
+		}
+	}
+	public void terminateWait(WaitReason lr) {
+		synchronized(waitLock){
+			if(wt[lr.getId()]!=null) {
+				sc[lr.getId()]=true;
+				wt[lr.getId()].interrupt();
+			}
 			wt[lr.getId()]=null;
 		}
 	}
@@ -314,6 +343,10 @@ public class WerewolfGame extends Game {
 		onDawn();
 	}
 	//混合循环
+	public void nextOnDawn() {
+		if(VictoryPending())return;
+		onDawn();
+	}
 	public void onDawn() {
 		lastCursed=cursed;
 		cursed=null;
@@ -386,10 +419,22 @@ public class WerewolfGame extends Game {
 				isDaySkipped=true;
 			}
 		}
-		skipWait(WaitReason.State);
-		skipWait(WaitReason.Vote);
-		skipWait(WaitReason.DieWord);
-		skipWait(WaitReason.Generic);
+		terminateWait(WaitReason.State);
+		terminateWait(WaitReason.Vote);
+		terminateWait(WaitReason.DieWord);
+		terminateWait(WaitReason.Generic);
+		nextOnDawn();
+	}
+	public void preSkipDay() {
+		synchronized(isDaySkipped) {
+			if(isDayTime) {
+				isDaySkipped=true;
+			}
+		}
+		terminateWait(WaitReason.State);
+		terminateWait(WaitReason.Vote);
+		terminateWait(WaitReason.DieWord);
+		terminateWait(WaitReason.Generic);
 	}
 	public void onDayTime() {
 		lastVoteOut=null;
@@ -420,39 +465,11 @@ public class WerewolfGame extends Game {
 		for(Villager p:playerlist) {
 			if(!p.isDead) {
 				p.onDayTime();
-				boolean needSkip=false;
-				synchronized(isDaySkipped) {
-					if(isDaySkipped) {
-						isDaySkipped=false;
-						canDayVote=false;
-						needSkip=true;
-						isDayTime=false;
-					}
-				}
-				if(needSkip) {
-					if(VictoryPending())return;
-					scheduler.execute(()->onDawn());
-					return;
-				}
 			}
 		}
-		muteAll(true);
 		this.sendPublicMessage("你们有15秒思考时间，15秒后开始投票。");
 		startWait(15000,WaitReason.Generic);
-		boolean needSkip=false;
-		synchronized(isDaySkipped) {
-			if(isDaySkipped) {
-				isDaySkipped=false;
-				canDayVote=false;
-				needSkip=true;
-				isDayTime=false;
-			}
-		}
-		if(needSkip) {
-			if(VictoryPending())return;
-			scheduler.execute(()->onDawn());
-			return;
-		}
+		muteAll(true);
 		this.sendPublicMessage("请在两分钟内在私聊中完成投票！");
 		for(Villager p:playerlist) {
 			if(!p.isDead) {
@@ -518,11 +535,10 @@ public class WerewolfGame extends Game {
 			for(Entry<Villager, DiedReason> pe:tokill.entrySet()) {
 				pe.getKey().onDied(pe.getValue());
 			}
-			if(VictoryPending())return;
 		}
 		tokill.clear();
 		canDayVote=false;
-		onDawn();
+		nextOnDawn();
 	}
 	//结束回合循环
 	public boolean VictoryPending() {

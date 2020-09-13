@@ -42,6 +42,7 @@ import net.mamoe.mirai.message.FriendMessageEvent;
 import net.mamoe.mirai.message.GroupMessageEvent;
 import net.mamoe.mirai.message.TempMessageEvent;
 import net.mamoe.mirai.message.data.At;
+import net.mamoe.mirai.message.data.MessageChainBuilder;
 
 public class TableGames extends PluginBase {
 	public static Map<String,BiConsumer<GroupMessageEvent,String[]>> normcmd=new ConcurrentHashMap<>();
@@ -126,7 +127,8 @@ public class TableGames extends PluginBase {
 			if(event.getGroup().getBotAsMember().getPermission()==MemberPermission.MEMBER)return;
 			At at = event.getMessage().first(At.Key);
 			if (at!=null&&at.getTarget() == event.getBot().getId()) {
-				if(!Utils.dispatch(event.getSender().getId(),event.getGroup(),MsgType.AT,event.getMessage())) {
+				Utils.dispatch(event.getSender().getId(),event.getGroup(),MsgType.AT,event.getMessage());
+				{
 					String command=Utils.getPlainText(event.getMessage());
 					String[] args=command.split(" ");
 					BiConsumer<GroupMessageEvent,String[]> bae=normcmd.get(args[0]);
@@ -150,6 +152,12 @@ public class TableGames extends PluginBase {
 								g.forceStop();
 							event.getGroup().sendMessage("已经停止正在进行的游戏！");
 							event.getSender().sendMessage("已经停止正在进行的游戏！");
+						}else if(args[0].startsWith("强制报名")) {
+							Game g=Utils.gs.get(event.getGroup());
+							if(g!=null&&g.isAlive())
+								g.addMember(event.getGroup().get(Long.parseLong(args[1])));
+						}else if(args[0].startsWith("执行")) {
+							Utils.dispatch(Long.parseLong(args[1]),MsgType.valueOf(args[2]),new MessageChainBuilder().append(args[3]).asMessageChain());
 						}
 					}
 				}
