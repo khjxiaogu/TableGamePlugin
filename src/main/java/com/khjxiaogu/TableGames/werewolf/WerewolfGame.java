@@ -1,6 +1,5 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import java.lang.Thread.State;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,11 +10,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
-
 import com.khjxiaogu.TableGames.Game;
+import com.khjxiaogu.TableGames.TableGames;
 import com.khjxiaogu.TableGames.Utils;
 import com.khjxiaogu.TableGames.VoteUtil;
+import com.khjxiaogu.TableGames.WaitThread;
+import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
 
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
@@ -95,12 +95,14 @@ public class WerewolfGame extends Game {
 	Object waitLock=new Object();
 	VoteUtil<Villager> vu=new VoteUtil<>();
 	int num=0;
-	Thread[] wt=new Thread[5];
-	boolean[] sc=new boolean[5];
+	WaitThread[] wt=new WaitThread[5];
 	Runnable next;
 	public List<Class<? extends Villager>> roles=Collections.synchronizedList(new ArrayList<>());
 	public WerewolfGame(Group g,int cplayer) {
 		super(g,cplayer,8);
+		for(int i=0;i<wt.length;i++) {
+			wt[i]=new WaitThread();
+		}
 		int godcount=(int) Math.ceil(cplayer/3.0);
 		if(godcount>5)godcount=5;
 		int wolfcount=(int)Math.ceil((cplayer-godcount)/2.0);
@@ -243,45 +245,16 @@ public class WerewolfGame extends Game {
 	}
 	//wait utils
 	public void startWait(long millis,WaitReason lr) {
-		try {
-			synchronized(waitLock){
-				wt[lr.getId()]=Thread.currentThread();
-				sc[lr.getId()]=false;
-			}
-			try {
-				Thread.sleep(millis);
-			} catch (InterruptedException e) {
-			}
-		}catch(Throwable T) {}finally {
-			synchronized(waitLock) {
-				wt[lr.getId()]=null;
-				if(sc[lr.getId()]!=false) {
-					sc[lr.getId()]=false;
-					throw new RuntimeException();
-				}
-			}
-		}
+		wt[lr.getId()].startWait(millis);
 	}
 	public void skipWait(WaitReason lr) {
-		synchronized(waitLock){
-			if(wt[lr.getId()]!=null)
-				wt[lr.getId()].interrupt();
-			wt[lr.getId()]=null;
-		}
+		wt[lr.getId()].stopWait();
 	}
 	public void terminateWait(WaitReason lr) {
-		synchronized(waitLock){
-			if(wt[lr.getId()]!=null) {
-				sc[lr.getId()]=true;
-				wt[lr.getId()].interrupt();
-			}
-			wt[lr.getId()]=null;
-		}
+		wt[lr.getId()].terminateWait();
 	}
 	public void endWait(WaitReason lr) throws InterruptedException{
-		synchronized(waitLock){
-			wt[lr.getId()]=null;
-		}
+		wt[lr.getId()].endWait();
 	}
 	//game logic
 	void removeAllListeners() {
@@ -563,20 +536,26 @@ public class WerewolfGame extends Game {
 		}
 		boolean ends=false;
 		String status=null;
+		Fraction winfrac=null;
 		if(innos==0&&wolfs>0) {
 			status=("游戏结束！狼人获胜\n");
 			ends=true;
+			winfrac=Fraction.Wolf;
 		}else if(wolfs==0&&innos>0) {
 			status=("游戏结束！平民获胜\n");
+			winfrac=Fraction.Innocent;
 			ends=true;
 		}else if(total==0){
 			status=("游戏结束！同归于尽\n");
 			ends=true;
 		}else if((wolfs>=innos)) {
 			status=("游戏结束！狼人获胜\n");
+			winfrac=Fraction.Wolf;
 			ends=true;
 		}
 		if(ends) {
+			GameData gd=null;
+			gd=TableGames.db.getGame(getName());
 			removeAllListeners();
 			MessageChainBuilder mc=new MessageChainBuilder();
 			mc.add(status);
@@ -589,11 +568,20 @@ public class WerewolfGame extends Game {
 					nc=nc.split("\\|")[1];
 				}
 				p.member.setNameCard(nc);
+				if(gd!=null) {
+					WerewolfPlayerData wpd=gd.getPlayer(p.member.getId(),WerewolfPlayerData.class);
+					wpd.log(p.getFraction(),winfrac,!p.isDead);
+					gd.setPlayer(p.member.getId(),wpd);
+				}
 				try {
 				if(p.isDead)p.member.unmute();
 				}catch(Throwable t) {}
 			}
 			muteAll(false);
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+			}
 			this.sendPublicMessage(mc.asMessageChain());
 			doFinalize();
 		}

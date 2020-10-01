@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,29 +16,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.data.PlayerDatabase;
 import com.khjxiaogu.TableGames.undercover.UnderCoverGame;
 import com.khjxiaogu.TableGames.undercover.UnderCoverPreserve;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary;
-import com.khjxiaogu.TableGames.werewolf.Crow;
-import com.khjxiaogu.TableGames.werewolf.Demon;
-import com.khjxiaogu.TableGames.werewolf.GraveKeeper;
-import com.khjxiaogu.TableGames.werewolf.Defender;
-import com.khjxiaogu.TableGames.werewolf.Hunter;
-import com.khjxiaogu.TableGames.werewolf.Idiot;
-import com.khjxiaogu.TableGames.werewolf.Villager;
-import com.khjxiaogu.TableGames.werewolf.Knight;
-import com.khjxiaogu.TableGames.werewolf.Elder;
-import com.khjxiaogu.TableGames.werewolf.Seer;
-import com.khjxiaogu.TableGames.werewolf.Tramp;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame;
 import com.khjxiaogu.TableGames.werewolf.WerewolfPreserve;
-import com.khjxiaogu.TableGames.werewolf.WhiteWolf;
-import com.khjxiaogu.TableGames.werewolf.Witch;
-import com.khjxiaogu.TableGames.werewolf.Werewolf;
-import com.khjxiaogu.TableGames.werewolf.WolfKiller;
-
 import net.mamoe.mirai.console.plugins.PluginBase;
-import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.MemberPermission;
 import net.mamoe.mirai.message.FriendMessageEvent;
 import net.mamoe.mirai.message.GroupMessageEvent;
@@ -44,12 +30,18 @@ import net.mamoe.mirai.message.TempMessageEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 
+
 public class TableGames extends PluginBase {
+	public static TableGames plugin;
+	public static PlayerDatabase db;
 	public static Map<String,BiConsumer<GroupMessageEvent,String[]>> normcmd=new ConcurrentHashMap<>();
 	public static Map<String,BiConsumer<GroupMessageEvent,String[]>> privcmd=new ConcurrentHashMap<>();
 	public static <T extends Game> void makeGame(String name,Class<? extends PreserveInfo<T>> preserver,Class<T> gameClass) {
 		normcmd.put("预定"+name, (event,command)->{
 			Utils.getPreserve(event.getGroup(),preserver).addPreserver(event.getSender());
+		});
+		normcmd.put(name+"统计", (event,command)->{
+			event.getGroup().sendMessage(new At(event.getSender()).plus(db.getPlayer(event.getSender().getId(),name).toString()));
 		});
 		normcmd.put("取消预定"+name, (event,command)->{
 			Utils.getPreserve(event.getGroup(),preserver).removePreserver(event.getSender());
@@ -66,6 +58,7 @@ public class TableGames extends PluginBase {
 			Utils.createGame(gameClass,event.getGroup(),Arrays.copyOfRange(command,1,command.length));
 			event.getGroup().sendMessage(name+"游戏已经创建，请 @我 报名 来报名。");
 		});
+		
 	}
 
 	static {
@@ -102,18 +95,32 @@ public class TableGames extends PluginBase {
 		cards.add("守卫");
 		cards.add("猎魔人");
 		normcmd.put("狼人杀抽卡",(event,args)->{
-			event.getGroup().sendMessage(new At((Member)event.getSender()).plus(cards.get(ckr.nextInt(cards.size()))));
+			event.getGroup().sendMessage(new At(event.getSender()).plus(cards.get(ckr.nextInt(cards.size()))));
 		});
 		makeGame("狼人杀",WerewolfPreserve.class,WerewolfGame.class);
 		makeGame("谁是卧底",UnderCoverPreserve.class,UnderCoverGame.class);
 	}
+	public static void transfer(InputStream i,OutputStream o) throws IOException {
+		int nRead;
+		byte[] data = new byte[4096];
+
+		try {
+			while ((nRead = i.read(data, 0, data.length)) != -1)
+				o.write(data, 0, nRead);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			throw e;
+		}
+	}
 	public void onEnable() {
+		plugin=this;
+		db=new PlayerDatabase(super.getDataFolder());
 		try {
 			File f=new File(super.getDataFolder(),"undtext.txt");
 			if(!f.exists()) {
 				f.createNewFile();
 				FileOutputStream fos=new FileOutputStream(f);
-				this.getResources("undtext.txt").transferTo(fos);
+				transfer(this.getResources("undtext.txt"),fos);
 				fos.close();
 			}
 			

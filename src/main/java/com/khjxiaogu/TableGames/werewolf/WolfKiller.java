@@ -47,6 +47,7 @@ public class WolfKiller extends Villager {
 			}
 			if(content.startsWith("放弃")) {
 				Utils.releaseListener(mid);
+				super.sendPrivate("您已经放弃");
 				super.EndTurn();
 			}
 		});

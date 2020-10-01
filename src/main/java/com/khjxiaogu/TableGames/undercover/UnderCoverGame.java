@@ -6,8 +6,11 @@ import java.util.List;
 import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.Utils;
 import com.khjxiaogu.TableGames.VoteUtil;
+import com.khjxiaogu.TableGames.WaitThread;
+import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary.WordPair;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.TableGames;
 
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
@@ -23,6 +26,7 @@ public class UnderCoverGame extends Game {
 	Thread main=new Thread(()->gameMain());
 	VoteUtil<UCPlayer> vu=new VoteUtil<>();
 	List<Boolean> wds=Collections.synchronizedList(new ArrayList<>());
+	WaitThread wt=new WaitThread();
 	public UnderCoverGame(Group group, int cplayer) {
 		super(group, cplayer,2);
 		this.cplayer=cplayer;
@@ -107,9 +111,9 @@ public class UnderCoverGame extends Game {
 				in.sendPublic("请在1分钟内描述你的词语，可以随时@我结束描述");
 				Utils.registerListener(in.member.getId(),group,(msg,type)->{
 					if(type==MsgType.AT)
-						main.interrupt();
+						wt.stopWait();
 				});
-				try {Thread.sleep(60000);} catch (InterruptedException e) {}
+				wt.startWait(60000);
 				Utils.releaseListener(in.member.getId());
 			}
 			vu.clear();
@@ -129,19 +133,19 @@ public class UnderCoverGame extends Game {
 						Utils.releaseListener(in.member.getId());
 						in.sendPublic(new MessageChainBuilder().append("已经投票给").append(at).asMessageChain());
 						if(vu.vote(in,p))
-							main.interrupt();
+							wt.stopWait();
 					}else if(type==MsgType.AT&&content.startsWith("弃权")) {
 						Utils.releaseListener(in.member.getId());
 						in.sendPublic("已弃权");
 						vu.giveUp(in);
 						if(vu.finished())
-							main.interrupt();
+							wt.stopWait();
 					}
 				});
 			}
 			this.sendPublicMessage("开始投票，请在两分钟内输入“投票 @要投的人”进行投票，或者 @我 弃权 弃票");
 			vu.hintVote(scheduler);
-			try {Thread.sleep(120000);;} catch (InterruptedException e) {}
+			wt.startWait(120000);
 			List<UCPlayer> vtd=vu.getMostVoted();
 			vu.clear();
 			if(vtd.size()!=1) {
@@ -159,18 +163,41 @@ public class UnderCoverGame extends Game {
 					hasSpy|=in.isSpy;
 				}
 			}
+			String status="";
 			if(hasSpy) {
 				if(left<=spycount+2) {
 					this.isEnded=true;
-					this.sendPublicMessage("卧底胜利！");
-					break;
+					status="卧底胜利！";
+					if(innos.size()>=8) {
+						GameData gd=TableGames.db.getGame(getName());
+						for(UCPlayer in:innos) {
+							UnderCoverPlayerData ucpd=gd.getPlayer(in.mid,UnderCoverPlayerData.class);
+							ucpd.log(in.isSpy,true,in.isDead);
+							gd.setPlayer(in.mid,ucpd);
+						}
+						
+					}
 				}
 			}else {
 				this.isEnded=true;
-				this.sendPublicMessage("卧底失败！");
+				status=("卧底失败！");
+				if(innos.size()>=8) {
+					GameData gd=TableGames.db.getGame(getName());
+					for(UCPlayer in:innos) {
+						UnderCoverPlayerData ucpd=gd.getPlayer(in.mid,UnderCoverPlayerData.class);
+						ucpd.log(in.isSpy,false,in.isDead);
+						gd.setPlayer(in.mid,ucpd);
+					}
+				}
+			}
+			if(this.isEnded) {
+				StringBuilder gr=new StringBuilder(status).append("\n游戏结果：");
+				for(UCPlayer in:innos) {
+					gr.append("\n").append(in.getMemberString()).append(in.isSpy?" 是卧底":" 不是卧底");
+				}
+				this.sendPublicMessage(gr.toString());
 				break;
 			}
-			
 		}
 	}
 	@Override

@@ -33,8 +33,10 @@ public class Utils {
 			return "";
 		return pt.getContent().trim();
 	}
-	public static String removeLeadings(String leading,String orig) {
-		return orig.replace(leading,"").trim();
+	public static String removeLeadings(String leading, String orig) {
+		if (orig.startsWith(leading))
+			return orig.substring(leading.length()).replace(leading, "").trim();
+		return orig;
 	}
 	public static void main(String[] args) {
 		System.out.println(removeLeadings("保护","保护1"));
@@ -139,6 +141,12 @@ public class Utils {
 			gs.put(gp,ng);
 			return ng;
 		}
+	}
+	public static String percent(double v1,double v2) {
+		if(v2!=0) {
+			return String.valueOf(Math.round(v1/v2*10000)/100)+"%";
+		}
+		return "N/A%";
 	}
 	public static <T extends Game> T createGame(Class<T> gameClass,Group gp,String... args) {
 		Game g=gs.get(gp);
