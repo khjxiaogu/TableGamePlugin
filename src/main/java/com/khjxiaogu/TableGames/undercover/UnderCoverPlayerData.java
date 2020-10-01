@@ -56,11 +56,11 @@ public class UnderCoverPlayerData {
 		apd.append("谁是卧底统计数据").append("\n");
 		apd.append("总计场数 ").append(total).append("\n");
 		apd.append("总计胜率 ").append(Utils.percent(wins,total)).append("\n");
-		apd.append("卧底胜率 ").append(Utils.percent(winasspy,total)).append("\n");
-		apd.append("平民胜率 ").append(Utils.percent(winasanno,total)).append("\n");
+		apd.append("卧底胜率 ").append(Utils.percent(winasspy,winasspy+loseasspy)).append("\n");
+		apd.append("平民胜率 ").append(Utils.percent(winasanno,winasanno+loseasanno)).append("\n");
 		apd.append("总计存活率 ").append(Utils.percent(alive,total)).append("\n");
-		apd.append("卧底存活率 ").append(Utils.percent(aliveasspy,total)).append("\n");
-		apd.append("平民存活率 ").append(Utils.percent(aliveasanno,total)).append("\n");
+		apd.append("卧底存活率 ").append(Utils.percent(aliveasspy,aliveasspy+outasspy)).append("\n");
+		apd.append("平民存活率 ").append(Utils.percent(aliveasanno,outasanno)).append("\n");
 		return apd.toString();
 	}
 }

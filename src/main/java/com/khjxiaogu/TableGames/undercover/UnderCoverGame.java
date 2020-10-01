@@ -168,26 +168,21 @@ public class UnderCoverGame extends Game {
 				if(left<=spycount+2) {
 					this.isEnded=true;
 					status="卧底胜利！";
-					if(innos.size()>=8) {
-						GameData gd=TableGames.db.getGame(getName());
-						for(UCPlayer in:innos) {
-							UnderCoverPlayerData ucpd=gd.getPlayer(in.mid,UnderCoverPlayerData.class);
-							ucpd.log(in.isSpy,true,in.isDead);
-							gd.setPlayer(in.mid,ucpd);
-						}
-						
+					GameData gd=TableGames.db.getGame(getName());
+					for(UCPlayer in:innos) {
+						UnderCoverPlayerData ucpd=gd.getPlayer(in.mid,UnderCoverPlayerData.class);
+						ucpd.log(in.isSpy,true,in.isDead);
+						gd.setPlayer(in.mid,ucpd);
 					}
 				}
 			}else {
 				this.isEnded=true;
 				status=("卧底失败！");
-				if(innos.size()>=8) {
-					GameData gd=TableGames.db.getGame(getName());
-					for(UCPlayer in:innos) {
-						UnderCoverPlayerData ucpd=gd.getPlayer(in.mid,UnderCoverPlayerData.class);
-						ucpd.log(in.isSpy,false,in.isDead);
-						gd.setPlayer(in.mid,ucpd);
-					}
+				GameData gd=TableGames.db.getGame(getName());
+				for(UCPlayer in:innos) {
+					UnderCoverPlayerData ucpd=gd.getPlayer(in.mid,UnderCoverPlayerData.class);
+					ucpd.log(in.isSpy,false,in.isDead);
+					gd.setPlayer(in.mid,ucpd);
 				}
 			}
 			if(this.isEnded) {
