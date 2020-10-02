@@ -561,7 +561,7 @@ public class WerewolfGame extends Game {
 			mc.add(status);
 			mc.add("游戏身份：\n");
 			for(Villager p:playerlist) {
-				mc.add(p.getMemberString());
+				mc.add(p.getAt());
 				mc.add("的身份为 "+p.getRole()+" "+DiedReason.getString(p.dr)+"\n");
 				String nc=p.member.getNameCard();
 				if(nc.indexOf('|')!=-1) {
@@ -579,7 +579,7 @@ public class WerewolfGame extends Game {
 			}
 			muteAll(false);
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(10000);//sbtx好像有频率限制，先等他个10秒再说
 			} catch (InterruptedException e) {
 			}
 			this.sendPublicMessage(mc.asMessageChain());

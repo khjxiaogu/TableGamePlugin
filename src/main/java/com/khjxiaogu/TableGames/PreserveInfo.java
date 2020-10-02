@@ -27,9 +27,20 @@ public abstract class PreserveInfo<T extends Game>{
 	protected abstract int getMaxMembers();
 	protected abstract Class<T> getGameClass();
 	public abstract String getName();
+	public boolean enablefake=false;
 	public static Integer prevSize=0;
+	public int getCurrentNum() {
+		int crn=topreserve.size();
+		if(enablefake&&crn<getMaxMembers()-3) {
+			crn+=3;
+		}
+		return crn;
+	};
+	public int getActualCurrentNum() {
+		return topreserve.size();
+	};
 	public void addPreserver(Member m) {
-		if(topreserve.size()>=getMaxMembers()) {
+		if(getCurrentNum()>=getMaxMembers()) {
 			group.sendMessage(getName()+"当前已经满人！");
 			return;
 		}
@@ -40,31 +51,35 @@ public abstract class PreserveInfo<T extends Game>{
 		}
 		if(topreserve.add(m)) {
 			m.sendMessage("预定成功");
-			group.sendMessage(getName()+"当前预定人数："+topreserve.size()+"\n最低开始人数："+getMinMembers()+"\n欢迎各位预定，格式为“@我 预定"+getName()+"”");
+			group.sendMessage(getName()+"当前预定人数："+getCurrentNum()+"\n最低开始人数："+getMinMembers()+"\n欢迎各位预定，格式为“@我 预定"+getName()+"”");
 		}else
 			m.sendMessage("您已经预定了。");
 		synchronized(prevSize) {
-			if(topreserve.size()>=getMinMembers()&&prevSize<getMinMembers()) {
+			if(getCurrentNum()>=getMinMembers()&&prevSize<getMinMembers()) {
 				group.sendMessage("已达到最低预定人数，游戏将会在5分钟后开始，还想参加的请抓紧时间预定，格式为“@我 预定"+getName()+"”");
-				onStartPending();
+				if(getActualCurrentNum()>=getMinMembers())
+					onStartPending();
+				else
+					return;
 			}
-			if(topreserve.size()>=getSuitMembers()&&prevSize<getSuitMembers()) {
+			if(getActualCurrentNum()>=getSuitMembers()&&prevSize<getSuitMembers()) {
 				group.sendMessage("已达到最佳预定人数，游戏将会在1分钟后开始，还想参加的请抓紧时间预定，格式为“@我 预定"+getName()+"”");
 				if(!acceled)
 					td.interrupt();
 				acceled=true;
 			}
-			prevSize=topreserve.size();
+			prevSize=getActualCurrentNum();
 		}
 	}
 	public void removePreserver(Member m) {
 		if(topreserve.remove(m)) {
 			m.sendMessage("取消预定成功");
-			group.sendMessage("当前预定人数："+topreserve.size()+"最低预定人数"+getMinMembers()+"，欢迎各位预定，格式为“@我 预定"+getName()+"”");
+			group.sendMessage("当前预定人数："+getCurrentNum()+"最低预定人数"+getMinMembers()+"，欢迎各位预定，格式为“@我 预定"+getName()+"”");
 		}else
 			m.sendMessage("你还没预定。");
-		if(topreserve.size()<getMinMembers()&&td!=null) {
+		if(getActualCurrentNum()<getMinMembers()&&td!=null) {
 			group.sendMessage("预定人数不足，已取消。");
+			prevSize=getActualCurrentNum();
 			td.interrupt();
 		}
 	}
@@ -79,18 +94,18 @@ public abstract class PreserveInfo<T extends Game>{
 					Thread.sleep(60000);
 					group.sendMessage("游戏将会在1分钟后开始，还想参加的请抓紧时间预定，格式为“@我 预定"+getName()+"”");
 				} catch (InterruptedException e) {}
-				if(topreserve.size()<getMinMembers())return;
+				if(getActualCurrentNum()<getMinMembers())return;
 				acceled=true;
 				Thread.sleep(60000);
 			} catch (InterruptedException e) {}
 			if(Utils.hasActiveGame(group))
 				group.sendMessage(getName()+"不能开始，因为有其他游戏正在运行，将在本次游戏结束后两分钟内开始……");
 			while(Utils.hasActiveGame(group)) {
-				if(topreserve.size()<getMinMembers())return;
+				if(getActualCurrentNum()<getMinMembers())return;
 				
 				try {Thread.sleep(120000);} catch (InterruptedException e) {}
 			}
-			if(topreserve.size()<getMinMembers())return;
+			if(getActualCurrentNum()<getMinMembers())return;
 			td=null;
 			
 			startGame();
@@ -120,6 +135,7 @@ public abstract class PreserveInfo<T extends Game>{
 		Collections.shuffle(mems);
 		Collections.shuffle(mems);
 		Collections.shuffle(mems);
+		Collections.reverse(mems);
 		mems.removeIf(m->gm.addMember(m));
 		this.group.sendMessage("游戏已经开始...");
 		return true;

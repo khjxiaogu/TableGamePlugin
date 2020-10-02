@@ -49,7 +49,10 @@ public class TableGames extends PluginBase {
 		privcmd.put("立即开始"+name, (event,command)->{
 			Utils.getPreserve(event.getGroup(),preserver).startNow();
 		});
-		
+		privcmd.put("b"+name, (event,command)->{
+			PreserveInfo<?> pi=Utils.getPreserve(event.getGroup(),preserver);
+			pi.enablefake=!pi.enablefake;
+		});
 		privcmd.put("开始"+name, (event,command)->{
 			Utils.createGame(gameClass,event.getGroup(),Integer.parseInt(command[1]));
 			event.getGroup().sendMessage(name+"游戏已经创建，请 @我 报名 来报名。");
