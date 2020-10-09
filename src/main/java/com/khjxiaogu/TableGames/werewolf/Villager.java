@@ -1,7 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
-import com.khjxiaogu.TableGames.Utils;
+import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 
@@ -19,7 +19,10 @@ public class Villager extends com.khjxiaogu.TableGames.Player {
 	boolean isSavedByWitch=false;
 	boolean isDemonChecked=false;
 	boolean isSheriff=false;
+	boolean isExchanged=false;
 	DiedReason dr = null;
+	Villager prev;
+	Villager next;
 
 	public Villager(WerewolfGame werewolfGame, Member member) {
 		super(member);
@@ -81,11 +84,15 @@ public class Villager extends com.khjxiaogu.TableGames.Player {
 						Long qq = Long.parseLong(Utils.removeLeadings("投票", content).replace('号', ' ').trim());
 						Villager p = game.getPlayerById(qq);
 						if (p == null) {
-							super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
+							super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入。");
 							return;
 						}
 						if (p.isDead) {
-							super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
+							super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入。");
+							return;
+						}
+						if(!game.checkCanVote(p)) {
+							super.sendPrivate("选择的qq号或者游戏号码非选择对象，请重新输入。");
 							return;
 						}
 						isVoteTurn=false;
@@ -97,7 +104,7 @@ public class Villager extends com.khjxiaogu.TableGames.Player {
 					} catch (Throwable t) {
 						super.sendPrivate("发生错误，正确格式为：“投票 qq号或者游戏号码”！");
 					}
-				}else doDaySkillPending(content);
+				}
 			}
 		});
 	}

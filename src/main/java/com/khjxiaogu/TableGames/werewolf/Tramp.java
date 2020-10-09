@@ -1,7 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.Utils;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 

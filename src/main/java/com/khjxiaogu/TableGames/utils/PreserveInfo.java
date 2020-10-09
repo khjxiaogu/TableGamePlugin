@@ -1,4 +1,4 @@
-package com.khjxiaogu.TableGames;
+package com.khjxiaogu.TableGames.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.werewolf.Villager;
 
 import net.mamoe.mirai.contact.Group;
@@ -16,6 +17,7 @@ import net.mamoe.mirai.contact.Member;
 public abstract class PreserveInfo<T extends Game>{
 	Set<Member> topreserve=Collections.newSetFromMap(new ConcurrentHashMap<>());
 	Group group;
+	Map<String, String> args=null;
 	Thread td;
 	public boolean acceled=false;
 	public PreserveInfo(Group g) {
@@ -71,6 +73,20 @@ public abstract class PreserveInfo<T extends Game>{
 			prevSize=getActualCurrentNum();
 		}
 	}
+	public static Map<String, String> queryToMap(String query) {
+		Map<String, String> result = new HashMap<>();
+		if (query == null || query.length() <= 0)
+			return result;
+
+		for (String param : query.split("&")) {
+			String[] entry = param.split("=");
+			if (entry.length > 1)
+				result.put(entry[0], entry[1]);
+			else
+				result.put(entry[0], "");
+		}
+		return result;
+	}
 	public void removePreserver(Member m) {
 		if(topreserve.remove(m)) {
 			m.sendMessage("取消预定成功");
@@ -124,16 +140,22 @@ public abstract class PreserveInfo<T extends Game>{
 		}else
 			startGame();
 	}
+	public void setArgs(String[] val) {
+		args=queryToMap(String.join(" ",val));
+	}
 	public boolean startGame() {
 		if(topreserve.isEmpty())return false;
 		System.out.println("starting game");
 		this.group.sendMessage("尝试开始游戏中...");
 		topreserve.removeIf(m->Utils.hasMember(m.getId()));
-		Game gm=Utils.createGame(getGameClass(),group,topreserve.size());
+		Game gm;
+		if(args==null)
+			gm=Utils.createGame(getGameClass(),group,topreserve.size());
+		else
+			gm=Utils.createGame(getGameClass(),group,topreserve.size(),args);
+		args=null;
 		List<Member> mems=new ArrayList<>(topreserve);
 		topreserve.clear();
-		Collections.shuffle(mems);
-		Collections.shuffle(mems);
 		Collections.shuffle(mems);
 		Collections.reverse(mems);
 		mems.removeIf(m->gm.addMember(m));

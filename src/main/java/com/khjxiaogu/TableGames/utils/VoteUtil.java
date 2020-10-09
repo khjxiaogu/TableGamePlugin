@@ -1,4 +1,4 @@
-package com.khjxiaogu.TableGames;
+package com.khjxiaogu.TableGames.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
+import com.khjxiaogu.TableGames.Player;
+
 
 public class VoteUtil<T extends Player> {
 	public Map<T,Double> voted=new ConcurrentHashMap<>(); 
@@ -16,6 +18,7 @@ public class VoteUtil<T extends Player> {
 	Thread hintThread;
 	int votenum=0;
 	int giveups=0;
+	public boolean skipHalf=false;
 	public VoteUtil() {
 	}
 	public void addToVote(T src) {
@@ -47,9 +50,10 @@ public class VoteUtil<T extends Player> {
 	public void giveUp(T p) {
 		synchronized(voted){
 			if(tovote.remove(p)) {
-				if(++giveups*1.0/votenum>0.5) {
-					tovote.clear();
-				}
+				if(skipHalf)
+					if(++giveups*1.0/votenum>0.5) {
+						tovote.clear();
+					}
 			}
 		}
 	}

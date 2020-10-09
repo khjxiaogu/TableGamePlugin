@@ -6,6 +6,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -67,7 +69,7 @@ public class PlayerDatabase {
 	        "data TEXT       NOT NULL DEFAULT '{}', " + // 游戏数据json
 	        "PRIMARY KEY (qq,game) ON CONFLICT FAIL" + ");";// 创建请求记录表
 	Connection database;
-	public static Map<String,Class<?>> datacls=new HashMap<>();
+	public static Map<String,Class<? extends GenericPlayerData<?>>> datacls=new HashMap<>();
 	static {
 		datacls.put("狼人杀",WerewolfPlayerData.class);
 		datacls.put("谁是卧底",UnderCoverPlayerData.class);
@@ -117,8 +119,24 @@ public class PlayerDatabase {
 		}
 		return false;
 	}
-	public Object getPlayer(long qq,String game) {
+	public GenericPlayerData<?> getPlayer(long qq,String game) {
 		return gs.fromJson(this.getData(qq, game),datacls.get(game));
+	}
+	public GenericPlayerData<?>[] getPlayers(String game) {
+		List<GenericPlayerData<?>> ll=new LinkedList<>();
+		Class<? extends GenericPlayerData<?>> dcls=datacls.get(game);
+		try(PreparedStatement ps=database.prepareStatement("SELECT data FROM profile WHERE game = ?")){
+			ps.setString(1,game);
+			try(ResultSet rs=ps.executeQuery()){
+				while(rs.next()) {
+					ll.add(gs.fromJson(rs.getString(1),dcls));
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return ll.toArray(new GenericPlayerData<?>[0]);
 	}
 	public GameData getGame(String game) {
 		return new GameData(game,this);

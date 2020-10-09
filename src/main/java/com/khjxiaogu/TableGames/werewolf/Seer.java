@@ -1,7 +1,8 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
-import com.khjxiaogu.TableGames.Utils;
+import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.PlainText;
@@ -35,6 +36,13 @@ public class Seer extends Villager{
 					this.EndTurn();
 					Utils.releaseListener(super.member.getId());
 					super.sendPrivate(p.getMemberString()+"是"+p.getPredictorRole());
+					if(p instanceof NightmareKnight) {
+						NightmareKnight nk=(NightmareKnight) p;
+						if(!nk.isSkillUsed) {
+							nk.isSkillUsed=true;
+							game.kill(this, DiedReason.Reflect);
+						}
+					}
 				}catch(Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“查验 qq号或者游戏号码”！");
 				}

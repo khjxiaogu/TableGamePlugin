@@ -1,6 +1,6 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.Utils;
+import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
 import net.mamoe.mirai.contact.Member;
@@ -14,6 +14,7 @@ public class WhiteWolf extends Werewolf {
 	public void onTurn() {
 		super.StartTurn();
 		super.sendPrivate("白狼王，你可以在投票前随时翻牌自爆带走一个玩家并且立即进入黑夜，格式：“自爆 qq号或者游戏号码”");
+		super.sendPrivate(game.getAliveList());
 	}
 	@Override
 	public void doDaySkillPending(String content) {

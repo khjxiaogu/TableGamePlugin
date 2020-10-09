@@ -1,10 +1,10 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 
-import com.khjxiaogu.TableGames.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.Utils;
 
 import net.mamoe.mirai.contact.Member;
 
@@ -20,6 +20,7 @@ public class Knight extends Villager {
 		super.StartTurn();
 		if(hasSkill) {
 			super.sendPrivate("骑士，你可以翻牌挑战一个人。\n如果这个人是狼人，狼人死，立即进入黑夜，你失去技能。\n如果这个人是好人，你死。\n你可以在投票前随时使用本技能。\n格式：“挑战 qq号或者游戏号码”\n");
+			super.sendPrivate(game.getAliveList());
 		}
 	}
 	@Override
@@ -39,7 +40,17 @@ public class Knight extends Villager {
 			}
 			hasSkill=false;
 			super.sendPublic("是骑士，挑战了"+p.getMemberString());
-			if(p.getFraction()==Fraction.Wolf) {
+			if(p instanceof NightmareKnight) {
+				NightmareKnight nk=(NightmareKnight) p;
+				if(!nk.isSkillUsed) {
+					nk.isSkillUsed=true;
+					game.sendPublicMessage(p.getMemberString()+"是恶灵骑士，同归于尽，进入黑夜。");
+					p.onDied(DiedReason.Knight);
+					game.kill(this, DiedReason.Reflect);
+					game.skipDay();
+					return;
+				}
+			}if(p.getFraction()==Fraction.Wolf) {
 				game.sendPublicMessage(p.getMemberString()+"是狼人，被骑士杀死，进入黑夜。");
 				p.onDied(DiedReason.Knight);
 				game.skipDay();

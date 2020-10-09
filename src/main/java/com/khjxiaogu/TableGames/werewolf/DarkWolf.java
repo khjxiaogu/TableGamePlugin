@@ -8,20 +8,30 @@ import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.PlainText;
 
-public class Hunter extends Villager {
+public class DarkWolf extends Werewolf {
+
+	public DarkWolf(WerewolfGame werewolfGame, Member member) {
+		super(werewolfGame, member);
+	}
+
+	@Override
+	public String getRole() {
+		return super.getRole();
+	}
+
 	boolean hasGun=true;
 	boolean asked=false;
 	@Override
 	public boolean onDiePending(DiedReason dir) {
 		super.StartTurn();
 		dr=dir;
-		if(!hasGun||asked)return false;
-		if(dir!=DiedReason.Poison) {
+		if(!hasGun&&!asked)return false;
+		if(dir!=DiedReason.Poison&&dir!=DiedReason.Explode) {
 			this.sendPrivate(game.getAliveList());
-			super.sendPrivate("猎人，你死了，你可以选择翻牌并开枪打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n如果不需要，则等待时间结束即可。");
+			super.sendPrivate("狼王，你死了，你可以选择打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
 			asked=true;
 			Utils.registerListener(super.mid,(msg,type)->{
-				if((dir==DiedReason.Vote||dir==DiedReason.Explode||game.isFirstNight)&&type==MsgType.AT) {
+				if((dir==DiedReason.Vote||game.isFirstNight)&&type==MsgType.AT) {
 					Utils.releaseListener(member.getId());
 					game.skipWait(WaitReason.DieWord);
 				}
@@ -54,51 +64,23 @@ public class Hunter extends Villager {
 							});
 						hasGun=false;
 						super.sendPrivate("你杀死了"+p.getMemberString());
-						boolean hasDarkWolf=false;
-						for(Villager vill:game.playerlist) {
-							if(vill instanceof DarkWolf) {
-								hasDarkWolf=true;
-								break;
-							}
-						}
-						if(!hasDarkWolf)
-							super.sendPublic(new PlainText("死亡，身份是猎人，同时带走了").plus(p.getAt()));
-						else
-							super.sendPublic(new PlainText("死亡，同时带走了").plus(p.getAt()));
+						super.sendPublic(new PlainText("死亡，同时带走了").plus(p.getAt()));
 						if(dir==DiedReason.Vote||dir==DiedReason.Explode)
-							game.scheduler.execute(()->p.onDied(DiedReason.Hunter));
+							game.scheduler.execute(()->p.onDied(DiedReason.DarkWolf));
 						else {
 							p.isDead=true;
-							game.kill(p,DiedReason.Hunter);
+							game.kill(p,DiedReason.DarkWolf);
 						}
 					}catch(Throwable t) {
 						super.sendPrivate("发生错误，正确格式为：“杀死 qq号或者游戏号码”！");
 					}
+				}else if(content.startsWith("放弃")) {
+					super.sendPrivate("你放弃了开枪！");
 				}
 			});
-
 			return true;
 		}
-		
 		return false;
 	}
-	@Override
-	public void onTurn() {
-		onDiePending(dr);
-	}
-	@Override
-	public Fraction getFraction() {
-		return Fraction.God;
-	}
-	public Hunter(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
-	@Override
-	public int getTurn() {
-		return 3;
-	}
-	@Override
-	public String getRole() {
-		return "猎人";
-	}
+
 }

@@ -1,6 +1,6 @@
 package com.khjxiaogu.TableGames.undercover;
 
-import com.khjxiaogu.TableGames.PreserveInfo;
+import com.khjxiaogu.TableGames.utils.PreserveInfo;
 
 import net.mamoe.mirai.contact.Group;
 

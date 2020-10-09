@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.khjxiaogu.TableGames.Game;
-import com.khjxiaogu.TableGames.Utils;
-import com.khjxiaogu.TableGames.VoteUtil;
-import com.khjxiaogu.TableGames.WaitThread;
 import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary.WordPair;
+import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.TableGames.utils.VoteUtil;
+import com.khjxiaogu.TableGames.utils.WaitThread;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.TableGames;
 
@@ -190,7 +190,7 @@ public class UnderCoverGame extends Game {
 				for(UCPlayer in:innos) {
 					gr.append("\n").append(in.getMemberString()).append(in.isSpy?" 是卧底":" 不是卧底");
 				}
-				this.sendPublicMessage(gr.toString());
+				this.sendPublicMessage(Utils.sendTextAsImage(gr.toString(),this.group));
 				break;
 			}
 		}

@@ -1,7 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.Utils;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.Utils;
 
 import net.mamoe.mirai.contact.Member;
 
@@ -27,9 +27,14 @@ public class HiddenWolf extends Villager {
 			if(inno instanceof Werewolf&&!inno.isDead)
 				return;
 		}
+		for(Villager inno:game.playerlist) {
+			if(inno==this)break;
+			if(inno.getFraction()==Fraction.Wolf&&!inno.isDead)
+				return;
+		}
 		this.StartTurn();
 		this.sendPrivate(game.getAliveList());
-		super.sendPrivate("请私聊选择要杀的人，你有2分钟的考虑时间\n格式：“投票 qq号或者游戏号码”\n如：“投票 1”");
+		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
 		Utils.registerListener(super.member,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
@@ -53,6 +58,11 @@ public class HiddenWolf extends Villager {
 				}catch(Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“投票 qq号或者游戏号码”！");
 				}
+			}else if(content.startsWith("放弃")) {
+				this.EndTurn();
+				Utils.releaseListener(super.member.getId());
+				game.NoVote(this);
+				super.sendPrivate("已放弃");
 			}
 		});
 	}

@@ -1,4 +1,4 @@
-package com.khjxiaogu.TableGames;
+package com.khjxiaogu.TableGames.utils;
 
 public class WaitThread {
 	Thread waiting;

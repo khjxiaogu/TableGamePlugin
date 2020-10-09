@@ -1,8 +1,9 @@
 package com.khjxiaogu.TableGames.undercover;
 
-import com.khjxiaogu.TableGames.Utils;
+import com.khjxiaogu.TableGames.data.GenericPlayerData;
+import com.khjxiaogu.TableGames.utils.Utils;
 
-public class UnderCoverPlayerData {
+public class UnderCoverPlayerData implements GenericPlayerData<UnderCoverPlayerData>{
 	int wins;
 	int loses;
 	int winasspy;
@@ -62,5 +63,21 @@ public class UnderCoverPlayerData {
 		apd.append("卧底存活率 ").append(Utils.percent(aliveasspy,aliveasspy+outasspy)).append("\n");
 		apd.append("平民存活率 ").append(Utils.percent(aliveasanno,outasanno)).append("\n");
 		return apd.toString();
+	}
+	@Override
+	public void plus(UnderCoverPlayerData another) {
+		wins+=another.wins;
+		loses+=another.loses;
+		winasspy+=another.winasspy;
+		loseasspy+=another.loseasspy;
+		winasanno+=another.winasanno;
+		loseasanno+=another.loseasanno;
+		aliveasanno+=another.aliveasanno;
+		aliveasspy+=another.aliveasspy;
+		alive+=another.alive;
+		outasanno+=another.outasanno;
+		outasspy+=another.outasspy;
+		out+=another.out;
+		total=Math.max(another.total,total);
 	}
 }

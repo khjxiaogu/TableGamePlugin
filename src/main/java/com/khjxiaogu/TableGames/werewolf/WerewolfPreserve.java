@@ -1,6 +1,6 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.PreserveInfo;
+import com.khjxiaogu.TableGames.utils.PreserveInfo;
 
 import net.mamoe.mirai.contact.Group;
 

@@ -1,8 +1,8 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
-import com.khjxiaogu.TableGames.Utils;
 
 import net.mamoe.mirai.contact.Member;
 
@@ -50,7 +50,7 @@ public class Werewolf extends Villager {
 	public void onWolfTurn() {
 		this.StartTurn();
 		this.sendPrivate(game.getAliveList());
-		super.sendPrivate("请私聊选择要杀的人，你有2分钟的考虑时间\n也可以通过“#要说的话”来给所有在场狼人发送信息\n投票之后“#要说的话”就会失效。\n格式：“投票 qq号或者游戏号码”\n如：“投票 1”");
+		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
 		Utils.registerListener(super.member,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
@@ -92,6 +92,11 @@ public class Werewolf extends Villager {
 					if(w instanceof Werewolf&&!w.isDead&&!w.equals(this))
 							w.sendPrivate(tosend);
 				}
+			}else if(content.startsWith("放弃")) {
+				this.EndTurn();
+				Utils.releaseListener(super.member.getId());
+				game.NoVote(this);
+				super.sendPrivate("已放弃");
 			}
 		});
 

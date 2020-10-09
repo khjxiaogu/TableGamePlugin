@@ -1,7 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.Utils;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.Utils;
 
 import net.mamoe.mirai.contact.Member;
 
@@ -15,7 +15,7 @@ public class Crow extends Villager {
 		super.StartTurn();
 		Villager last=game.lastCursed;
 		this.sendPrivate(game.getAliveList());
-		super.sendPrivate("你可以诅咒一个人，让他在明天的投票之中被额外投一票。\n请私聊选择诅咒的人，你有60秒的考虑时间。\n格式：“诅咒 qq号或者游戏号码”\n也可以放弃，格式：“放弃”");
+		super.sendPrivate("你可以诅咒一个人，让他在明天的投票之中被额外投一票。\n请私聊选择诅咒的人，你有60秒的考虑时间。\n格式：“诅咒 qq号或者游戏号码”\n如果无需诅咒，则无需发送任何内容，等待时间结束即可。");
 		Utils.registerListener(super.mid,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
@@ -42,10 +42,6 @@ public class Crow extends Villager {
 				}catch(Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“诅咒 qq号或者游戏号码”！");
 				}
-			}else if(content.startsWith("放弃")) {
-				super.sendPrivate("你放弃了诅咒。");
-				this.EndTurn();
-				Utils.releaseListener(super.member.getId());
 			}
 		});
 	}
