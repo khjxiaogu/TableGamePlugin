@@ -29,6 +29,8 @@ import com.khjxiaogu.TableGames.werewolf.Villager;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame;
 import com.khjxiaogu.TableGames.werewolf.WerewolfPreserve;
 
+import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.console.MiraiConsole;
 import net.mamoe.mirai.console.plugins.PluginBase;
 import net.mamoe.mirai.contact.MemberPermission;
 import net.mamoe.mirai.message.FriendMessageEvent;
@@ -50,23 +52,51 @@ public class TableGames extends PluginBase {
 		normcmd.put("预定"+name, (event,command)->{
 			Utils.getPreserve(event.getGroup(),preserver).addPreserver(event.getSender());
 		});
-		normcmd.put("设置"+name+"参数", (event,command)->{
-			String[] args=Arrays.copyOfRange(command,1,command.length);
-			Utils.getPreserve(event.getGroup(),preserver).setArgs(args);
-			event.getGroup().sendMessage("已设置参数为"+String.join(",",args));
-			event.getGroup().sendMessage("特殊场已经设置，欢迎 @我 预定狼人杀 参与特殊场。");
+		normcmd.put(name+"预定列表", (event,command)->{
+			event.getGroup().sendMessage(Utils.getPreserve(event.getGroup(),preserver).getPreserveList());;
 		});
 		normcmd.put(name+"统计", (event,command)->{
-			event.getGroup().sendMessage(new At(event.getSender()).plus(db.getPlayer(event.getSender().getId(),name).toString()));
+			if(command.length==1)
+				event.getGroup().sendMessage(new At(event.getSender()).plus(db.getPlayer(event.getSender().getId(),name).toString()));
+			else {
+				long id=Long.parseLong(command[1]);
+				event.getGroup().sendMessage(event.getGroup().get(id).getNameCard()+"的"+db.getPlayer(id,name).toString());
+			}
 		});
 		normcmd.put("取消预定"+name, (event,command)->{
 			Utils.getPreserve(event.getGroup(),preserver).removePreserver(event.getSender());
 		});
+		normcmd.put("查询"+name+"参数", (event,command)->{
+			event.getGroup().sendMessage(Utils.getPreserve(event.getGroup(),preserver).getArgs());
+		});
+		privcmd.put("设置"+name+"参数", (event,command)->{
+			String[] args=Arrays.copyOfRange(command,1,command.length);
+			Utils.getPreserve(event.getGroup(),preserver).setArgs(args);
+			event.getGroup().sendMessage(Utils.getPreserve(event.getGroup(),preserver).getArgs());
+			event.getGroup().sendMessage("特殊场已经设置，欢迎 @我 预定狼人杀 参与。");
+		});
+		privcmd.put("清除"+name+"参数", (event,command)->{
+			Utils.getPreserve(event.getGroup(),preserver).clearArgs();
+			event.getGroup().sendMessage("狼人杀已经重置为普通场。");
+		});
 		privcmd.put("立即开始"+name, (event,command)->{
 			Utils.getPreserve(event.getGroup(),preserver).startNow();
 		});
+		privcmd.put("强制开始"+name, (event,command)->{
+			Utils.getPreserve(event.getGroup(),preserver).startForce();
+		});
+		privcmd.put("清空"+name+"预定", (event,command)->{
+			Utils.getPreserve(event.getGroup(),preserver).removeAll();
+		});
+		privcmd.put(name+"提醒", (event,command)->{
+			Utils.getPreserve(event.getGroup(),preserver).notifyPreserver();
+			event.getGroup().sendMessage("已经提醒所有预定玩家");
+		});
 		privcmd.put("强制预定"+name,(event,command)->{
 			Utils.getPreserve(event.getGroup(),preserver).addPreserver(event.getGroup().get(Long.parseLong(command[1])));
+		});
+		privcmd.put("强制取消预定"+name,(event,command)->{
+			Utils.getPreserve(event.getGroup(),preserver).removePreserver(event.getGroup().get(Long.parseLong(command[1])));
 		});
 		privcmd.put(name+"统计t", (event,command)->{
 			event.getGroup().sendMessage(new At(event.getSender()).plus(db.getGame(name).getPlayer(event.getSender().getId(),PlayerDatabase.datacls.get(name)).toString()));

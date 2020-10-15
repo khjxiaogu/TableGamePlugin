@@ -73,6 +73,26 @@ public abstract class PreserveInfo<T extends Game>{
 			prevSize=getActualCurrentNum();
 		}
 	}
+	public void removeAll() {
+		topreserve.clear();
+		if(td!=null) {
+			td.stop();
+			td=null;
+		}
+	}
+	public void notifyPreserver() {
+		for(Member m:topreserve) {
+			m.sendMessage("狼人杀游戏即将开始，请注意！");
+		}
+	}
+	public String getPreserveList() {
+		StringBuilder sb=new StringBuilder(this.getName());
+		sb.append("预定列表：\n");
+		for(Member m:topreserve) {
+			sb.append(m.getNameCard()).append("\n");
+		}
+		return sb.toString();
+	}
 	public static Map<String, String> queryToMap(String query) {
 		Map<String, String> result = new HashMap<>();
 		if (query == null || query.length() <= 0)
@@ -101,6 +121,7 @@ public abstract class PreserveInfo<T extends Game>{
 	}
 	public void onStartPending() {
 		td=new Thread(()-> {
+			acceled=false;
 			try {
 				try {
 					Thread.sleep(60000);
@@ -140,8 +161,27 @@ public abstract class PreserveInfo<T extends Game>{
 		}else
 			startGame();
 	}
+	public void startForce() {
+		if(td!=null) {
+			acceled=true;
+			td.stop();
+			td=null;
+		}
+		startGame();
+	}
+	public String getArgs() {
+		StringBuilder sb=new StringBuilder(getName()).append("游戏参数：\n");
+		if(args!=null)
+			for(Map.Entry<String,String> mes:args.entrySet()) {
+				sb.append(mes.getKey()).append(":").append(mes.getValue()).append("\n");
+			}
+		return sb.toString();
+	}
 	public void setArgs(String[] val) {
 		args=queryToMap(String.join(" ",val));
+	}
+	public void clearArgs() {
+		args=null;
 	}
 	public boolean startGame() {
 		if(topreserve.isEmpty())return false;

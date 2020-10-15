@@ -36,8 +36,10 @@ public class WolfBeauty extends Werewolf {
 						super.sendPrivate("选择的qq号或者游戏号码是狼人，请重新输入");
 						return;
 					}
+					
 					this.EndTurn();
 					Utils.releaseListener(super.member.getId());
+					if(!(p instanceof Tramp))
 					this.p=p;
 					super.sendPrivate(p.getMemberString()+"获得了魅惑！");
 				}catch(Throwable t) {

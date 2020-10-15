@@ -363,6 +363,31 @@ public class WerewolfGame extends Game {
 		terminateWait(WaitReason.Vote);
 		terminateWait(WaitReason.DieWord);
 		terminateWait(WaitReason.Generic);
+		StringBuilder mc=new StringBuilder("游戏已中断\n");
+		mc.append("游戏身份：");
+		for(Villager p:playerlist) {
+			Utils.releaseListener(p.member.getId());
+			Utils.RemoveMember(p.member.getId());
+			mc.append("\n").append(p.getMemberString())
+			.append("的身份为 ").append(p.getRole()).append(" ").append(DiedReason.getString(p.dr));
+			String nc=p.member.getNameCard();
+			if(nc.indexOf('|')!=-1) {
+				nc=nc.split("\\|")[1];
+			}
+			p.member.setNameCard(nc);
+			try {
+			if(p.isDead)p.member.unmute();
+			}catch(Throwable t) {}
+			
+		}
+		muteAll(false);
+		mc.append("\n角色评分：").append(winrate);
+		try {
+			Thread.sleep(1000);//sbtx好像有频率限制，先等他个1秒再说
+		} catch (InterruptedException e) {
+		}
+		this.sendPublicMessage(Utils.sendTextAsImage(mc.toString(),this.group));
+		isEnded=true;
 		super.forceStop();
 	}
 	@Override
@@ -808,7 +833,6 @@ public class WerewolfGame extends Game {
 				Thread.sleep(10000);//sbtx好像有频率限制，先等他个10秒再说
 			} catch (InterruptedException e) {
 			}
-			
 			this.sendPublicMessage(Utils.sendTextAsImage(mc.toString(),this.group));
 			doFinalize();
 		}
