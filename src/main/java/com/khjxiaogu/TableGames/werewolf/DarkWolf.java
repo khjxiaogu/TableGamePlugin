@@ -1,6 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
@@ -30,9 +31,9 @@ public class DarkWolf extends Werewolf {
 			this.sendPrivate(game.getAliveList());
 			super.sendPrivate("狼王，你死了，你可以选择打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
 			asked=true;
-			Utils.registerListener(super.mid,(msg,type)->{
+			ListenerUtils.registerListener(super.mid,(msg,type)->{
 				if((dir==DiedReason.Vote||game.isFirstNight)&&type==MsgType.AT) {
-					Utils.releaseListener(member.getId());
+					ListenerUtils.releaseListener(member.getId());
 					game.skipWait(WaitReason.DieWord);
 				}
 				if(type!=MsgType.PRIVATE)return;
@@ -54,11 +55,11 @@ public class DarkWolf extends Werewolf {
 							return;
 						}
 						this.EndTurn();
-						Utils.releaseListener(super.member.getId());
+						ListenerUtils.releaseListener(super.member.getId());
 						if(dir==DiedReason.Vote||dir==DiedReason.Explode)
-							Utils.registerListener(super.member, (msgx,typex)->{
+							ListenerUtils.registerListener(super.member, (msgx,typex)->{
 								if(typex==MsgType.AT) {
-									Utils.releaseListener(member.getId());
+									ListenerUtils.releaseListener(member.getId());
 									game.skipWait(WaitReason.DieWord);
 								}
 							});

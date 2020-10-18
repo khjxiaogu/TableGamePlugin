@@ -1,6 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
@@ -18,7 +19,7 @@ public class WolfKiller extends Villager {
 		super.StartTurn();
 		this.sendPrivate(game.getAliveList());
 		super.sendPrivate("猎魔人，你可以选择狩猎一个人。\n如果这个人是狼人，狼人出局。\n如果这个人是好人，你出局。\n格式：“猎杀 qq号或者游戏号码”\n或者可以放弃，格式：“放弃”");
-		Utils.registerListener(mid,(msg,type)->{
+		ListenerUtils.registerListener(mid,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("猎杀"))
@@ -40,13 +41,13 @@ public class WolfKiller extends Villager {
 				}else {
 					game.kill(this,DiedReason.Hunt_s);
 				}
-				Utils.releaseListener(mid);
+				ListenerUtils.releaseListener(mid);
 				super.EndTurn();
 			} catch (Throwable t) {
 				super.sendPrivate("发生错误，正确格式为：“猎杀 qq号或者游戏号码”！");
 			}
 			if(content.startsWith("放弃")) {
-				Utils.releaseListener(mid);
+				ListenerUtils.releaseListener(mid);
 				super.sendPrivate("您已经放弃");
 				super.EndTurn();
 			}

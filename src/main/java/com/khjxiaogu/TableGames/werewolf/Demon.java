@@ -1,6 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 import net.mamoe.mirai.contact.Member;
@@ -16,7 +17,7 @@ public class Demon extends Villager {
 		super.StartTurn();
 		this.sendPrivate(game.getAliveList());
 		super.sendPrivate("石像鬼，你可以查验一个人的身份，请私聊选择查验的人，你有30秒的考虑时间\n格式：“查验 qq号或者游戏号码”\n如：“查验 1”");
-		Utils.registerListener(super.member,(msg,type)->{
+		ListenerUtils.registerListener(super.member,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("查验")) {
@@ -40,7 +41,7 @@ public class Demon extends Villager {
 						return;
 					}
 					this.EndTurn();
-					Utils.releaseListener(super.member.getId());
+					ListenerUtils.releaseListener(super.member.getId());
 					p.isDemonChecked=true;
 					super.sendPrivate(p.getMemberString()+"是"+p.getPredictorRole());
 				}catch(Throwable t) {
@@ -65,7 +66,7 @@ public class Demon extends Villager {
 		this.sendPrivate(game.getAliveList());
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
-		Utils.registerListener(super.member,(msg,type)->{
+		ListenerUtils.registerListener(super.member,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("投票")) {
@@ -81,7 +82,7 @@ public class Demon extends Villager {
 						return;
 					}
 					this.EndTurn();
-					Utils.releaseListener(super.member.getId());
+					ListenerUtils.releaseListener(super.member.getId());
 					game.WolfVote(this,p);
 					super.sendPrivate("已投票给 "+p.getMemberString());
 				}catch(Throwable t) {
@@ -89,7 +90,7 @@ public class Demon extends Villager {
 				}
 			}else if(content.startsWith("放弃")) {
 				this.EndTurn();
-				Utils.releaseListener(super.member.getId());
+				ListenerUtils.releaseListener(super.member.getId());
 				game.NoVote(this);
 				super.sendPrivate("已放弃");
 			}

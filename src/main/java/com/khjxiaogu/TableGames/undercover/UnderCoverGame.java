@@ -6,6 +6,8 @@ import java.util.List;
 import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary.WordPair;
+import com.khjxiaogu.TableGames.utils.GameUtils;
+import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.utils.VoteUtil;
 import com.khjxiaogu.TableGames.utils.WaitThread;
@@ -49,7 +51,7 @@ public class UnderCoverGame extends Game {
 	@Override
 	protected void doFinalize() {
 		for(UCPlayer in:innos)
-			Utils.RemoveMember(in.member.getId());
+			GameUtils.RemoveMember(in.member.getId());
 		super.doFinalize();
 	}
 	public UCPlayer getPlayerById(long id) {
@@ -65,7 +67,7 @@ public class UnderCoverGame extends Game {
 			this.sendPublicMessage(new At(mem).plus("你已经报名了！"));
 			return false;
 		}
-		if(!Utils.tryAddMember(mem.getId())) {
+		if(!GameUtils.tryAddMember(mem.getId())) {
 			this.sendPublicMessage(new At(mem).plus("你已参加其他游戏！"));
 			return true;
 		}
@@ -109,18 +111,18 @@ public class UnderCoverGame extends Game {
 			for(UCPlayer in:innos) {
 				if(in.isDead)continue;
 				in.sendPublic("请在1分钟内描述你的词语，可以随时@我结束描述");
-				Utils.registerListener(in.member.getId(),group,(msg,type)->{
+				ListenerUtils.registerListener(in.member.getId(),group,(msg,type)->{
 					if(type==MsgType.AT)
 						wt.stopWait();
 				});
 				wt.startWait(60000);
-				Utils.releaseListener(in.member.getId());
+				ListenerUtils.releaseListener(in.member.getId());
 			}
 			vu.clear();
 			for(UCPlayer in:innos) {
 				if(in.isDead)continue;
 				vu.addToVote(in);
-				Utils.registerListener(in.member.getId(),group,(msg,type)->{
+				ListenerUtils.registerListener(in.member.getId(),group,(msg,type)->{
 					At at=msg.first(At.Key);
 					if(at==null)return;
 					String content=Utils.getPlainText(msg);
@@ -130,12 +132,12 @@ public class UnderCoverGame extends Game {
 							in.sendPublic("选择的玩家非游戏玩家，请重新输入");
 							return;
 						}
-						Utils.releaseListener(in.member.getId());
+						ListenerUtils.releaseListener(in.member.getId());
 						in.sendPublic(new MessageChainBuilder().append("已经投票给").append(at).asMessageChain());
 						if(vu.vote(in,p))
 							wt.stopWait();
 					}else if(type==MsgType.AT&&content.startsWith("弃权")) {
-						Utils.releaseListener(in.member.getId());
+						ListenerUtils.releaseListener(in.member.getId());
 						in.sendPublic("已弃权");
 						vu.giveUp(in);
 						if(vu.finished())
@@ -157,7 +159,7 @@ public class UnderCoverGame extends Game {
 			boolean hasSpy=false;
 			int left=0;
 			for(UCPlayer in:innos) {
-				Utils.releaseListener(in.member.getId());
+				ListenerUtils.releaseListener(in.member.getId());
 				if(!in.isDead) {
 					left++;
 					hasSpy|=in.isSpy;

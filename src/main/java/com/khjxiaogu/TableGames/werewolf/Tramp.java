@@ -1,7 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
-import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 
@@ -18,9 +18,9 @@ public class Tramp extends Villager {
 		dr = dir;
 		isDead = true;
 		sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时@我结束你的讲话。");
-		Utils.registerListener(member, (msg, type) -> {
+		ListenerUtils.registerListener(member, (msg, type) -> {
 			if (type == MsgType.AT) {
-				Utils.releaseListener(member.getId());
+				ListenerUtils.releaseListener(member.getId());
 				game.skipWait(WaitReason.DieWord);
 			}
 		});

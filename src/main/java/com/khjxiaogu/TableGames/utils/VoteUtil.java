@@ -104,7 +104,7 @@ public class VoteUtil<T extends Player> {
 				}
 			}
 			List<T> vpl=new ArrayList<>();
-			if(lastmax<=1)
+			if(votenum>=4&&lastmax<=1)
 				return vpl;
 			for(Map.Entry<T,Double> p:voted.entrySet()) {
 				if(p.getValue()==lastmax)

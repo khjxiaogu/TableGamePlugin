@@ -23,6 +23,9 @@ import com.khjxiaogu.TableGames.data.PlayerDatabase;
 import com.khjxiaogu.TableGames.undercover.UnderCoverGame;
 import com.khjxiaogu.TableGames.undercover.UnderCoverPreserve;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary;
+import com.khjxiaogu.TableGames.utils.GameUtils;
+import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.utils.PreserveHolder;
 import com.khjxiaogu.TableGames.utils.PreserveInfo;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.Villager;
@@ -50,10 +53,10 @@ public class TableGames extends PluginBase {
 	public static ExecutorService dispatchexec=Executors.newCachedThreadPool();
 	public static <T extends Game> void makeGame(String name,Class<? extends PreserveInfo<T>> preserver,Class<T> gameClass) {
 		normcmd.put("预定"+name, (event,command)->{
-			Utils.getPreserve(event.getGroup(),preserver).addPreserver(event.getSender());
+			PreserveHolder.getPreserve(event.getGroup(),preserver).addPreserver(event.getSender());
 		});
 		normcmd.put(name+"预定列表", (event,command)->{
-			event.getGroup().sendMessage(Utils.getPreserve(event.getGroup(),preserver).getPreserveList());;
+			event.getGroup().sendMessage(PreserveHolder.getPreserve(event.getGroup(),preserver).getPreserveList());;
 		});
 		normcmd.put(name+"统计", (event,command)->{
 			if(command.length==1)
@@ -64,45 +67,45 @@ public class TableGames extends PluginBase {
 			}
 		});
 		normcmd.put("取消预定"+name, (event,command)->{
-			Utils.getPreserve(event.getGroup(),preserver).removePreserver(event.getSender());
+			PreserveHolder.getPreserve(event.getGroup(),preserver).removePreserver(event.getSender());
 		});
 		normcmd.put("查询"+name+"参数", (event,command)->{
-			event.getGroup().sendMessage(Utils.getPreserve(event.getGroup(),preserver).getArgs());
+			event.getGroup().sendMessage(PreserveHolder.getPreserve(event.getGroup(),preserver).getArgs());
 		});
 		privcmd.put("设置"+name+"参数", (event,command)->{
 			String[] args=Arrays.copyOfRange(command,1,command.length);
-			Utils.getPreserve(event.getGroup(),preserver).setArgs(args);
-			event.getGroup().sendMessage(Utils.getPreserve(event.getGroup(),preserver).getArgs());
+			PreserveHolder.getPreserve(event.getGroup(),preserver).setArgs(args);
+			event.getGroup().sendMessage(PreserveHolder.getPreserve(event.getGroup(),preserver).getArgs());
 			event.getGroup().sendMessage("特殊场已经设置，欢迎 @我 预定狼人杀 参与。");
 		});
 		privcmd.put("清除"+name+"参数", (event,command)->{
-			Utils.getPreserve(event.getGroup(),preserver).clearArgs();
+			PreserveHolder.getPreserve(event.getGroup(),preserver).clearArgs();
 			event.getGroup().sendMessage("狼人杀已经重置为普通场。");
 		});
 		privcmd.put("立即开始"+name, (event,command)->{
-			Utils.getPreserve(event.getGroup(),preserver).startNow();
+			PreserveHolder.getPreserve(event.getGroup(),preserver).startNow();
 		});
 		privcmd.put("强制开始"+name, (event,command)->{
-			Utils.getPreserve(event.getGroup(),preserver).startForce();
+			PreserveHolder.getPreserve(event.getGroup(),preserver).startForce();
 		});
 		privcmd.put("清空"+name+"预定", (event,command)->{
-			Utils.getPreserve(event.getGroup(),preserver).removeAll();
+			PreserveHolder.getPreserve(event.getGroup(),preserver).removeAll();
 		});
 		privcmd.put(name+"提醒", (event,command)->{
-			Utils.getPreserve(event.getGroup(),preserver).notifyPreserver();
+			PreserveHolder.getPreserve(event.getGroup(),preserver).notifyPreserver();
 			event.getGroup().sendMessage("已经提醒所有预定玩家");
 		});
 		privcmd.put("强制预定"+name,(event,command)->{
-			Utils.getPreserve(event.getGroup(),preserver).addPreserver(event.getGroup().get(Long.parseLong(command[1])));
+			PreserveHolder.getPreserve(event.getGroup(),preserver).addPreserver(event.getGroup().get(Long.parseLong(command[1])));
 		});
 		privcmd.put("强制取消预定"+name,(event,command)->{
-			Utils.getPreserve(event.getGroup(),preserver).removePreserver(event.getGroup().get(Long.parseLong(command[1])));
+			PreserveHolder.getPreserve(event.getGroup(),preserver).removePreserver(event.getGroup().get(Long.parseLong(command[1])));
 		});
 		privcmd.put(name+"统计t", (event,command)->{
 			event.getGroup().sendMessage(new At(event.getSender()).plus(db.getGame(name).getPlayer(event.getSender().getId(),PlayerDatabase.datacls.get(name)).toString()));
 		});
 		privcmd.put("b"+name, (event,command)->{
-			PreserveInfo<?> pi=Utils.getPreserve(event.getGroup(),preserver);
+			PreserveInfo<?> pi=PreserveHolder.getPreserve(event.getGroup(),preserver);
 			pi.enablefake=!pi.enablefake;
 		});
 		privcmd.put(name+"全局统计", (event,command)->{
@@ -113,11 +116,11 @@ public class TableGames extends PluginBase {
 			event.getGroup().sendMessage("全局"+ds[0].toString());
 		});
 		privcmd.put("开始"+name, (event,command)->{
-			Utils.createGame(gameClass,event.getGroup(),Integer.parseInt(command[1]));
+			GameUtils.createGame(gameClass,event.getGroup(),Integer.parseInt(command[1]));
 			event.getGroup().sendMessage(name+"游戏已经创建，请 @我 报名 来报名。");
 		});
 		privcmd.put("定制"+name, (event,command)->{
-			Utils.createGame(gameClass,event.getGroup(),Arrays.copyOfRange(command,1,command.length));
+			GameUtils.createGame(gameClass,event.getGroup(),Arrays.copyOfRange(command,1,command.length));
 			event.getGroup().sendMessage(name+"游戏已经创建，请 @我 报名 来报名。");
 		});
 		
@@ -211,7 +214,7 @@ public class TableGames extends PluginBase {
 			At at = event.getMessage().first(At.Key);
 			
 			if (at!=null&&at.getTarget() == event.getBot().getId()) {
-				Utils.dispatch(event.getSender().getId(),event.getGroup(),MsgType.AT,event.getMessage());
+				ListenerUtils.dispatch(event.getSender().getId(),event.getGroup(),MsgType.AT,event.getMessage());
 				{
 					String command=Utils.getPlainText(event.getMessage());
 					String[] args=command.split(" ");
@@ -219,7 +222,7 @@ public class TableGames extends PluginBase {
 					if(bae!=null) {
 						bae.accept(event,args);
 					}else if(args[0].startsWith("报名")) {
-						Game g=Utils.getGames().get(event.getGroup());
+						Game g=GameUtils.getGames().get(event.getGroup());
 						if(g!=null&&g.isAlive())
 							g.addMember(event.getSender());
 					}else if(event.getSender().getPermission().getLevel()>0) {
@@ -227,30 +230,30 @@ public class TableGames extends PluginBase {
 						if(bce!=null) {
 							bce.accept(event,args);
 						}else if(command.startsWith("强制开始")) {
-							Game g=Utils.getGames().get(event.getGroup());
+							Game g=GameUtils.getGames().get(event.getGroup());
 							if(g!=null&&g.isAlive())
 								g.forceStart();
 						}else if(command.startsWith("停止游戏")) {
-							Game g=Utils.getGames().get(event.getGroup());
+							Game g=GameUtils.getGames().get(event.getGroup());
 							if(g!=null)
 								g.forceStop();
 							event.getGroup().sendMessage("已经停止正在进行的游戏！");
 							event.getSender().sendMessage("已经停止正在进行的游戏！");
 						}else if(args[0].startsWith("强制报名")) {
-							Game g=Utils.getGames().get(event.getGroup());
+							Game g=GameUtils.getGames().get(event.getGroup());
 							if(g!=null&&g.isAlive())
 								g.addMember(event.getGroup().get(Long.parseLong(args[1])));
 						}else if(args[0].startsWith("执行")) {
-							dispatchexec.execute(()->Utils.dispatch(Long.parseLong(args[1]),MsgType.valueOf(args[2]),new MessageChainBuilder().append(args[3]).asMessageChain()));
+							dispatchexec.execute(()->ListenerUtils.dispatch(Long.parseLong(args[1]),MsgType.valueOf(args[2]),new MessageChainBuilder().append(args[3]).asMessageChain()));
 						}
 					}
 				}
 			}else {
-				dispatchexec.execute(()->Utils.dispatch(event.getSender().getId(),event.getGroup(),MsgType.PUBLIC,event.getMessage()));
+				dispatchexec.execute(()->ListenerUtils.dispatch(event.getSender().getId(),event.getGroup(),MsgType.PUBLIC,event.getMessage()));
 			}
 		});
-		this.getEventListener().subscribeAlways(TempMessageEvent.class, event -> {dispatchexec.execute(()->Utils.dispatch(event.getSender().getId(),MsgType.PRIVATE,event.getMessage()));});
-		this.getEventListener().subscribeAlways(FriendMessageEvent.class, event -> {dispatchexec.execute(()->Utils.dispatch(event.getSender().getId(),MsgType.PRIVATE,event.getMessage()));});
+		this.getEventListener().subscribeAlways(TempMessageEvent.class, event -> {dispatchexec.execute(()->ListenerUtils.dispatch(event.getSender().getId(),MsgType.PRIVATE,event.getMessage()));});
+		this.getEventListener().subscribeAlways(FriendMessageEvent.class, event -> {dispatchexec.execute(()->ListenerUtils.dispatch(event.getSender().getId(),MsgType.PRIVATE,event.getMessage()));});
 	}
 
 }

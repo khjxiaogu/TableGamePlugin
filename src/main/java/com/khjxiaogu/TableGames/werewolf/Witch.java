@@ -1,6 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
@@ -41,7 +42,7 @@ public class Witch extends Villager {
 		sb.append("你可以使用其中一瓶\n如：“救 1”，\n");
 		sb.append("你有一分钟的考虑时间。\n如果不需要使用药，无需发送任何内容，等待时间结束即可。");
 		super.sendPrivate(sb.toString());
-		Utils.registerListener(super.member,(msg,type)->{
+		ListenerUtils.registerListener(super.member,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(hasPoison&&content.startsWith("毒")) {
@@ -57,7 +58,7 @@ public class Witch extends Villager {
 						return;
 					}
 					this.EndTurn();
-					Utils.releaseListener(super.member.getId());
+					ListenerUtils.releaseListener(super.member.getId());
 					if(p instanceof NightmareKnight) {
 						NightmareKnight nk=(NightmareKnight) p;
 						if(!nk.isSkillUsed) {
@@ -92,7 +93,7 @@ public class Witch extends Villager {
 						return;
 					}
 					this.EndTurn();
-					Utils.releaseListener(super.member.getId());
+					ListenerUtils.releaseListener(super.member.getId());
 					p.isSavedByWitch=true;
 					hasHeal=false;
 					super.sendPrivate("救活了"+p.getMemberString());

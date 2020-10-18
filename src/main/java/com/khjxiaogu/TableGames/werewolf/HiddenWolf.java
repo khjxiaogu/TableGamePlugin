@@ -1,6 +1,7 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 import net.mamoe.mirai.contact.Member;
@@ -36,7 +37,7 @@ public class HiddenWolf extends Villager {
 		this.sendPrivate(game.getAliveList());
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
-		Utils.registerListener(super.member,(msg,type)->{
+		ListenerUtils.registerListener(super.member,(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("投票")) {
@@ -52,7 +53,7 @@ public class HiddenWolf extends Villager {
 						return;
 					}
 					this.EndTurn();
-					Utils.releaseListener(super.member.getId());
+					ListenerUtils.releaseListener(super.member.getId());
 					game.WolfVote(this,p);
 					super.sendPrivate("已投票给 "+p.getMemberString());
 				}catch(Throwable t) {
@@ -60,7 +61,7 @@ public class HiddenWolf extends Villager {
 				}
 			}else if(content.startsWith("放弃")) {
 				this.EndTurn();
-				Utils.releaseListener(super.member.getId());
+				ListenerUtils.releaseListener(super.member.getId());
 				game.NoVote(this);
 				super.sendPrivate("已放弃");
 			}

@@ -135,9 +135,9 @@ public abstract class PreserveInfo<T extends Game>{
 				acceled=true;
 				Thread.sleep(60000);
 			} catch (InterruptedException e) {}
-			if(Utils.hasActiveGame(group))
+			if(GameUtils.hasActiveGame(group))
 				group.sendMessage(getName()+"不能开始，因为有其他游戏正在运行，将在本次游戏结束后两分钟内开始……");
-			while(Utils.hasActiveGame(group)) {
+			while(GameUtils.hasActiveGame(group)) {
 				if(getActualCurrentNum()<getMinMembers())return;
 				
 				try {Thread.sleep(120000);} catch (InterruptedException e) {}
@@ -187,12 +187,12 @@ public abstract class PreserveInfo<T extends Game>{
 		if(topreserve.isEmpty())return false;
 		System.out.println("starting game");
 		this.group.sendMessage("尝试开始游戏中...");
-		topreserve.removeIf(m->Utils.hasMember(m.getId()));
+		topreserve.removeIf(m->GameUtils.hasMember(m.getId()));
 		Game gm;
 		if(args==null)
-			gm=Utils.createGame(getGameClass(),group,topreserve.size());
+			gm=GameUtils.createGame(getGameClass(),group,topreserve.size());
 		else
-			gm=Utils.createGame(getGameClass(),group,topreserve.size(),args);
+			gm=GameUtils.createGame(getGameClass(),group,topreserve.size(),args);
 		args=null;
 		List<Member> mems=new ArrayList<>(topreserve);
 		topreserve.clear();

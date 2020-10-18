@@ -13,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.TableGames;
 import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
+import com.khjxiaogu.TableGames.utils.GameUtils;
+import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.utils.VoteUtil;
 import com.khjxiaogu.TableGames.utils.WaitThread;
@@ -352,8 +354,8 @@ public class WerewolfGame extends Game {
 	protected void doFinalize() {
 		vu.clear();
 		for(Villager p:playerlist) {
-			Utils.releaseListener(p.member.getId());
-			Utils.RemoveMember(p.member.getId());
+			ListenerUtils.releaseListener(p.member.getId());
+			GameUtils.RemoveMember(p.member.getId());
 		}
 		super.doFinalize();
 	}
@@ -366,8 +368,8 @@ public class WerewolfGame extends Game {
 		StringBuilder mc=new StringBuilder("游戏已中断\n");
 		mc.append("游戏身份：");
 		for(Villager p:playerlist) {
-			Utils.releaseListener(p.member.getId());
-			Utils.RemoveMember(p.member.getId());
+			ListenerUtils.releaseListener(p.member.getId());
+			GameUtils.RemoveMember(p.member.getId());
 			mc.append("\n").append(p.getMemberString())
 			.append("的身份为 ").append(p.getRole()).append(" ").append(DiedReason.getString(p.dr));
 			String nc=p.member.getNameCard();
@@ -422,7 +424,7 @@ public class WerewolfGame extends Game {
 			this.sendPublicMessage(new At(mem).plus("你已经报名了！"));
 			return false;
 		}
-		if(!Utils.tryAddMember(mem.getId())) {
+		if(!GameUtils.tryAddMember(mem.getId())) {
 			this.sendPublicMessage(new At(mem).plus("你已参加其他游戏！"));
 			return true;
 		}
@@ -484,7 +486,7 @@ public class WerewolfGame extends Game {
 	void removeAllListeners() {
 		for(Villager p:playerlist) {
 			p.EndTurn();
-			Utils.releaseListener(p.member.getId());
+			ListenerUtils.releaseListener(p.member.getId());
 		}
 	}
 	public Villager getPlayerById(long id) {
