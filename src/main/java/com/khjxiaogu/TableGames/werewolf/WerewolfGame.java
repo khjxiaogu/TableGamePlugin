@@ -16,7 +16,7 @@ import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
-import com.khjxiaogu.TableGames.utils.VoteUtil;
+import com.khjxiaogu.TableGames.utils.VoteHelper;
 import com.khjxiaogu.TableGames.utils.WaitThread;
 
 import net.mamoe.mirai.contact.Group;
@@ -27,22 +27,26 @@ import net.mamoe.mirai.qqandroid.network.protocol.data.proto.Submsgtype0xdd.Subm
 
 public class WerewolfGame extends Game {
 	public enum DiedReason{
-		Vote("被驱逐"),
-		Wolf("被杀死"),
-		Poison("被毒死"),
-		Hunter("被射死"),
-		DarkWolf("被狼王杀死"),
-		Knight("被单挑死"),
-		Explode("自爆死"),
-		Knight_s("以死谢罪"),
-		Hunt("被猎杀"),
-		Reflect("被反伤"),
-		Love("殉情"),
-		Hunt_s("猎杀失败");
+		Vote("被驱逐",true,true),
+		Wolf("被杀死",true,false),
+		Poison("被毒死",false,false),
+		Hunter("被射死",false,false),
+		DarkWolf("被狼王杀死",true,false),
+		Knight("被单挑死",false,false),
+		Explode("自爆死",false,true),
+		Knight_s("以死谢罪",false,false),
+		Hunt("被猎杀",true,false),
+		Reflect("被反伤",false,false),
+		Love("殉情",false,false),
+		Hunt_s("猎杀失败",false,false);
 		String desc;
+		final boolean canUseSkill;
+		final boolean hasDiedWord;
 
-		private DiedReason(String desc) {
+		private DiedReason(String desc, boolean canUseSkill, boolean hasDiedWord) {
 			this.desc = desc;
+			this.canUseSkill = canUseSkill;
+			this.hasDiedWord = hasDiedWord;
 		}
 
 		@Override
@@ -139,7 +143,7 @@ public class WerewolfGame extends Game {
 	Villager cursed=null;
 	Villager lastCursed=null;
 	Object waitLock=new Object();
-	VoteUtil<Villager> vu=new VoteUtil<>();
+	VoteHelper<Villager> vu=new VoteHelper<>();
 	int num=0;
 	WaitThread[] wt=new WaitThread[5];
 	Runnable next;

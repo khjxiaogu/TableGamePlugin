@@ -3,6 +3,7 @@ package com.khjxiaogu.TableGames.werewolf;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.TableGames.werewolf.Behaviour.SkillBehaviour;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 
@@ -24,7 +25,10 @@ public class Villager extends com.khjxiaogu.TableGames.Player {
 	DiedReason dr = null;
 	Villager prev;
 	Villager next;
-
+	Behaviour vote;
+	Behaviour desc;
+	Behaviour dead;
+	Behaviour[] skills=new Behaviour[4];
 	public Villager(WerewolfGame werewolfGame, Member member) {
 		super(member);
 		this.game = werewolfGame;
@@ -167,7 +171,7 @@ public class Villager extends com.khjxiaogu.TableGames.Player {
 	};
 	public void onDied(DiedReason dir) {
 		dr = dir;
-		if (game.isFirstNight || dir == DiedReason.Vote||dir==DiedReason.Explode) {
+		if (game.isFirstNight || dir.hasDiedWord) {
 			isDead = true;
 			sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时@我结束你的讲话。");
 			if(!this.onDiePending(dir))
@@ -224,5 +228,12 @@ public class Villager extends com.khjxiaogu.TableGames.Player {
 	}
 	public int getTurn() {
 		return 0;
+	}
+	/**
+	 * @param receiver  
+	 * @param skid 
+	 */
+	public void fireSkill(Villager receiver,int skid) {
+		
 	}
 }

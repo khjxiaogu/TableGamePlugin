@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import com.khjxiaogu.TableGames.Player;
 
 
-public class VoteUtil<T extends Player> {
+public class VoteHelper<T extends Player> {
 	public Map<T,Double> voted=new ConcurrentHashMap<>(); 
 	public Set<T> tovote=Collections.newSetFromMap(new ConcurrentHashMap<>());
 	boolean isEnded=true;
@@ -19,7 +19,7 @@ public class VoteUtil<T extends Player> {
 	int votenum=0;
 	int giveups=0;
 	public boolean skipHalf=false;
-	public VoteUtil() {
+	public VoteHelper() {
 	}
 	public void addToVote(T src) {
 		synchronized(voted){

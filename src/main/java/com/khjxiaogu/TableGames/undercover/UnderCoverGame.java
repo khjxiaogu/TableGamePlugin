@@ -9,7 +9,7 @@ import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary.WordPair;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
-import com.khjxiaogu.TableGames.utils.VoteUtil;
+import com.khjxiaogu.TableGames.utils.VoteHelper;
 import com.khjxiaogu.TableGames.utils.WaitThread;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.TableGames;
@@ -26,7 +26,7 @@ public class UnderCoverGame extends Game {
 	int spycount=1;
 	Integer cplayer;
 	Thread main=new Thread(()->gameMain());
-	VoteUtil<UCPlayer> vu=new VoteUtil<>();
+	VoteHelper<UCPlayer> vu=new VoteHelper<>();
 	List<Boolean> wds=Collections.synchronizedList(new ArrayList<>());
 	WaitThread wt=new WaitThread();
 	public UnderCoverGame(Group group, int cplayer) {

@@ -23,13 +23,13 @@ public class GameUtils {
 	}
 
 	public static boolean tryAddMember(Long id) {
-		// return ingame.add(id);
-		return true;
+		return ingame.add(id);
+		//return true;
 	}
 
 	public static boolean hasMember(Long id) {
-		// return ingame.contains(id);
-		return false;
+		return ingame.contains(id);
+		//return false;
 	}
 
 	public static void RemoveMember(Long id) {

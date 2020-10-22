@@ -5,8 +5,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.MessageListener;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
-import com.khjxiaogu.TableGames.utils.Utils.MessageListenerWrapper;
-
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.MessageChain;
