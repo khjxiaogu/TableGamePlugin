@@ -37,11 +37,11 @@ public class WolfBeauty extends Werewolf {
 						super.sendPrivate("选择的qq号或者游戏号码是狼人，请重新输入");
 						return;
 					}
-					
+					game.logger.logSkill(this,p,"狼美人魅惑");
 					this.EndTurn();
 					ListenerUtils.releaseListener(super.member.getId());
 					if(!(p instanceof Tramp))
-					this.p=p;
+						this.p=p;
 					super.sendPrivate(p.getMemberString()+"获得了魅惑！");
 				}catch(Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“魅惑 qq号或者游戏号码”！");
@@ -53,8 +53,10 @@ public class WolfBeauty extends Werewolf {
 	@Override
 	public boolean onDiePending(DiedReason dir) {
 		if(dir==DiedReason.Vote||dir==DiedReason.Hunter||dir==DiedReason.Knight||dir==DiedReason.Explode) {
+			game.logger.logSkill(p,this,"殉情");
 			super.sendPublic(p.getAt()+"殉情了。");
 			p.onDied(DiedReason.Love);
+			game.logger.logDeath(p,DiedReason.Love);
 		}
 		return super.onDiePending(dir);
 	}
@@ -62,8 +64,10 @@ public class WolfBeauty extends Werewolf {
 	@Override
 	public void onDied(DiedReason dir) {
 		if(dir==DiedReason.Vote||dir==DiedReason.Hunter||dir==DiedReason.Knight||dir==DiedReason.Explode) {
+			game.logger.logSkill(p,this,"殉情");
 			super.sendPublic(p.getAt()+"殉情了。");
 			p.onDied(DiedReason.Love);
+			game.logger.logDeath(p,DiedReason.Love);
 		}
 		super.onDied(dir);
 	}

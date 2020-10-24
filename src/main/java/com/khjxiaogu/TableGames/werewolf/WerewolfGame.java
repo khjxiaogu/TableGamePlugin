@@ -14,6 +14,7 @@ import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.TableGames;
 import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
 import com.khjxiaogu.TableGames.utils.GameUtils;
+import com.khjxiaogu.TableGames.utils.ImagePrintStream;
 import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.utils.VoteHelper;
@@ -26,6 +27,7 @@ import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.qqandroid.network.protocol.data.proto.Submsgtype0xdd.Submsgtype0xdd.MsgBody.PlayerState;
 
 public class WerewolfGame extends Game {
+	
 	public enum DiedReason{
 		Vote("被驱逐",true,true),
 		Wolf("被杀死",true,false),
@@ -85,6 +87,7 @@ public class WerewolfGame extends Game {
 	Map<Villager,DiedReason> tokill=new ConcurrentHashMap<>();
 	private static Map<String,Class<? extends Villager>> caraMap=new HashMap<>();
 	private static Map<String,RoleRoller> patterns=new HashMap<>();
+	WerewolfGameLogger logger=new WerewolfGameLogger();
 	static {
 		caraMap.put("乌鸦",Crow.class);
 		caraMap.put("石像鬼",Demon.class);
@@ -140,6 +143,7 @@ public class WerewolfGame extends Game {
 	boolean doStat=true;
 	boolean hasTramp=false;
 	boolean hasElder=false;
+	int day=0;
 	Villager cursed=null;
 	Villager lastCursed=null;
 	Object waitLock=new Object();
@@ -362,6 +366,7 @@ public class WerewolfGame extends Game {
 			GameUtils.RemoveMember(p.member.getId());
 		}
 		super.doFinalize();
+		logger.sendLog(this.group);
 	}
 	@Override
 	public void forceStop() {
@@ -535,6 +540,7 @@ public class WerewolfGame extends Game {
 	}
 	//开始游戏流程
 	public void gameStart() {
+		logger.title("游戏开始");
 		muteAll(true);
 		this.sendPublicMessage(getGameRules());
 		StringBuilder sb=new StringBuilder("玩家列表：\n");
@@ -555,9 +561,11 @@ public class WerewolfGame extends Game {
 		onDawn();
 	}
 	public void onDawn() {
+		day++;
 		isDayTime=false;
 		vu.clear();
 		removeAllListeners();
+		logger.logTurn(day,"狼人回合");
 		onWolfTurn();
 	}
 	/*public void onUpperNightTurn() {
@@ -581,10 +589,12 @@ public class WerewolfGame extends Game {
 		startWait(120000,WaitReason.Vote);
 		removeAllListeners();
 		List<Villager> il=vu.getForceMostVoted();
-		if(il.size()>0)
+		if(il.size()>0) {
+			logger.logSkill("狼人",il.get(0),"杀死");
 			wolfKill(il.get(0));
-		else {
+		}else {
 			if(canNoKill&&vu.finished()) {
+				logger.logRaw("狼人空刀");
 				scheduler.execute(()->afterWolf());
 				return;
 			}
@@ -592,18 +602,21 @@ public class WerewolfGame extends Game {
 			do {
 				rd=playerlist.get((int)(Math.random()*playerlist.size()));
 			}while(rd.isDead||rd.getFraction()==Fraction.Wolf);
+			logger.logSkill("系统",rd,"随机杀死");
 			wolfKill(rd);
 		}
 	}
 	public void wolfKill(Villager p) {
 		vu.clear();
 		if(p instanceof Elder&&!((Elder) p).lifeUsed) {
+			logger.logRaw("长老生命减少");
 			((Elder) p).lifeUsed=true;
 		}else if(p!=null)
 			tokill.put(p,DiedReason.Wolf);
 		afterWolf();
 	}
 	public void afterWolf() {
+		logger.logTurn(day,"技能回合");
 		this.sendPublicMessage("狼人请闭眼，有夜间技能的玩家请睁眼，请私聊选择你们的技能。");
 		for(Villager p2:playerlist) {
 			if(p2.isDead)continue;
@@ -614,8 +627,8 @@ public class WerewolfGame extends Game {
 		scheduler.execute(()->onDiePending());
 	}
 	public void onDiePending() {
+		logger.logTurn(day,"死亡技能回合");
 		this.sendPublicMessage("有夜间技能的玩家请闭眼，有死亡技能的玩家请睁眼，你的技能状态是……");
-
 		tokill.entrySet().removeIf(in->in.getKey().shouldSurvive(in.getValue()));
 		for(Villager px:tokill.keySet()) {
 			px.isDead=true;
@@ -666,6 +679,7 @@ public class WerewolfGame extends Game {
 	public void onDayTime() {
 		lastVoteOut=null;
 		muteAll(false);
+		logger.logTurn(day,"宣布死者");
 		if(!tokill.isEmpty()) {
 			StringBuilder sb=new StringBuilder("天亮了，昨晚的死者是：\n");
 			for(Villager p:tokill.keySet()) {
@@ -677,6 +691,7 @@ public class WerewolfGame extends Game {
 			this.sendPublicMessage(sb.toString());
 			for(Entry<Villager, DiedReason> p:tokill.entrySet()) {
 				p.getKey().onDied(p.getValue());
+				logger.logDeath(p.getKey(),p.getValue());
 			}
 		}else
 			this.sendPublicMessage("昨夜无死者。");
@@ -689,6 +704,7 @@ public class WerewolfGame extends Game {
 			}
 		}
 		isDayTime=true;
+		logger.logTurn(day,"白天陈述");
 		for(Villager p:playerlist) {
 			if(!p.isDead) {
 				p.onDayTime();
@@ -699,6 +715,7 @@ public class WerewolfGame extends Game {
 		startWait(15000,WaitReason.Generic);
 		muteAll(true);
 		this.sendPublicMessage("请在两分钟内在私聊中完成投票！");
+		logger.logTurn(day,"白天投票");
 		for(Villager p:playerlist) {
 			if(!p.isDead) {
 				p.vote();
@@ -719,6 +736,7 @@ public class WerewolfGame extends Game {
 		vu.clear();
 		if(ps.size()>1) {
 			if(!sameTurn) {
+				logger.logTurn(day,"同票PK");
 				sameTurn=true;
 				this.sendPublicMessage("同票，请做最终陈述。");
 				MessageChainBuilder mcb=new MessageChainBuilder();
@@ -762,6 +780,7 @@ public class WerewolfGame extends Game {
 			muteAll(false);
 			for(Entry<Villager, DiedReason> pe:tokill.entrySet()) {
 				pe.getKey().onDied(pe.getValue());
+				logger.logDeath(pe.getKey(), pe.getValue());
 			}
 		}
 		tokill.clear();
@@ -809,6 +828,7 @@ public class WerewolfGame extends Game {
 			ends=true;
 		}
 		if(ends) {
+			logger.title(status);
 			GameData gd=null;
 			if(doStat&&playerlist.size()>=6)
 			gd=TableGames.db.getGame(getName());
@@ -840,7 +860,9 @@ public class WerewolfGame extends Game {
 			} catch (InterruptedException e) {
 			}
 			this.sendPublicMessage(Utils.sendTextAsImage(mc.toString(),this.group));
+			
 			doFinalize();
+			
 		}
 		isEnded=ends;
 		return ends;

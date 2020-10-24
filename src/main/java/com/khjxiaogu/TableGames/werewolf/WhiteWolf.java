@@ -31,13 +31,16 @@ public class WhiteWolf extends Werewolf {
 					super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
 					return;
 				}
+				game.logger.logSkill(this,p,"白狼自爆");
 				super.sendPublic("是白狼王，带走了"+p.getMemberString()+"进入黑夜！");
 				this.isDead=true;
 				p.isDead=true;
 				game.scheduler.execute(()->{
 					game.removeAllListeners();
 					p.onDied(DiedReason.Explode);
+					game.logger.logDeath(p, DiedReason.Explode);
 					this.onDied(DiedReason.Explode);
+					game.logger.logDeath(this, DiedReason.Explode);
 					game.skipDay();
 				});
 			} catch (Throwable t) {

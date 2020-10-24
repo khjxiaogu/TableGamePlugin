@@ -54,6 +54,7 @@ public class Hunter extends Villager {
 								}
 							});
 						hasGun=false;
+						game.logger.logSkill(this,p,"猎人杀死");
 						super.sendPrivate("你杀死了"+p.getMemberString());
 						boolean hasDarkWolf=false;
 						for(Villager vill:game.playerlist) {
@@ -66,9 +67,10 @@ public class Hunter extends Villager {
 							super.sendPublic(new PlainText("死亡，身份是猎人，同时带走了").plus(p.getAt()));
 						else
 							super.sendPublic(new PlainText("死亡，同时带走了").plus(p.getAt()));
-						if(dir==DiedReason.Vote||dir==DiedReason.Explode)
+						if(dir==DiedReason.Vote||dir==DiedReason.Explode) {
+							game.logger.logDeath(p,DiedReason.Hunter);
 							game.scheduler.execute(()->p.onDied(DiedReason.Hunter));
-						else {
+						}else {
 							p.isDead=true;
 							game.kill(p,DiedReason.Hunter);
 						}

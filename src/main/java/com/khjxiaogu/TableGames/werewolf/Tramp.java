@@ -17,6 +17,7 @@ public class Tramp extends Villager {
 	public void onDied(DiedReason dir) {
 		dr = dir;
 		isDead = true;
+		game.logger.logRaw(this.member.getNameCard()+" 老流氓出局");
 		sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时@我结束你的讲话。");
 		ListenerUtils.registerListener(member, (msg, type) -> {
 			if (type == MsgType.AT) {

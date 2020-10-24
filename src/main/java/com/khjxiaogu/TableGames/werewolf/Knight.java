@@ -40,6 +40,7 @@ public class Knight extends Villager {
 				return;
 			}
 			hasSkill=false;
+			game.logger.logSkill(this,p,"骑士挑战");
 			super.sendPublic("是骑士，挑战了"+p.getMemberString());
 			if(p instanceof NightmareKnight) {
 				NightmareKnight nk=(NightmareKnight) p;
@@ -52,6 +53,7 @@ public class Knight extends Villager {
 					return;
 				}
 			}if(p.getFraction()==Fraction.Wolf) {
+				game.logger.logDeath(p,DiedReason.Knight);
 				game.sendPublicMessage(p.getMemberString()+"是狼人，被骑士杀死，进入黑夜。");
 				p.onDied(DiedReason.Knight);
 				game.skipDay();

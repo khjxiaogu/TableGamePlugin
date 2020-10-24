@@ -102,6 +102,7 @@ public class Villager extends com.khjxiaogu.TableGames.Player {
 						}
 						isVoteTurn=false;
 						ListenerUtils.releaseListener(super.member.getId());
+						game.logger.logSkill(this,p,"投票");
 						super.sendPrivate("已投票给 " + p.getMemberString());
 						super.sendPublic("已投票给 " + p.getMemberString());
 						game.DayVote(this, p);

@@ -82,6 +82,7 @@ public class Werewolf extends Villager {
 							}
 						}
 					});
+					game.logger.logSkill(this,p,"狼人投票");
 					game.WolfVote(this,p);
 					super.sendPrivate("已投票给 "+p.getMemberString());
 				}catch(Throwable t) {

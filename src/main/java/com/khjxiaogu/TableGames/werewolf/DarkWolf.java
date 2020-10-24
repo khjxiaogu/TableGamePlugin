@@ -65,10 +65,12 @@ public class DarkWolf extends Werewolf {
 							});
 						hasGun=false;
 						super.sendPrivate("你杀死了"+p.getMemberString());
+						game.logger.logSkill(this,p,"狼王杀死");
 						super.sendPublic(new PlainText("死亡，同时带走了").plus(p.getAt()));
-						if(dir==DiedReason.Vote||dir==DiedReason.Explode)
+						if(dir==DiedReason.Vote||dir==DiedReason.Explode) {
+							game.logger.logDeath(p,DiedReason.DarkWolf);
 							game.scheduler.execute(()->p.onDied(DiedReason.DarkWolf));
-						else {
+						}else {
 							p.isDead=true;
 							game.kill(p,DiedReason.DarkWolf);
 						}

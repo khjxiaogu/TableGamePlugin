@@ -37,8 +37,10 @@ public class WolfKiller extends Villager {
 				lastkill=p;
 				super.sendPrivate("技能发动成功，请等待第二天早上结果。");
 				if(p.getFraction()==Fraction.Wolf) {
+					game.logger.logSkill(this,p,"猎杀");
 					game.kill(p, DiedReason.Hunt);
 				}else {
+					game.logger.logSkill(this,p,"猎杀失败");
 					game.kill(this,DiedReason.Hunt_s);
 				}
 				ListenerUtils.releaseListener(mid);

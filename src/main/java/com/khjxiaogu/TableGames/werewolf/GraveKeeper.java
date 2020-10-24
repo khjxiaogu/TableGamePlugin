@@ -11,6 +11,7 @@ public class GraveKeeper extends Villager{
 	@Override
 	public void onTurn() {
 		if(game.lastVoteOut!=null) {
+			game.logger.logSkill(this,game.lastVoteOut,"守墓人查验");
 			if(game.lastVoteOut.getFraction()==Fraction.Wolf)
 				super.sendPrivate("上一个驱逐的是狼人");
 			else

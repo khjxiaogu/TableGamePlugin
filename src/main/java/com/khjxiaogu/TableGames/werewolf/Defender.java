@@ -40,6 +40,7 @@ public class Defender extends Villager {
 						player.EndTurn();
 						ListenerUtils.releaseListener(player.mid);
 						fireSkill(p,0);
+						
 						player.sendPrivate(p.getMemberString()+"获得了保护！");
 					}catch(Throwable t) {
 						player.sendPrivate("发生错误，正确格式为：“保护 qq号或者游戏号码”！");
@@ -81,6 +82,7 @@ public class Defender extends Villager {
 					}
 					this.EndTurn();
 					ListenerUtils.releaseListener(super.member.getId());
+					game.logger.logSkill(this,p,"保护");
 					p.isGuarded=true;
 					super.sendPrivate(p.getMemberString()+"获得了保护！");
 				}catch(Throwable t) {

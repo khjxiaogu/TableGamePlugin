@@ -36,6 +36,7 @@ public class Seer extends Villager{
 					}
 					this.EndTurn();
 					ListenerUtils.releaseListener(super.member.getId());
+					game.logger.logSkill(this,p,"查验");
 					super.sendPrivate(p.getMemberString()+"是"+p.getPredictorRole());
 					if(p instanceof NightmareKnight) {
 						NightmareKnight nk=(NightmareKnight) p;

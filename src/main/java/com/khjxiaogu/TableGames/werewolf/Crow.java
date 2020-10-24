@@ -38,6 +38,7 @@ public class Crow extends Villager {
 					}
 					this.EndTurn();
 					ListenerUtils.releaseListener(super.member.getId());
+					game.logger.logSkill(this,p,"诅咒");
 					game.cursed=p;
 					super.sendPrivate(p.getMemberString()+"获得了诅咒！");
 				}catch(Throwable t) {

@@ -20,6 +20,7 @@ public class Idiot extends Villager {
 		if(dir!=DiedReason.Vote) {
 			super.onDied(dir);
 		}else {
+			game.logger.logRaw(this.member.getNameCard()+" 白痴出局");
 			isDead=false;
 			canVote=false;
 			sendPublic("被驱逐了，身份是白痴。");

@@ -18,6 +18,8 @@ import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.clue.ClueGame;
+import com.khjxiaogu.TableGames.clue.CluePreserve;
 import com.khjxiaogu.TableGames.data.GenericPlayerData;
 import com.khjxiaogu.TableGames.data.PlayerDatabase;
 import com.khjxiaogu.TableGames.undercover.UnderCoverGame;
@@ -177,6 +179,7 @@ public class TableGames extends PluginBase {
 		});
 		makeGame("狼人杀",WerewolfPreserve.class,WerewolfGame.class);
 		makeGame("谁是卧底",UnderCoverPreserve.class,UnderCoverGame.class);
+		makeGame("妙探寻凶",CluePreserve.class,ClueGame.class);
 	}
 	public static void transfer(InputStream i,OutputStream o) throws IOException {
 		int nRead;

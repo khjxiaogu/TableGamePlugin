@@ -67,6 +67,7 @@ public class Witch extends Villager {
 						}
 					}
 					game.kill(p,DiedReason.Poison);
+					game.logger.logSkill(this,p,"女巫毒");
 					hasPoison=false;
 					super.sendPrivate("毒死了"+p.getMemberString());
 				}catch(Throwable t) {
@@ -96,6 +97,7 @@ public class Witch extends Villager {
 					ListenerUtils.releaseListener(super.member.getId());
 					p.isSavedByWitch=true;
 					hasHeal=false;
+					game.logger.logSkill(this,p,"女巫救");
 					super.sendPrivate("救活了"+p.getMemberString());
 				}catch(Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“救 qq号或者游戏号码”！");

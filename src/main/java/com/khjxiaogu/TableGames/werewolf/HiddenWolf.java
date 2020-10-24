@@ -55,6 +55,7 @@ public class HiddenWolf extends Villager {
 					this.EndTurn();
 					ListenerUtils.releaseListener(super.member.getId());
 					game.WolfVote(this,p);
+					game.logger.logSkill(this,p,"狼人投票");
 					super.sendPrivate("已投票给 "+p.getMemberString());
 				}catch(Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“投票 qq号或者游戏号码”！");
