@@ -1,4 +1,4 @@
-package com.khjxiaogu.TableGames.clue;
+package com.khjxiaogu.TableGames.fastclue;
 
 public class Card {
 	String name;

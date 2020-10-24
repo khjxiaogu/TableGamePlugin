@@ -1,6 +1,6 @@
-package com.khjxiaogu.TableGames.clue;
+package com.khjxiaogu.TableGames.fastclue;
 
-import com.khjxiaogu.TableGames.clue.Card.CardType;
+import com.khjxiaogu.TableGames.fastclue.Card.CardType;
 
 public class Room {
 	Room next;

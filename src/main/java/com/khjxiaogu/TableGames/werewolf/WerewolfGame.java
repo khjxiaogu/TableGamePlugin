@@ -364,6 +364,7 @@ public class WerewolfGame extends Game {
 		for(Villager p:playerlist) {
 			ListenerUtils.releaseListener(p.member.getId());
 			GameUtils.RemoveMember(p.member.getId());
+			
 		}
 		super.doFinalize();
 		logger.sendLog(this.group);

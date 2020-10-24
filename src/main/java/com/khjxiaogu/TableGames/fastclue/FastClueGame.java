@@ -1,4 +1,4 @@
-package com.khjxiaogu.TableGames.clue;
+package com.khjxiaogu.TableGames.fastclue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.khjxiaogu.TableGames.Game;
-import com.khjxiaogu.TableGames.clue.Card.CardType;
+import com.khjxiaogu.TableGames.fastclue.Card.CardType;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
@@ -15,7 +15,7 @@ import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.At;
 
-public class ClueGame extends Game {
+public class FastClueGame extends Game {
 	Random rnd=new Random();
 	List<Card> weapons=new ArrayList<>();//凶器卡
 	List<CluePlayer> players=new ArrayList<>();//玩家
@@ -23,7 +23,7 @@ public class ClueGame extends Game {
 	List<Room> rooms=new ArrayList<>();//房间
 	WaitThread selectCard=new WaitThread();//选择出示等待
 	WaitThread doPrompt=new WaitThread();//假设等待
-	String[] roomnames= new String[]{"客厅","厨房","餐厅","卧室","书房","阳台","休息室","舞厅","台球室"};
+	String[] roomnames= new String[]{"客厅","厨房","餐厅","卧室","书房","阳台"};
 	String[] weaponnames=new String[] {"烛台","小刀","铅管","手枪","绳子","扳手"};
 	List<Card> allcard=new ArrayList<>();//玩家抽卡
 	Card Rroom;//正确房间
@@ -32,7 +32,7 @@ public class ClueGame extends Game {
 	boolean alive=true;//游戏是否存活
 	int cpp;//每个玩家分到卡片数量
 	int tcp;//总玩家数
-	public ClueGame(Group group, int cplayer) {
+	public FastClueGame(Group group, int cplayer) {
 		super(group, cplayer,4);
 		tcp=cplayer;
 		List<Card> roomcard=new ArrayList<>();
@@ -126,7 +126,6 @@ public class ClueGame extends Game {
 			players.get(rnd.nextInt(players.size())).addCard(allcard.remove(0));
 		}
 		for(CluePlayer p:players) {
-			p.current=rooms.get(0);
 			p.onGameStart();
 		}
 		players.get(0).onTurn();
@@ -170,6 +169,10 @@ public class ClueGame extends Game {
 		sb.append("\n所有玩家：");
 		for(CluePlayer player:players) {
 			sb.append("\n").append(player.member.getNameCard());
+		}
+		sb.append("\n所有房间：");
+		for(Room room:rooms) {
+			sb.append("\n").append(room.present.getDisplayName());
 		}
 		return sb.toString();
 	}
@@ -245,5 +248,8 @@ public class ClueGame extends Game {
 	}
 	public CluePlayer getPlayer(int num) {
 		return players.get(num);
+	}
+	public Room getRoom(int num) {
+		return rooms.get(num);
 	}
 }
