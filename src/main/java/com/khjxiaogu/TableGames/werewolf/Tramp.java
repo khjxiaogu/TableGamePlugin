@@ -17,11 +17,11 @@ public class Tramp extends Villager {
 	public void onDied(DiedReason dir) {
 		dr = dir;
 		isDead = true;
-		game.logger.logRaw(this.member.getNameCard()+" 老流氓出局");
+		game.logger.logRaw(this.getNameCard()+" 老流氓出局");
 		sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时@我结束你的讲话。");
-		ListenerUtils.registerListener(member, (msg, type) -> {
+		ListenerUtils.registerListener(getId(), (msg, type) -> {
 			if (type == MsgType.AT) {
-				ListenerUtils.releaseListener(member.getId());
+				ListenerUtils.releaseListener(getId());
 				game.skipWait(WaitReason.DieWord);
 			}
 		});

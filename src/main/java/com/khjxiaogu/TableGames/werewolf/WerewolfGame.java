@@ -14,7 +14,6 @@ import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.TableGames;
 import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
 import com.khjxiaogu.TableGames.utils.GameUtils;
-import com.khjxiaogu.TableGames.utils.ImagePrintStream;
 import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.utils.VoteHelper;
@@ -24,7 +23,6 @@ import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
-import net.mamoe.mirai.qqandroid.network.protocol.data.proto.Submsgtype0xdd.Submsgtype0xdd.MsgBody.PlayerState;
 
 public class WerewolfGame extends Game {
 	
@@ -354,7 +352,7 @@ public class WerewolfGame extends Game {
 	}
 	public void executeNext() {
 		if(next!=null)
-			scheduler.execute(next);
+			getScheduler().execute(next);
 	}
 
 	//game control
@@ -362,12 +360,12 @@ public class WerewolfGame extends Game {
 	protected void doFinalize() {
 		vu.clear();
 		for(Villager p:playerlist) {
-			ListenerUtils.releaseListener(p.member.getId());
-			GameUtils.RemoveMember(p.member.getId());
+			ListenerUtils.releaseListener(p.getId());
+			GameUtils.RemoveMember(p.getId());
 			
 		}
 		super.doFinalize();
-		logger.sendLog(this.group);
+		logger.sendLog(this.getGroup());
 	}
 	@Override
 	public void forceStop() {
@@ -378,17 +376,17 @@ public class WerewolfGame extends Game {
 		StringBuilder mc=new StringBuilder("游戏已中断\n");
 		mc.append("游戏身份：");
 		for(Villager p:playerlist) {
-			ListenerUtils.releaseListener(p.member.getId());
-			GameUtils.RemoveMember(p.member.getId());
+			ListenerUtils.releaseListener(p.getId());
+			GameUtils.RemoveMember(p.getId());
 			mc.append("\n").append(p.getMemberString())
 			.append("的身份为 ").append(p.getRole()).append(" ").append(DiedReason.getString(p.dr));
-			String nc=p.member.getNameCard();
+			String nc=p.getNameCard();
 			if(nc.indexOf('|')!=-1) {
 				nc=nc.split("\\|")[1];
 			}
-			p.member.setNameCard(nc);
+			p.setNameCard(nc);
 			try {
-			if(p.isDead)p.member.unmute();
+			if(p.isDead)p.tryUnmute();
 			}catch(Throwable t) {}
 			
 		}
@@ -398,7 +396,7 @@ public class WerewolfGame extends Game {
 			Thread.sleep(1000);//sbtx好像有频率限制，先等他个1秒再说
 		} catch (InterruptedException e) {
 		}
-		this.sendPublicMessage(Utils.sendTextAsImage(mc.toString(),this.group));
+		this.sendPublicMessage(Utils.sendTextAsImage(mc.toString(),this.getGroup()));
 		isEnded=true;
 		super.forceStop();
 	}
@@ -446,7 +444,7 @@ public class WerewolfGame extends Game {
 					playerlist.add(cp=roles.remove(0).getConstructor(WerewolfGame.class,Member.class).newInstance(this,mem));
 					
 					cp.sendPrivate("已经报名");
-					String nc=cp.member.getNameCard();
+					String nc=cp.getNameCard();
 					if(nc.indexOf('|')!=-1) {
 						nc=nc.split("\\|")[1];
 					}
@@ -454,12 +452,12 @@ public class WerewolfGame extends Game {
 						cp.prev=playerlist.get(min-1);
 						cp.prev.next=cp;
 					}
-					cp.member.setNameCard(min+"号 |"+nc);
+					cp.setNameCard(min+"号 |"+nc);
 					if(roles.size()==0) {
 						cp.next=playerlist.get(0);
 						cp.next.prev=cp;
 						this.sendPublicMessage("狼人杀已满人，游戏即将开始。");
-						scheduler.execute(()->gameStart());
+						getScheduler().execute(()->gameStart());
 					}
 				}
 				return true;
@@ -477,7 +475,7 @@ public class WerewolfGame extends Game {
 		Villager cp=playerlist.get(playerlist.size()-1);
 		cp.next=playerlist.get(0);
 		cp.next.prev=cp;
-		scheduler.execute(()->gameStart());
+		getScheduler().execute(()->gameStart());
 	}
 	//wait utils
 	public void startWait(long millis,WaitReason lr) {
@@ -496,13 +494,13 @@ public class WerewolfGame extends Game {
 	void removeAllListeners() {
 		for(Villager p:playerlist) {
 			p.EndTurn();
-			ListenerUtils.releaseListener(p.member.getId());
+			ListenerUtils.releaseListener(p.getId());
 		}
 	}
 	public Villager getPlayerById(long id) {
 		int i=0;
 		for(Villager p:playerlist) {
-			if(p.member.getId()==id||i==id)
+			if(p.getId()==id||i==id)
 				return p;
 			i++;
 		}
@@ -537,7 +535,7 @@ public class WerewolfGame extends Game {
 	 * @param isMute  
 	 */
 	private void muteAll(boolean isMute) {
-		group.getSettings().setMuteAll(isMute);
+		getGroup().getSettings().setMuteAll(isMute);
 	}
 	//开始游戏流程
 	public void gameStart() {
@@ -550,7 +548,7 @@ public class WerewolfGame extends Game {
 			sb.append(p.getMemberString());
 			sb.append("\n");
 		}
-		this.sendPublicMessage(Utils.sendTextAsImage(sb.toString(),this.group));
+		this.sendPublicMessage(Utils.sendTextAsImage(sb.toString(),this.getGroup()));
 		
 		onDawn();
 	}
@@ -596,7 +594,7 @@ public class WerewolfGame extends Game {
 		}else {
 			if(canNoKill&&vu.finished()) {
 				logger.logRaw("狼人空刀");
-				scheduler.execute(()->afterWolf());
+				getScheduler().execute(()->afterWolf());
 				return;
 			}
 			Villager rd;
@@ -625,7 +623,7 @@ public class WerewolfGame extends Game {
 		}
 		startWait(60000,WaitReason.Generic);
 		removeAllListeners();
-		scheduler.execute(()->onDiePending());
+		getScheduler().execute(()->onDiePending());
 	}
 	public void onDiePending() {
 		logger.logTurn(day,"死亡技能回合");
@@ -661,7 +659,7 @@ public class WerewolfGame extends Game {
 			removeAllListeners();
 		}
 		tokill.putAll(tks);
-		scheduler.execute(()->onDayTime());
+		getScheduler().execute(()->onDayTime());
 	}
 	boolean isDayTime=false;
 	public void skipDay() {
@@ -696,7 +694,7 @@ public class WerewolfGame extends Game {
 			}
 		}else
 			this.sendPublicMessage("昨夜无死者。");
-		this.sendPublicMessage(Utils.sendTextAsImage(getAliveList(),this.group));
+		this.sendPublicMessage(Utils.sendTextAsImage(getAliveList(),this.getGroup()));
 		tokill.clear();
 		this.isFirstNight=false;
 		for(Villager p:playerlist) {
@@ -724,7 +722,7 @@ public class WerewolfGame extends Game {
 		}
 		if(cursed!=null)
 			vu.vote(cursed);
-		vu.hintVote(scheduler);
+		vu.hintVote(getScheduler());
 		canDayVote=true;
 		startWait(120000,WaitReason.Vote);
 		removeAllListeners();
@@ -759,8 +757,8 @@ public class WerewolfGame extends Game {
 				}
 				if(cursed!=null)
 					vu.vote(cursed);
-				vu.hintVote(scheduler);
-				scheduler.execute(()->{
+				vu.hintVote(getScheduler());
+				getScheduler().execute(()->{
 					startWait(120000,WaitReason.Vote);
 					removeAllListeners();
 					voteKill(vu.getMostVoted());
@@ -840,18 +838,18 @@ public class WerewolfGame extends Game {
 			for(Villager p:playerlist) {
 				mc.append("\n").append(p.getMemberString())
 				.append("的身份为 ").append(p.getRole()).append(" ").append(DiedReason.getString(p.dr));
-				String nc=p.member.getNameCard();
+				String nc=p.getNameCard();
 				if(nc.indexOf('|')!=-1) {
 					nc=nc.split("\\|")[1];
 				}
-				p.member.setNameCard(nc);
+				p.setNameCard(nc);
 				if(gd!=null) {
-					WerewolfPlayerData wpd=gd.getPlayer(p.member.getId(),WerewolfPlayerData.class);
+					WerewolfPlayerData wpd=gd.getPlayer(p.getId(),WerewolfPlayerData.class);
 					wpd.log(p.getFraction(),winfrac,!p.isDead);
-					gd.setPlayer(p.member.getId(),wpd);
+					gd.setPlayer(p.getId(),wpd);
 				}
 				try {
-				if(p.isDead)p.member.unmute();
+				if(p.isDead)p.tryUnmute();
 				}catch(Throwable t) {}
 			}
 			muteAll(false);
@@ -860,7 +858,7 @@ public class WerewolfGame extends Game {
 				Thread.sleep(10000);//sbtx好像有频率限制，先等他个10秒再说
 			} catch (InterruptedException e) {
 			}
-			this.sendPublicMessage(Utils.sendTextAsImage(mc.toString(),this.group));
+			this.sendPublicMessage(Utils.sendTextAsImage(mc.toString(),this.getGroup()));
 			
 			doFinalize();
 			

@@ -24,6 +24,10 @@ public class CluePlayer extends Player {
 		super(member);
 		this.game=game;
 	}
+	public CluePlayer(FastClueGame game,int id) {
+		super(new BotCluePlayer(id,game));
+		this.game = game;
+	}
 	public void addCard(Card cd) {
 		inhand.add(cd);
 		alknow.add(cd);
@@ -46,9 +50,10 @@ public class CluePlayer extends Player {
 		if(game.CheckWin())
 			return;
 		zqqr=false;
+		this.sendPublic("的回合。");
 		this.sendPrivate(game.getCardList());
 		this.sendPrivate("你可以提出假设：“假设 [凶手角色号码] [房间号码] [凶器号码]”。\n可以提出指控“指控 [凶手角色号码] [房间号码] [凶器号码]”。\n可以输入“我的卡片”查看手中的卡片。\n可以输入“已知卡片”查看所有我看过的卡片。\n输入“放弃”放弃当前回合。\n你有2分钟的时间考虑。");
-		ListenerUtils.registerListener(this.mid,(msg,type)->{
+		ListenerUtils.registerListener(this.getId(),(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String text=Utils.getPlainText(msg);
 			if(text.startsWith("我的卡片")) {
@@ -74,9 +79,9 @@ public class CluePlayer extends Player {
 					Card role=game.getRole(rolei);
 					Card room=game.getRoom(roomi).present;
 					this.sendPublic("假设 "+role.getName()+" 在 "+room.getName()+" 使用 "+weapon.getName()+" 杀人。\n请等待15秒检查玩家卡片。");
-					ListenerUtils.releaseListener(this.mid);
+					ListenerUtils.releaseListener(this.getId());
 					game.doPrompt.terminateWait();
-					game.scheduler.submit(()->checkAllCardPresnet(room,weapon,role));
+					game.getScheduler().submit(()->checkAllCardPresnet(room,weapon,role));
 				}catch(Exception e) {
 					this.sendPrivate("格式错误，正确格式：“假设 [凶手角色号码] [房间号码] [凶器号码]”");
 				}
@@ -96,7 +101,7 @@ public class CluePlayer extends Player {
 					Card role=game.getRole(rolei);
 					Card room=game.getRoom(roomi).present;
 					this.sendPublic("指控 "+role.getName()+" 在 "+room.getName()+" 使用 "+weapon.getName()+" 杀人。");
-					ListenerUtils.releaseListener(this.mid);
+					ListenerUtils.releaseListener(this.getId());
 					game.doPrompt.terminateWait();
 					if(room==game.Rroom&&role==game.Rrole&&weapon==game.Rweapon) {
 						this.sendPublic("指控正确！");
@@ -109,7 +114,7 @@ public class CluePlayer extends Player {
 							game.addKnow(c);
 						}
 						this.sendPublic(sb.toString());
-						game.scheduler.submit(()->next.onTurn());
+						game.getScheduler().submit(()->next.onTurn());
 					}
 				}catch(Exception e) {
 					this.sendPrivate("格式错误，正确格式：“指控 [凶手角色号码] [房间号码] [凶器号码]”");
@@ -124,9 +129,10 @@ public class CluePlayer extends Player {
 		}catch(RuntimeException ex) {
 			return;
 		}
-		ListenerUtils.releaseListener(this.mid);
-		game.scheduler.submit(()->next.onTurn());
+		ListenerUtils.releaseListener(this.getId());
+		game.getScheduler().submit(()->next.onTurn());
 	}
+
 	public void checkAllCardPresnet(Card room,Card weapon,Card role) {
 		CluePlayer fst=this;
 		Card rslt=null;
@@ -139,10 +145,10 @@ public class CluePlayer extends Player {
 			game.sendPublicMessage("无玩家出示卡片");
 		}else {
 			alknow.add(rslt);
-			this.sendPrivate(fst.member.getNameCard()+" 向你出示了\n"+rslt.getDisplayName());
-			game.sendPublicMessage(fst.member.getNameCard()+" 向 "+this.member.getNameCard()+" 出示了一张牌");
+			this.sendPrivate(fst.getNameCard()+" 向你出示了\n"+rslt.getDisplayName());
+			game.sendPublicMessage(fst.getNameCard()+" 向 "+this.getNameCard()+" 出示了一张牌");
 		}
-		game.scheduler.submit(()->next.onTurn());
+		game.getScheduler().submit(()->next.onTurn());
 	}
 	public Card checkCardPresent(Card room,Card weapon,Card role) {
 		List<Card> cl=new ArrayList<>(3);
@@ -172,7 +178,7 @@ public class CluePlayer extends Player {
 			}
 			sb.append("\n你有15秒时间选择要出示的卡片，输入“出示 [卡片号码]”出示对应卡片，过时自动出示第一张。");
 			this.sendPrivate(sb.toString());
-			ListenerUtils.registerListener(this.mid,(msg,type)->{
+			ListenerUtils.registerListener(this.getId(),(msg,type)->{
 				if(type!=MsgType.PRIVATE)return;
 				String text=Utils.getPlainText(msg);
 				if(text.startsWith("出示")) {
@@ -187,7 +193,7 @@ public class CluePlayer extends Player {
 				}
 			});
 			game.selectCard.startWait(15000);
-			ListenerUtils.releaseListener(this.mid);
+			ListenerUtils.releaseListener(this.getId());
 			return toshow;
 		}
 		return null;

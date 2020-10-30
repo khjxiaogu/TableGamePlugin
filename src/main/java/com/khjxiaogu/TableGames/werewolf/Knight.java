@@ -2,7 +2,6 @@ package com.khjxiaogu.TableGames.werewolf;
 
 
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
-import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
@@ -78,7 +77,7 @@ public class Knight extends Villager {
 	@Override
 	public void addDaySkillListener() {
 		if(hasSkill)
-			ListenerUtils.registerListener(mid,(msgx,typex)->{
+			ListenerUtils.registerListener(getId(),(msgx,typex)->{
 				if(typex==MsgType.PRIVATE) {
 					String content=Utils.getPlainText(msgx);
 					doDaySkillPending(content);

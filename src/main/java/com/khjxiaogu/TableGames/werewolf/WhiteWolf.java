@@ -35,7 +35,7 @@ public class WhiteWolf extends Werewolf {
 				super.sendPublic("是白狼王，带走了"+p.getMemberString()+"进入黑夜！");
 				this.isDead=true;
 				p.isDead=true;
-				game.scheduler.execute(()->{
+				game.getScheduler().execute(()->{
 					game.removeAllListeners();
 					p.onDied(DiedReason.Explode);
 					game.logger.logDeath(p, DiedReason.Explode);

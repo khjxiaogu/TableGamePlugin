@@ -6,7 +6,6 @@ import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
 import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.PlainText;
 
 public class Seer extends Villager{
 
@@ -19,7 +18,7 @@ public class Seer extends Villager{
 		super.StartTurn();
 		this.sendPrivate(game.getAliveList());
 		super.sendPrivate("预言家，你可以查验一个人是否为狼人，请私聊选择查验的人，你有一分钟的考虑时间\n格式：“查验 qq号或者游戏号码”\n如：“查验 1”");
-		ListenerUtils.registerListener(super.member,(msg,type)->{
+		ListenerUtils.registerListener(super.getId(),(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("查验")) {
@@ -35,7 +34,7 @@ public class Seer extends Villager{
 						return;
 					}
 					this.EndTurn();
-					ListenerUtils.releaseListener(super.member.getId());
+					ListenerUtils.releaseListener(super.getId());
 					game.logger.logSkill(this,p,"查验");
 					super.sendPrivate(p.getMemberString()+"是"+p.getPredictorRole());
 					if(p instanceof NightmareKnight) {

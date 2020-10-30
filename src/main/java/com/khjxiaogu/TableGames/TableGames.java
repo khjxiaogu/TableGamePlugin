@@ -36,8 +36,6 @@ import com.khjxiaogu.TableGames.werewolf.Villager;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame;
 import com.khjxiaogu.TableGames.werewolf.WerewolfPreserve;
 
-import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.console.MiraiConsole;
 import net.mamoe.mirai.console.plugins.PluginBase;
 import net.mamoe.mirai.contact.MemberPermission;
 import net.mamoe.mirai.message.FriendMessageEvent;

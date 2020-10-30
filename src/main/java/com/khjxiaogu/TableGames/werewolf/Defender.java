@@ -18,7 +18,7 @@ public class Defender extends Villager {
 		public boolean fireBehaviour() {
 			player.sendPrivate(player.game.getAliveList());
 			player.sendPrivate("守卫，你可以保护一个人包括自己免于死亡，不能连续两次保护同一个人，请私聊选择保护的人，你有一分钟的考虑时间\n格式：“保护 qq号或者游戏号码”\n如：“保护 1”\n如果放弃保护，则无需发送任何内容，等待时间结束即可。");
-			ListenerUtils.registerListener(player.mid,(msg,type)->{
+			ListenerUtils.registerListener(player.getId(),(msg,type)->{
 				if(type!=MsgType.PRIVATE)return;
 				String content=Utils.getPlainText(msg);
 				if(content.startsWith("保护")) {
@@ -38,7 +38,7 @@ public class Defender extends Villager {
 							return;
 						}
 						player.EndTurn();
-						ListenerUtils.releaseListener(player.mid);
+						ListenerUtils.releaseListener(player.getId());
 						fireSkill(p,0);
 						
 						player.sendPrivate(p.getMemberString()+"获得了保护！");
@@ -61,7 +61,7 @@ public class Defender extends Villager {
 		super.StartTurn();
 		this.sendPrivate(game.getAliveList());
 		super.sendPrivate("守卫，你可以保护一个人包括自己免于死亡，不能连续两次保护同一个人，请私聊选择保护的人，你有一分钟的考虑时间\n格式：“保护 qq号或者游戏号码”\n如：“保护 1”\n如果放弃保护，则无需发送任何内容，等待时间结束即可。");
-		ListenerUtils.registerListener(super.mid,(msg,type)->{
+		ListenerUtils.registerListener(super.getId(),(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("保护")) {
@@ -81,7 +81,7 @@ public class Defender extends Villager {
 						return;
 					}
 					this.EndTurn();
-					ListenerUtils.releaseListener(super.member.getId());
+					ListenerUtils.releaseListener(super.getId());
 					game.logger.logSkill(this,p,"保护");
 					p.isGuarded=true;
 					super.sendPrivate(p.getMemberString()+"获得了保护！");

@@ -4,14 +4,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.Message;
 
 public abstract class Game {
-	protected final Group group;
-	public final ExecutorService scheduler;
+	private Group group;
+	private ExecutorService scheduler;
 	/**
 	 * @param cplayer  
 	 */
@@ -20,6 +19,10 @@ public abstract class Game {
 		if(nthread>0) {
 			scheduler=Executors.newFixedThreadPool(nthread);
 		}else scheduler=null;
+	}
+
+	public Group getGroup() {
+		return group;
 	}
 
 	public void forceStop() {
@@ -34,20 +37,24 @@ public abstract class Game {
 	
 	public abstract boolean isAlive();
 	protected void doFinalize() {
-		if(scheduler!=null) {
-			scheduler.shutdownNow();
+		if(getScheduler()!=null) {
+			getScheduler().shutdownNow();
 			try {
-				while(!scheduler.awaitTermination(1,TimeUnit.SECONDS)) {
-					scheduler.shutdownNow();
+				while(!getScheduler().awaitTermination(1,TimeUnit.SECONDS)) {
+					getScheduler().shutdownNow();
 				}
 			} catch (InterruptedException e) {}
 		}
 	}
 	public abstract boolean onReAttach(Long id);
 	public void sendPublicMessage(Message msg) {
-		group.sendMessage(msg);
+		getGroup().sendMessage(msg);
 	}
 	public void sendPublicMessage(String msg) {
-		group.sendMessage(msg);
+		getGroup().sendMessage(msg);
+	}
+
+	public ExecutorService getScheduler() {
+		return scheduler;
 	}
 }

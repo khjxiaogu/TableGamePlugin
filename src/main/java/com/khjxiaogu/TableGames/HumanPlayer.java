@@ -1,30 +1,28 @@
 package com.khjxiaogu.TableGames;
 
 import net.mamoe.mirai.contact.Member;
+import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Message;
 
-public class Player implements AbstractPlayer{
-	private AbstractPlayer member;
-	public Player(Member member) {
-		this.member = new HumanPlayer(member);
-	}
-	public Player(AbstractPlayer p) {
-		this.member = p;
+public class HumanPlayer implements AbstractPlayer {
+	private Member member;
+	public HumanPlayer(Member member) {
+		this.member = member;
 	}
 	public void sendPrivate(String str) {
-		member.sendPrivate(str);
+		member.sendMessage(str);
 	}
 	public void sendPublic(String str) {
-		member.sendPublic(str);
+		member.getGroup().sendMessage(this.getAt().plus(str));
 	}
 	public void sendPublic(Message msg) {
-		member.sendPublic(msg);
+		member.getGroup().sendMessage(this.getAt().plus(msg));
 	}
 	public Message getAt() {
-		return member.getAt();
+		return new At(member);
 	}
 	public String getMemberString() {
-		return member.getMemberString();
+		return member.getNameCard()+"("+getId()+")";
 	}
 	public void setNameCard(String s) {
 		member.setNameCard(s);
@@ -33,13 +31,18 @@ public class Player implements AbstractPlayer{
 		return member.getNameCard();
 	}
 	public void tryMute() {
-		member.tryMute();
+		try {
+			member.mute(3600);
+		} catch (Throwable t) {
+		}
 	}
 	public void tryUnmute() {
-		member.tryUnmute();
+		try {
+			member.unmute();
+		} catch (Throwable t) {
+		}
 	}
 	public long getId() {
 		return member.getId();
 	}
 }
-

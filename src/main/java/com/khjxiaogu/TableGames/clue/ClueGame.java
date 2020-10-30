@@ -94,7 +94,7 @@ public class ClueGame extends Game {
 					players.add(cp);
 					
 					cp.sendPrivate("已经报名");
-					String nc=cp.member.getNameCard();
+					String nc=cp.getNameCard();
 					if(nc.indexOf('|')!=-1) {
 						nc=nc.split("\\|")[1];
 					}
@@ -105,11 +105,11 @@ public class ClueGame extends Game {
 					while(--cpx>=0) {
 						cp.addCard(allcard.remove(0));
 					}
-					cp.member.setNameCard(min+"号 |"+nc);
+					cp.setNameCard(min+"号 |"+nc);
 					if(tcp==players.size()) {
 						cp.next=players.get(0);
 						this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
-						scheduler.execute(()->gameStart());
+						getScheduler().execute(()->gameStart());
 					}
 				}
 				return true;
@@ -133,7 +133,7 @@ public class ClueGame extends Game {
 	}
 	private CluePlayer getPlayerById(long id) {
 		for(CluePlayer p:players) {
-			if(p.member.getId()==id)
+			if(p.getId()==id)
 				return p;
 		}
 		return null;
@@ -169,7 +169,7 @@ public class ClueGame extends Game {
 		}
 		sb.append("\n所有玩家：");
 		for(CluePlayer player:players) {
-			sb.append("\n").append(player.member.getNameCard());
+			sb.append("\n").append(player.getNameCard());
 		}
 		return sb.toString();
 	}
@@ -190,28 +190,28 @@ public class ClueGame extends Game {
 	}
 	public void Win(CluePlayer cp) {
 		StringBuilder result=new StringBuilder("胜利玩家：");
-		result.append(cp.member.getNameCard());
+		result.append(cp.getNameCard());
 		for(CluePlayer p:players) {
-			result.append("\n").append(p.member.getNameCard()).append(p.isDead?"(出局)":"(在场)").append("持有卡片：");
+			result.append("\n").append(p.getNameCard()).append(p.isDead?"(出局)":"(在场)").append("持有卡片：");
 			for(Card c:p.inhand) {
 				result.append(c.getDisplayName()).append(" ");
 			}
 		}
 		result.append("\n正确答案：").append(Rrole.getName()).append(" 在 ").append(Rroom.getName()).append(" 使用 ").append(Rweapon.getName()).append(" 杀人。");
-		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.group));
+		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.getGroup()));
 		doFinalize();
 	}
 	@Override
 	protected void doFinalize() {
 		alive=false;
 		for(CluePlayer p:players) {
-			ListenerUtils.releaseListener(p.member.getId());
-			GameUtils.RemoveMember(p.member.getId());
-			String nc=p.member.getNameCard();
+			ListenerUtils.releaseListener(p.getId());
+			GameUtils.RemoveMember(p.getId());
+			String nc=p.getNameCard();
 			if(nc.indexOf('|')!=-1) {
 				nc=nc.split("\\|")[1];
 			}
-			p.member.setNameCard(nc);
+			p.setNameCard(nc);
 		}
 		super.doFinalize();
 	}
@@ -225,13 +225,13 @@ public class ClueGame extends Game {
 		doPrompt.terminateWait();
 		StringBuilder result=new StringBuilder("游戏中断。");
 		for(CluePlayer p:players) {
-			result.append("\n").append(p.member.getNameCard()).append(p.isDead?"(在场)":"(出局)").append("持有卡片：");
+			result.append("\n").append(p.getNameCard()).append(p.isDead?"(出局)":"(在场)").append("持有卡片：");
 			for(Card c:p.inhand) {
 				result.append(c.getDisplayName()).append(" ");
 			}
 		}
 		result.append("\n正确答案：").append(Rrole.getName()).append(" 在 ").append(Rroom.getName()).append(" 使用 ").append(Rweapon.getName()).append(" 杀人。");
-		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.group));
+		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.getGroup()));
 		doFinalize();
 	}
 

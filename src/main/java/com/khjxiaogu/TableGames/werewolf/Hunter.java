@@ -21,9 +21,9 @@ public class Hunter extends Villager {
 			this.sendPrivate(game.getAliveList());
 			super.sendPrivate("猎人，你死了，你可以选择翻牌并开枪打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n如果不需要，则等待时间结束即可。");
 			asked=true;
-			ListenerUtils.registerListener(super.mid,(msg,type)->{
+			ListenerUtils.registerListener(super.getId(),(msg,type)->{
 				if((dir==DiedReason.Vote||dir==DiedReason.Explode||game.isFirstNight)&&type==MsgType.AT) {
-					ListenerUtils.releaseListener(member.getId());
+					ListenerUtils.releaseListener(getId());
 					game.skipWait(WaitReason.DieWord);
 				}
 				if(type!=MsgType.PRIVATE)return;
@@ -45,11 +45,11 @@ public class Hunter extends Villager {
 							return;
 						}
 						this.EndTurn();
-						ListenerUtils.releaseListener(super.member.getId());
+						ListenerUtils.releaseListener(super.getId());
 						if(dir==DiedReason.Vote||dir==DiedReason.Explode)
-							ListenerUtils.registerListener(super.member, (msgx,typex)->{
+							ListenerUtils.registerListener(super.getId(), (msgx,typex)->{
 								if(typex==MsgType.AT) {
-									ListenerUtils.releaseListener(member.getId());
+									ListenerUtils.releaseListener(getId());
 									game.skipWait(WaitReason.DieWord);
 								}
 							});
@@ -69,7 +69,7 @@ public class Hunter extends Villager {
 							super.sendPublic(new PlainText("死亡，同时带走了").plus(p.getAt()));
 						if(dir==DiedReason.Vote||dir==DiedReason.Explode) {
 							game.logger.logDeath(p,DiedReason.Hunter);
-							game.scheduler.execute(()->p.onDied(DiedReason.Hunter));
+							game.getScheduler().execute(()->p.onDied(DiedReason.Hunter));
 						}else {
 							p.isDead=true;
 							game.kill(p,DiedReason.Hunter);

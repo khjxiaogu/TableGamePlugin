@@ -13,16 +13,16 @@ public class WerewolfGameLogger {
 		gamelog.println(s);
 	}
 	public void logSkill(Villager from,Villager to,String name) {
-		logSkill(from.member.getNameCard(),to,name);
+		logSkill(from.getNameCard(),to,name);
 	}
 	public void logSkill(String from,Villager to,String name) {
-		gamelog.append(from).append(" ").append(name).append("了 ").append(to.member.getNameCard()).println();
+		gamelog.append(from).append(" ").append(name).append("了 ").append(to.getNameCard()).println();
 	}
 	public void logVote(Villager from,Villager to) {
-		gamelog.append(from.member.getNameCard()).append(" 投票给").append(to.member.getNameCard()).println();
+		gamelog.append(from.getNameCard()).append(" 投票给").append(to.getNameCard()).println();
 	}
 	public void logDeath(Villager to,DiedReason dr){
-		gamelog.append(to.member.getNameCard()).append(" ").append(dr.desc).println();
+		gamelog.append(to.getNameCard()).append(" ").append(dr.desc).println();
 	}
 	public void title(String name) {
 		gamelog.append("========").append(name).append("========").println();

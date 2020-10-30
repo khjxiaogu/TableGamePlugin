@@ -28,7 +28,7 @@ public class Werewolf extends Villager {
 		if(s.startsWith("自爆"))
 		try {
 			super.sendPublic("是狼人，自爆了，进入黑夜。");
-			game.scheduler.execute(()->{
+			game.getScheduler().execute(()->{
 				game.removeAllListeners();
 				game.preSkipDay();
 				this.onDied(DiedReason.Explode);
@@ -40,7 +40,7 @@ public class Werewolf extends Villager {
 	}
 	@Override
 	public void addDaySkillListener() {
-		ListenerUtils.registerListener(mid,(msgx,typex)->{
+		ListenerUtils.registerListener(getId(),(msgx,typex)->{
 			if(typex==MsgType.PRIVATE) {
 				String content=Utils.getPlainText(msgx);
 				this.doDaySkillPending(content);
@@ -53,7 +53,7 @@ public class Werewolf extends Villager {
 		this.sendPrivate(game.getAliveList());
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
-		ListenerUtils.registerListener(super.member,(msg,type)->{
+		ListenerUtils.registerListener(super.getId(),(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("投票")) {
@@ -69,8 +69,8 @@ public class Werewolf extends Villager {
 						return;
 					}
 					this.EndTurn();
-					ListenerUtils.releaseListener(super.member.getId());
-					ListenerUtils.registerListener(super.member, (msgx,typex)->{
+					ListenerUtils.releaseListener(super.getId());
+					ListenerUtils.registerListener(super.getId(), (msgx,typex)->{
 						if(typex!=MsgType.PRIVATE)
 							return;
 						String contentx=Utils.getPlainText(msgx);
@@ -96,7 +96,7 @@ public class Werewolf extends Villager {
 				}
 			}else if(content.startsWith("放弃")) {
 				this.EndTurn();
-				ListenerUtils.releaseListener(super.member.getId());
+				ListenerUtils.releaseListener(super.getId());
 				game.NoVote(this);
 				super.sendPrivate("已放弃");
 			}

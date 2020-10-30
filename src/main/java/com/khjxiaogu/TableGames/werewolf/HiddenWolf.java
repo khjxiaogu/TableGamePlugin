@@ -37,7 +37,7 @@ public class HiddenWolf extends Villager {
 		this.sendPrivate(game.getAliveList());
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
-		ListenerUtils.registerListener(super.member,(msg,type)->{
+		ListenerUtils.registerListener(super.getId(),(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("投票")) {
@@ -53,7 +53,7 @@ public class HiddenWolf extends Villager {
 						return;
 					}
 					this.EndTurn();
-					ListenerUtils.releaseListener(super.member.getId());
+					ListenerUtils.releaseListener(super.getId());
 					game.WolfVote(this,p);
 					game.logger.logSkill(this,p,"狼人投票");
 					super.sendPrivate("已投票给 "+p.getMemberString());
@@ -62,7 +62,7 @@ public class HiddenWolf extends Villager {
 				}
 			}else if(content.startsWith("放弃")) {
 				this.EndTurn();
-				ListenerUtils.releaseListener(super.member.getId());
+				ListenerUtils.releaseListener(super.getId());
 				game.NoVote(this);
 				super.sendPrivate("已放弃");
 			}

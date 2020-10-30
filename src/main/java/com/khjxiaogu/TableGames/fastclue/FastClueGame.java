@@ -3,6 +3,7 @@ package com.khjxiaogu.TableGames.fastclue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import com.khjxiaogu.TableGames.Game;
@@ -32,9 +33,13 @@ public class FastClueGame extends Game {
 	boolean alive=true;//游戏是否存活
 	int cpp;//每个玩家分到卡片数量
 	int tcp;//总玩家数
+	int botnum=0;//机器人ID
 	public FastClueGame(Group group, int cplayer) {
 		super(group, cplayer,4);
 		tcp=cplayer;
+		putCards(cplayer);
+	}
+	public void putCards(int cplayer) {
 		List<Card> roomcard=new ArrayList<>();
 		Room last=null;
 		int is=0;
@@ -75,7 +80,21 @@ public class FastClueGame extends Game {
 		cpp=allcard.size()/cplayer;
 		Collections.shuffle(allcard);
 	}
-
+	public FastClueGame(Group g,int cplayer,Map<String,String> sets) {
+		super(g,cplayer,4);
+		
+		if(sets.containsKey("机器人"))
+			cplayer+=Integer.parseInt(sets.get("机器人"));
+		else if(sets.containsKey("人数")) {
+			int tplayer=Integer.parseInt(sets.get("人数"));
+			int botnm=tplayer-cplayer;
+			cplayer=tplayer;
+			while(--botnm>=0)
+				addBot();
+		}
+		tcp=cplayer;
+		putCards(cplayer);
+	}
 	@Override
 	public boolean addMember(Member mem) {
 		if(this.getPlayerById(mem.getId())!=null) {
@@ -86,7 +105,7 @@ public class FastClueGame extends Game {
 			this.sendPublicMessage(new At(mem).plus("你已参加其他游戏！"));
 			return true;
 		}
-		if(roles.size()>0) {
+		if(tcp!=players.size()) {
 			try {
 				synchronized(players) {
 					int min=players.size();
@@ -94,7 +113,7 @@ public class FastClueGame extends Game {
 					players.add(cp);
 					
 					cp.sendPrivate("已经报名");
-					String nc=cp.member.getNameCard();
+					String nc=cp.getNameCard();
 					if(nc.indexOf('|')!=-1) {
 						nc=nc.split("\\|")[1];
 					}
@@ -105,11 +124,11 @@ public class FastClueGame extends Game {
 					while(--cpx>=0) {
 						cp.addCard(allcard.remove(0));
 					}
-					cp.member.setNameCard(min+"号 |"+nc);
+					cp.setNameCard(min+"号 |"+nc);
 					if(tcp==players.size()) {
 						cp.next=players.get(0);
 						this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
-						scheduler.execute(()->gameStart());
+						getScheduler().execute(()->gameStart());
 					}
 				}
 				return true;
@@ -132,20 +151,82 @@ public class FastClueGame extends Game {
 	}
 	private CluePlayer getPlayerById(long id) {
 		for(CluePlayer p:players) {
-			if(p.member.getId()==id)
+			if(p.getId()==id)
 				return p;
 		}
 		return null;
 	}
-
+	public void addBot() {
+		try {
+			synchronized(players) {
+				int min=players.size();
+				CluePlayer cp=new CluePlayer(this,++botnum);
+				players.add(cp);
+				
+				cp.sendPrivate("已经报名");
+				String nc=cp.getNameCard();
+				if(nc.indexOf('|')!=-1) {
+					nc=nc.split("\\|")[1];
+				}
+				if(min!=0) {
+					players.get(min-1).next=cp;
+				}
+				int cpx=cpp;
+				while(--cpx>=0) {
+					cp.addCard(allcard.remove(0));
+				}
+				cp.setNameCard(min+"号 |"+nc);
+				if(tcp==players.size()) {
+					cp.next=players.get(0);
+					this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
+					getScheduler().execute(()->gameStart());
+				}
+			}
+		} catch (IllegalArgumentException
+				| SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	@Override
 	public void forceStart() {
-		this.sendPublicMessage("本游戏无法强行开始。");
+		while(tcp!=players.size()) {
+			try {
+				synchronized(players) {
+					int min=players.size();
+					CluePlayer cp=new CluePlayer(this,++botnum);
+					players.add(cp);
+					
+					cp.sendPrivate("已经报名");
+					String nc=cp.getNameCard();
+					if(nc.indexOf('|')!=-1) {
+						nc=nc.split("\\|")[1];
+					}
+					if(min!=0) {
+						players.get(min-1).next=cp;
+					}
+					int cpx=cpp;
+					while(--cpx>=0) {
+						cp.addCard(allcard.remove(0));
+					}
+					cp.setNameCard(min+"号 |"+nc);
+					if(tcp==players.size()) {
+						cp.next=players.get(0);
+						this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
+						getScheduler().execute(()->gameStart());
+					}
+				}
+			} catch (IllegalArgumentException
+					| SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public String getName() {
-		return "妙探寻凶";
+		return "妙探寻凶X";
 	}
 
 	@Override
@@ -168,7 +249,7 @@ public class FastClueGame extends Game {
 		}
 		sb.append("\n所有玩家：");
 		for(CluePlayer player:players) {
-			sb.append("\n").append(player.member.getNameCard());
+			sb.append("\n").append(player.getNameCard());
 		}
 		sb.append("\n所有房间：");
 		for(Room room:rooms) {
@@ -193,28 +274,28 @@ public class FastClueGame extends Game {
 	}
 	public void Win(CluePlayer cp) {
 		StringBuilder result=new StringBuilder("胜利玩家：");
-		result.append(cp.member.getNameCard());
+		result.append(cp.getNameCard());
 		for(CluePlayer p:players) {
-			result.append("\n").append(p.member.getNameCard()).append(p.isDead?"(出局)":"(在场)").append("持有卡片：");
+			result.append("\n").append(p.getNameCard()).append(p.isDead?"(出局)":"(在场)").append("持有卡片：");
 			for(Card c:p.inhand) {
 				result.append(c.getDisplayName()).append(" ");
 			}
 		}
 		result.append("\n正确答案：").append(Rrole.getName()).append(" 在 ").append(Rroom.getName()).append(" 使用 ").append(Rweapon.getName()).append(" 杀人。");
-		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.group));
+		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.getGroup()));
 		doFinalize();
 	}
 	@Override
 	protected void doFinalize() {
 		alive=false;
 		for(CluePlayer p:players) {
-			ListenerUtils.releaseListener(p.member.getId());
-			GameUtils.RemoveMember(p.member.getId());
-			String nc=p.member.getNameCard();
+			ListenerUtils.releaseListener(p.getId());
+			GameUtils.RemoveMember(p.getId());
+			String nc=p.getNameCard();
 			if(nc.indexOf('|')!=-1) {
 				nc=nc.split("\\|")[1];
 			}
-			p.member.setNameCard(nc);
+			p.setNameCard(nc);
 		}
 		super.doFinalize();
 	}
@@ -228,13 +309,13 @@ public class FastClueGame extends Game {
 		doPrompt.terminateWait();
 		StringBuilder result=new StringBuilder("游戏中断。");
 		for(CluePlayer p:players) {
-			result.append("\n").append(p.member.getNameCard()).append(p.isDead?"(在场)":"(出局)").append("持有卡片：");
+			result.append("\n").append(p.getNameCard()).append(p.isDead?"(出局)":"(在场)").append("持有卡片：");
 			for(Card c:p.inhand) {
 				result.append(c.getDisplayName()).append(" ");
 			}
 		}
 		result.append("\n正确答案：").append(Rrole.getName()).append(" 在 ").append(Rroom.getName()).append(" 使用 ").append(Rweapon.getName()).append(" 杀人。");
-		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.group));
+		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.getGroup()));
 		doFinalize();
 	}
 

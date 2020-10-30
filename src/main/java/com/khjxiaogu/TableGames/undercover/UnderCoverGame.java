@@ -43,6 +43,7 @@ public class UnderCoverGame extends Game {
 		}
 		Collections.shuffle(wds);
 	}
+	@SuppressWarnings("deprecation")
 	@Override
 	public void forceStop() {
 		doFinalize();
@@ -51,12 +52,12 @@ public class UnderCoverGame extends Game {
 	@Override
 	protected void doFinalize() {
 		for(UCPlayer in:innos)
-			GameUtils.RemoveMember(in.member.getId());
+			GameUtils.RemoveMember(in.getId());
 		super.doFinalize();
 	}
 	public UCPlayer getPlayerById(long id) {
 		for(UCPlayer p:innos) {
-			if(p.member.getId()==id)
+			if(p.getId()==id)
 				return p;
 		}
 		return null;
@@ -111,18 +112,18 @@ public class UnderCoverGame extends Game {
 			for(UCPlayer in:innos) {
 				if(in.isDead)continue;
 				in.sendPublic("请在1分钟内描述你的词语，可以随时@我结束描述");
-				ListenerUtils.registerListener(in.member.getId(),group,(msg,type)->{
+				ListenerUtils.registerListener(in.getId(),getGroup(),(msg,type)->{
 					if(type==MsgType.AT)
 						wt.stopWait();
 				});
 				wt.startWait(60000);
-				ListenerUtils.releaseListener(in.member.getId());
+				ListenerUtils.releaseListener(in.getId());
 			}
 			vu.clear();
 			for(UCPlayer in:innos) {
 				if(in.isDead)continue;
 				vu.addToVote(in);
-				ListenerUtils.registerListener(in.member.getId(),group,(msg,type)->{
+				ListenerUtils.registerListener(in.getId(),getGroup(),(msg,type)->{
 					At at=msg.first(At.Key);
 					if(at==null)return;
 					String content=Utils.getPlainText(msg);
@@ -132,12 +133,12 @@ public class UnderCoverGame extends Game {
 							in.sendPublic("选择的玩家非游戏玩家，请重新输入");
 							return;
 						}
-						ListenerUtils.releaseListener(in.member.getId());
+						ListenerUtils.releaseListener(in.getId());
 						in.sendPublic(new MessageChainBuilder().append("已经投票给").append(at).asMessageChain());
 						if(vu.vote(in,p))
 							wt.stopWait();
 					}else if(type==MsgType.AT&&content.startsWith("弃权")) {
-						ListenerUtils.releaseListener(in.member.getId());
+						ListenerUtils.releaseListener(in.getId());
 						in.sendPublic("已弃权");
 						vu.giveUp(in);
 						if(vu.finished())
@@ -146,7 +147,7 @@ public class UnderCoverGame extends Game {
 				});
 			}
 			this.sendPublicMessage("开始投票，请在两分钟内输入“投票 @要投的人”进行投票，或者 @我 弃权 弃票");
-			vu.hintVote(scheduler);
+			vu.hintVote(getScheduler());
 			wt.startWait(120000);
 			List<UCPlayer> vtd=vu.getMostVoted();
 			vu.clear();
@@ -159,7 +160,7 @@ public class UnderCoverGame extends Game {
 			boolean hasSpy=false;
 			int left=0;
 			for(UCPlayer in:innos) {
-				ListenerUtils.releaseListener(in.member.getId());
+				ListenerUtils.releaseListener(in.getId());
 				if(!in.isDead) {
 					left++;
 					hasSpy|=in.isSpy;
@@ -172,9 +173,9 @@ public class UnderCoverGame extends Game {
 					status="卧底胜利！";
 					GameData gd=TableGames.db.getGame(getName());
 					for(UCPlayer in:innos) {
-						UnderCoverPlayerData ucpd=gd.getPlayer(in.mid,UnderCoverPlayerData.class);
+						UnderCoverPlayerData ucpd=gd.getPlayer(in.getId(),UnderCoverPlayerData.class);
 						ucpd.log(in.isSpy,true,in.isDead);
-						gd.setPlayer(in.mid,ucpd);
+						gd.setPlayer(in.getId(),ucpd);
 					}
 				}
 			}else {
@@ -182,9 +183,9 @@ public class UnderCoverGame extends Game {
 				status=("卧底失败！");
 				GameData gd=TableGames.db.getGame(getName());
 				for(UCPlayer in:innos) {
-					UnderCoverPlayerData ucpd=gd.getPlayer(in.mid,UnderCoverPlayerData.class);
+					UnderCoverPlayerData ucpd=gd.getPlayer(in.getId(),UnderCoverPlayerData.class);
 					ucpd.log(in.isSpy,false,in.isDead);
-					gd.setPlayer(in.mid,ucpd);
+					gd.setPlayer(in.getId(),ucpd);
 				}
 			}
 			if(this.isEnded) {
@@ -192,7 +193,7 @@ public class UnderCoverGame extends Game {
 				for(UCPlayer in:innos) {
 					gr.append("\n").append(in.getMemberString()).append(in.isSpy?" 是卧底":" 不是卧底");
 				}
-				this.sendPublicMessage(Utils.sendTextAsImage(gr.toString(),this.group));
+				this.sendPublicMessage(Utils.sendTextAsImage(gr.toString(),this.getGroup()));
 				break;
 			}
 		}

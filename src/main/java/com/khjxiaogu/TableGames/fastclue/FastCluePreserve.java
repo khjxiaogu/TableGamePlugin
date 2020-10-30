@@ -32,7 +32,7 @@ public class FastCluePreserve extends PreserveInfo<FastClueGame> {
 
 	@Override
 	public String getName() {
-		return "妙探寻凶";
+		return "妙探寻凶X";
 	}
 
 }

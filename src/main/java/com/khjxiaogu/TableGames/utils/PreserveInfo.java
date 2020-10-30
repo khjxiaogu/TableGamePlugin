@@ -73,6 +73,7 @@ public abstract class PreserveInfo<T extends Game>{
 			prevSize=getActualCurrentNum();
 		}
 	}
+	@SuppressWarnings("deprecation")
 	public void removeAll() {
 		topreserve.clear();
 		if(td!=null) {
@@ -82,7 +83,7 @@ public abstract class PreserveInfo<T extends Game>{
 	}
 	public void notifyPreserver() {
 		for(Member m:topreserve) {
-			m.sendMessage("狼人杀游戏即将开始，请注意！");
+			m.sendMessage(this.getName()+"游戏即将开始，请注意！");
 		}
 	}
 	public String getPreserveList() {
@@ -161,6 +162,7 @@ public abstract class PreserveInfo<T extends Game>{
 		}else
 			startGame();
 	}
+	@SuppressWarnings("deprecation")
 	public void startForce() {
 		if(td!=null) {
 			acceled=true;

@@ -31,9 +31,9 @@ public class DarkWolf extends Werewolf {
 			this.sendPrivate(game.getAliveList());
 			super.sendPrivate("狼王，你死了，你可以选择打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
 			asked=true;
-			ListenerUtils.registerListener(super.mid,(msg,type)->{
+			ListenerUtils.registerListener(super.getId(),(msg,type)->{
 				if((dir==DiedReason.Vote||game.isFirstNight)&&type==MsgType.AT) {
-					ListenerUtils.releaseListener(member.getId());
+					ListenerUtils.releaseListener(super.getId());
 					game.skipWait(WaitReason.DieWord);
 				}
 				if(type!=MsgType.PRIVATE)return;
@@ -55,11 +55,11 @@ public class DarkWolf extends Werewolf {
 							return;
 						}
 						this.EndTurn();
-						ListenerUtils.releaseListener(super.member.getId());
+						ListenerUtils.releaseListener(super.getId());
 						if(dir==DiedReason.Vote||dir==DiedReason.Explode)
-							ListenerUtils.registerListener(super.member, (msgx,typex)->{
+							ListenerUtils.registerListener(super.getId(), (msgx,typex)->{
 								if(typex==MsgType.AT) {
-									ListenerUtils.releaseListener(member.getId());
+									ListenerUtils.releaseListener(super.getId());
 									game.skipWait(WaitReason.DieWord);
 								}
 							});
@@ -69,7 +69,7 @@ public class DarkWolf extends Werewolf {
 						super.sendPublic(new PlainText("死亡，同时带走了").plus(p.getAt()));
 						if(dir==DiedReason.Vote||dir==DiedReason.Explode) {
 							game.logger.logDeath(p,DiedReason.DarkWolf);
-							game.scheduler.execute(()->p.onDied(DiedReason.DarkWolf));
+							game.getScheduler().execute(()->p.onDied(DiedReason.DarkWolf));
 						}else {
 							p.isDead=true;
 							game.kill(p,DiedReason.DarkWolf);

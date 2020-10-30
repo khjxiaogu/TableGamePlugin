@@ -70,7 +70,7 @@ public class ListenerUtils {
 		ListenerUtils.MessageListenerWrapper ml = mls.get(id);
 		if (ml == null || !ml.isValid)
 			return false;
-		if (!(g.equals(ml.from) || ml.from == null))
+		if (!(ml.from == null||g.equals(ml.from)))
 			return false;
 		System.out.println("dispatching msg to " + id);
 		ml.handle(msg, type);

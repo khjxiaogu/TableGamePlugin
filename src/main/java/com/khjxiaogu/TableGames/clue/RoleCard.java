@@ -8,7 +8,7 @@ public class RoleCard extends Card {
 	}
 	@Override
 	String getName() {
-		return game.getPlayer(id).member.getNameCard();
+		return game.getPlayer(id).getNameCard();
 	}
 	
 }

@@ -18,7 +18,7 @@ public class WolfBeauty extends Werewolf {
 		super.StartTurn();
 		this.sendPrivate(game.getAliveList());
 		super.sendPrivate("狼美人，你可以魅惑一个好人，当你白天受伤害时此人同时出局。\n格式：“魅惑 qq号或者游戏号码”\n如：“魅惑 1”\n如果放弃魅惑，则无需发送任何内容，等待时间结束即可。");
-		ListenerUtils.registerListener(super.mid,(msg,type)->{
+		ListenerUtils.registerListener(super.getId(),(msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String content=Utils.getPlainText(msg);
 			if(content.startsWith("魅惑")) {
@@ -39,7 +39,7 @@ public class WolfBeauty extends Werewolf {
 					}
 					game.logger.logSkill(this,p,"狼美人魅惑");
 					this.EndTurn();
-					ListenerUtils.releaseListener(super.member.getId());
+					ListenerUtils.releaseListener(super.getId());
 					if(!(p instanceof Tramp))
 						this.p=p;
 					super.sendPrivate(p.getMemberString()+"获得了魅惑！");
