@@ -1,4 +1,4 @@
-package com.khjxiaogu.TableGames;
+package com.khjxiaogu.TableGames.utils;
 
 import net.mamoe.mirai.message.data.MessageChain;
 

@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Set;
 
 import com.khjxiaogu.TableGames.Player;
-import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 
 import net.mamoe.mirai.contact.Member;
 
-public class CluePlayer extends Player {
+public class CluePlayer extends Player{
 	FastClueGame game;
 	CluePlayer next;
 	Set<Card> alknow=new HashSet<Card>();

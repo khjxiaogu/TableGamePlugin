@@ -7,7 +7,10 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import net.mamoe.mirai.contact.Contact;
+import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.PlainText;
@@ -27,8 +30,13 @@ public class Utils {
 	}
 
 	public static String percent(double v1, double v2) {
+		long val=Math.round(v1 / v2 * 10000) / 100;
+		if(val>100)
+			val=100;
+		if(val<0)
+			val=0;
 		if (v2 != 0) {
-			return String.valueOf(Math.round(v1 / v2 * 10000) / 100) + "%";
+			return String.valueOf(val) + "%";
 		}
 		return "N/A%";
 	}
@@ -72,5 +80,37 @@ public class Utils {
 
 		g2d.dispose();
 		return img;
+	}
+	/*public static void main(String[] args) {
+		String atmsg="Hi,@awa How are you@pwp ";
+		Pattern pat=Pattern.compile("@[^\\s]+");
+		Matcher mc=pat.matcher(atmsg);
+		int last=0;
+		MessageChainBuilder mcb=new MessageChainBuilder();
+		while(mc.find()) {
+			int crn=mc.start();
+			mcb.append(atmsg.substring(last,crn));
+			last=mc.end();
+			mcb.add(getAtByName(mc.group().substring(1)));
+		}
+		System.out.println(mcb.asMessageChain().toString());
+	}*/
+	public static At getAtByName(String name) {
+		Constructor<At> ctor = null;
+		try {
+			ctor = At.class.getDeclaredConstructor(long.class,String.class);
+		} catch (NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ctor.setAccessible(true);
+		try {
+			return ctor.newInstance(0, name);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

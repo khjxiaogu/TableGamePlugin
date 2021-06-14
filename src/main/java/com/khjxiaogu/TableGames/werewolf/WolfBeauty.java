@@ -1,49 +1,78 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.AbstractPlayer;
 import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
 import net.mamoe.mirai.contact.Member;
 
 public class WolfBeauty extends Werewolf {
-	Villager p;
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Override
+	public double onVotedAccuracy() {
+		return 0.95;
+	}
+
+	@Override
+	public double onSkilledAccuracy() {
+		return 1;
+	}
+
+	public WolfBeauty(WerewolfGame game, AbstractPlayer p) {
+		super(game, p);
+	}
+
+	int pid=-1;
+
 	public WolfBeauty(WerewolfGame werewolfGame, Member member) {
 		super(werewolfGame, member);
 	}
 
 	@Override
+	public String getJobDescription() {
+		return "你属于狼人阵营，你每晚除了杀人外可以额外魅惑一个人，当你白天受到伤害时此人同时出局。";
+	}
+
+	@Override
 	public void onTurn() {
+		this.pid=-1;
 		super.StartTurn();
-		this.sendPrivate(game.getAliveList());
-		super.sendPrivate("狼美人，你可以魅惑一个好人，当你白天受伤害时此人同时出局。\n格式：“魅惑 qq号或者游戏号码”\n如：“魅惑 1”\n如果放弃魅惑，则无需发送任何内容，等待时间结束即可。");
-		ListenerUtils.registerListener(super.getId(),(msg,type)->{
-			if(type!=MsgType.PRIVATE)return;
-			String content=Utils.getPlainText(msg);
-			if(content.startsWith("魅惑")) {
+		sendPrivate(game.getAliveList());
+		super.sendPrivate("狼美人，你可以魅惑一个好人。\n格式：“魅惑 qq号或者游戏号码”\n如：“魅惑 1”\n如果放弃魅惑，则无需发送任何内容，等待时间结束即可。");
+		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+			if (type != MsgType.PRIVATE)
+				return;
+			String content = Utils.getPlainText(msg);
+			if (content.startsWith("魅惑")) {
 				try {
-					Long qq=Long.parseLong(Utils.removeLeadings("魅惑",content).replace('号', ' ').trim());
-					Villager p=game.getPlayerById(qq);
-					if(p==null) {
+					Long qq = Long.parseLong(Utils.removeLeadings("魅惑", content).replace('号', ' ').trim());
+					Villager p = game.getPlayerById(qq);
+					if (p == null) {
 						super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
 						return;
 					}
-					if(p.isDead) {
+					if (p.isDead) {
 						super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
 						return;
 					}
-					if(p instanceof Werewolf) {
+					if (p instanceof Werewolf) {
 						super.sendPrivate("选择的qq号或者游戏号码是狼人，请重新输入");
 						return;
 					}
-					game.logger.logSkill(this,p,"狼美人魅惑");
-					this.EndTurn();
+					game.logger.logSkill(this, p, "狼美人魅惑");
+					EndTurn();
 					ListenerUtils.releaseListener(super.getId());
-					if(!(p instanceof Tramp))
-						this.p=p;
-					super.sendPrivate(p.getMemberString()+"获得了魅惑！");
-				}catch(Throwable t) {
+					if (!(p instanceof Tramp)) {
+						this.pid = game.getIdByPlayer(p);
+					}
+					super.sendPrivate(p.getMemberString() + "获得了魅惑！");
+				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“魅惑 qq号或者游戏号码”！");
 				}
 			}
@@ -51,23 +80,40 @@ public class WolfBeauty extends Werewolf {
 	}
 
 	@Override
-	public boolean onDiePending(DiedReason dir) {
-		if(dir==DiedReason.Vote||dir==DiedReason.Hunter||dir==DiedReason.Knight||dir==DiedReason.Explode) {
-			game.logger.logSkill(p,this,"殉情");
-			super.sendPublic(p.getAt()+"殉情了。");
-			p.onDied(DiedReason.Love);
-			game.logger.logDeath(p,DiedReason.Love);
+	public void onDieSkill(DiedReason dir) {
+		if (dir == DiedReason.Vote || dir == DiedReason.Hunter || dir == DiedReason.Knight
+				|| dir == DiedReason.Explode) {
+			if(pid==-1)return;
+			Villager p=game.getPlayerById(pid);
+			if(p==null||p.isDead)return;
+			game.logger.logSkill(p, this, "殉情");
+			super.sendPublic(p.getAt().plus("殉情了。"));
+			game.kill(p,DiedReason.Love);
+			game.logger.logDeath(p, DiedReason.Love);
 		}
-		return super.onDiePending(dir);
+	}
+
+	@Override
+	public boolean shouldWaitDeathSkill() {
+		return super.shouldWaitDeathSkill();
+	}
+
+	@Override
+	public boolean canDeathSkill(DiedReason dir) {
+		return true;
 	}
 
 	@Override
 	public void onDied(DiedReason dir) {
-		if(dir==DiedReason.Vote||dir==DiedReason.Hunter||dir==DiedReason.Knight||dir==DiedReason.Explode) {
-			game.logger.logSkill(p,this,"殉情");
-			super.sendPublic(p.getAt()+"殉情了。");
-			p.onDied(DiedReason.Love);
-			game.logger.logDeath(p,DiedReason.Love);
+		if (dir == DiedReason.Vote || dir == DiedReason.Hunter || dir == DiedReason.Knight
+				|| dir == DiedReason.Explode) {
+			if(pid==-1)return;
+			Villager p=game.getPlayerById(pid);
+			if(p==null||p.isDead)return;
+			game.logger.logSkill(p, this, "殉情");
+			super.sendPublic(p.getAt().plus("殉情了。"));
+			game.kill(p,DiedReason.Love);
+			game.logger.logDeath(p, DiedReason.Love);
 		}
 		super.onDied(dir);
 	}

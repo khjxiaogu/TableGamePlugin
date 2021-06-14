@@ -11,7 +11,7 @@ import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.utils.VoteHelper;
 import com.khjxiaogu.TableGames.utils.WaitThread;
-import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.TableGames;
 
 import net.mamoe.mirai.contact.Group;
@@ -29,12 +29,17 @@ public class UnderCoverGame extends Game {
 	VoteHelper<UCPlayer> vu=new VoteHelper<>();
 	List<Boolean> wds=Collections.synchronizedList(new ArrayList<>());
 	WaitThread wt=new WaitThread();
+	double pointspool=0;
 	public UnderCoverGame(Group group, int cplayer) {
 		super(group, cplayer,2);
 		this.cplayer=cplayer;
 		wds.add(true);
 		if(cplayer>7) {
 			spycount=2;
+			wds.add(true);
+		}
+		if(cplayer>9) {
+			spycount=3;
 			wds.add(true);
 		}
 		int innocount=cplayer-spycount;
@@ -51,6 +56,7 @@ public class UnderCoverGame extends Game {
 	}
 	@Override
 	protected void doFinalize() {
+		isEnded=true;
 		for(UCPlayer in:innos)
 			GameUtils.RemoveMember(in.getId());
 		super.doFinalize();
@@ -99,6 +105,7 @@ public class UnderCoverGame extends Game {
 	}
 	public void gameMain() {
 		boolean changeWordNeeded=true;
+		pointspool=innos.size()*0.5;
 		while(true) {
 			if(changeWordNeeded) {
 				changeWordNeeded=false;
@@ -172,19 +179,23 @@ public class UnderCoverGame extends Game {
 					this.isEnded=true;
 					status="卧底胜利！";
 					GameData gd=TableGames.db.getGame(getName());
+					double ppp=pointspool/spycount;
 					for(UCPlayer in:innos) {
 						UnderCoverPlayerData ucpd=gd.getPlayer(in.getId(),UnderCoverPlayerData.class);
 						ucpd.log(in.isSpy,true,in.isDead);
+						TableGames.credit.get(in.getId()).givePT(ppp);
 						gd.setPlayer(in.getId(),ucpd);
 					}
 				}
 			}else {
 				this.isEnded=true;
-				status=("卧底失败！");
+				status=("卧底失败！"); 
 				GameData gd=TableGames.db.getGame(getName());
+				double ppp=pointspool/(cplayer-spycount);
 				for(UCPlayer in:innos) {
 					UnderCoverPlayerData ucpd=gd.getPlayer(in.getId(),UnderCoverPlayerData.class);
 					ucpd.log(in.isSpy,false,in.isDead);
+					TableGames.credit.get(in.getId()).givePT(ppp);
 					gd.setPlayer(in.getId(),ucpd);
 				}
 			}

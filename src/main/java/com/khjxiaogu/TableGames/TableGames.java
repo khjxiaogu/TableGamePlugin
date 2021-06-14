@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -17,14 +18,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 
-import com.khjxiaogu.TableGames.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.clue.ClueGame;
 import com.khjxiaogu.TableGames.clue.CluePreserve;
+import com.khjxiaogu.TableGames.data.CreditTrade;
 import com.khjxiaogu.TableGames.data.GenericPlayerData;
+import com.khjxiaogu.TableGames.data.PlayerCreditData;
 import com.khjxiaogu.TableGames.data.PlayerDatabase;
 import com.khjxiaogu.TableGames.fastclue.FastClueGame;
 import com.khjxiaogu.TableGames.fastclue.FastCluePreserve;
+import com.khjxiaogu.TableGames.spwarframe.SpWarframe;
+import com.khjxiaogu.TableGames.spwarframe.SpWarframePreserve;
 import com.khjxiaogu.TableGames.undercover.UnderCoverGame;
+import com.khjxiaogu.TableGames.undercover.UnderCoverHolder;
+import com.khjxiaogu.TableGames.undercover.UnderCoverHolderPreserve;
 import com.khjxiaogu.TableGames.undercover.UnderCoverPreserve;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary;
 import com.khjxiaogu.TableGames.utils.GameUtils;
@@ -32,11 +38,13 @@ import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.PreserveHolder;
 import com.khjxiaogu.TableGames.utils.PreserveInfo;
 import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.werewolf.Villager;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame;
 import com.khjxiaogu.TableGames.werewolf.WerewolfPreserve;
 
 import net.mamoe.mirai.console.plugins.PluginBase;
+import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.MemberPermission;
 import net.mamoe.mirai.message.FriendMessageEvent;
 import net.mamoe.mirai.message.GroupMessageEvent;
@@ -50,6 +58,7 @@ import net.mamoe.mirai.utils.BotConfiguration.MiraiProtocol;
 public class TableGames extends PluginBase {
 	public static TableGames plugin;
 	public static PlayerDatabase db;
+	public static PlayerCreditData credit;
 	public static Map<String,BiConsumer<GroupMessageEvent,String[]>> normcmd=new ConcurrentHashMap<>();
 	public static Map<String,BiConsumer<GroupMessageEvent,String[]>> privcmd=new ConcurrentHashMap<>();
 	public static ExecutorService dispatchexec=Executors.newCachedThreadPool();
@@ -97,13 +106,14 @@ public class TableGames extends PluginBase {
 			PreserveHolder.getPreserve(event.getGroup(),preserver).notifyPreserver();
 			event.getGroup().sendMessage("已经提醒所有预定玩家");
 		});
+		
 		privcmd.put("强制预定"+name,(event,command)->{
 			PreserveHolder.getPreserve(event.getGroup(),preserver).addPreserver(event.getGroup().get(Long.parseLong(command[1])));
 		});
 		privcmd.put("强制取消预定"+name,(event,command)->{
-			PreserveHolder.getPreserve(event.getGroup(),preserver).removePreserver(event.getGroup().get(Long.parseLong(command[1])));
+			PreserveHolder.getPreserve(event.getGroup(),preserver).removePreserver(event.getGroup().get(Long.parseLong(command[1])),true);
 		});
-		privcmd.put(name+"统计t", (event,command)->{
+		privcmd.put(name+"统计", (event,command)->{
 			event.getGroup().sendMessage(new At(event.getSender()).plus(db.getGame(name).getPlayer(event.getSender().getId(),PlayerDatabase.datacls.get(name)).toString()));
 		});
 		privcmd.put("b"+name, (event,command)->{
@@ -174,13 +184,95 @@ public class TableGames extends PluginBase {
 			sb.append("得分：").append(pts);
 			event.getGroup().sendMessage(sb.toString());
 		});
+		privcmd.put("揭示",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getGroup());
+			if(g!=null&&g.isAlive())
+				g.forceShow(event.getSender());
+		});
+		privcmd.put("跳过",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getGroup());
+			if(g!=null&&g.isAlive())
+				g.forceSkip();
+		});
+		privcmd.put("接管",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getGroup());
+			if(g!=null&&g.isAlive()) {
+				long m1=Long.parseLong(args[1]);
+				Member m2=null;
+				if(args.length>2) {
+					m2=event.getGroup().get(Long.parseLong(args[2]));
+				}
+				if(g.takeOverMember(m1,m2)) {
+					event.getGroup().sendMessage("接管成功");
+				}else event.getGroup().sendMessage("接管失败");
+			}
+		});
+		privcmd.put("CMD",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getGroup());
+			if(g!=null) {
+				g.specialCommand(event.getSender(),Arrays.copyOfRange(args,1,args.length));
+			}
+		});
 		privcmd.put("TTI",(event,args)->{
 			event.getGroup().sendMessage(Utils.sendTextAsImage(String.join(" ",args), event.getGroup()));
 		});
+		normcmd.put("查询积分",(event,args)->{
+			event.getGroup().sendMessage(new At(event.getSender()).plus(credit.get(event.getSender().getId()).toString()));
+		});
+		normcmd.put("积分商城",(event,args)->{
+			event.getGroup().sendMessage(event.getGroup().uploadImage(CreditTrade.getList()));
+		});
+		normcmd.put("购买",(event,args)->{
+			int is=Integer.parseInt(args[1]);
+			if(is>CreditTrade.trades.size()+1||is<1) {
+				event.getGroup().sendMessage(new At(event.getSender()).plus("非法商品序号"));
+				return;
+			}
+			if(CreditTrade.trades.get(is-1).execute(event.getSender().getId())) {
+				event.getGroup().sendMessage(new At(event.getSender()).plus("购买成功"));
+			}else
+				event.getGroup().sendMessage(new At(event.getSender()).plus("购买失败"));
+		});
+		privcmd.put("给积分",(event,args)->{
+			double crp=credit.get(Long.parseLong(args[1])).givePT(Integer.parseInt(args[2]));
+			event.getGroup().sendMessage("添加成功，现有"+crp+"积分");
+		});
+		privcmd.put("扣积分",(event,args)->{
+			double crp=credit.get(Long.parseLong(args[1])).removePT(Integer.parseInt(args[2]));
+			event.getGroup().sendMessage("扣除成功，还剩"+crp+"积分");
+		});
+		
+		privcmd.put("使用积分",(event,args)->{
+			double crp;
+			if((crp=credit.get(Long.parseLong(args[1])).withdrawPT(Integer.parseInt(args[2])))<0) {
+				event.getGroup().sendMessage("扣除失败，积分还差"+(-crp)+"点");
+			}
+			event.getGroup().sendMessage("扣除成功，还剩"+crp+"积分");
+		});
+		privcmd.put("给物品",(event,args)->{
+			int cnt=args.length>3?Integer.parseInt(args[3]):1;
+			int crp=credit.get(Long.parseLong(args[1])).giveItem(args[2],cnt);
+			event.getGroup().sendMessage("添加成功，现有"+crp+"个"+args[2]);
+		});
+		privcmd.put("扣物品",(event,args)->{
+			int cnt=args.length>3?Integer.parseInt(args[3]):1;
+			int crp=credit.get(Long.parseLong(args[1])).removeItem(args[2],cnt);
+			event.getGroup().sendMessage("扣除成功，还剩"+crp+"个"+args[2]);
+		});
+		privcmd.put("使用物品",(event,args)->{
+			int crp;
+			int cnt=args.length>3?Integer.parseInt(args[3]):1;
+			if((crp=credit.get(Long.parseLong(args[1])).withdrawItem(args[2],cnt))<0) {
+				event.getGroup().sendMessage("扣除失败，"+args[2]+"还差"+(-crp)+"个");
+			}
+			event.getGroup().sendMessage("扣除成功，还剩"+crp+"个"+args[2]);
+		});
 		makeGame("狼人杀",WerewolfPreserve.class,WerewolfGame.class);
 		makeGame("谁是卧底",UnderCoverPreserve.class,UnderCoverGame.class);
+		makeGame("谁是卧底发词",UnderCoverHolderPreserve.class,UnderCoverHolder.class);
 		makeGame("妙探寻凶",CluePreserve.class,ClueGame.class);
 		makeGame("妙探寻凶X",FastCluePreserve.class,FastClueGame.class);
+		makeGame("SP战纪",SpWarframePreserve.class,SpWarframe.class);
 	}
 	public static void transfer(InputStream i,OutputStream o) throws IOException {
 		int nRead;
@@ -198,6 +290,7 @@ public class TableGames extends PluginBase {
 		BotConfiguration.getDefault().setProtocol(MiraiProtocol.ANDROID_PHONE);
 		plugin=this;
 		db=new PlayerDatabase(super.getDataFolder());
+		credit=new PlayerCreditData(super.getDataFolder());
 		try {
 			File f=new File(super.getDataFolder(),"undtext.txt");
 			if(!f.exists()) {
@@ -243,6 +336,28 @@ public class TableGames extends PluginBase {
 								g.forceStop();
 							event.getGroup().sendMessage("已经停止正在进行的游戏！");
 							event.getSender().sendMessage("已经停止正在进行的游戏！");
+						}else if(command.startsWith("暂停游戏")) {
+							Game g=GameUtils.getGames().get(event.getGroup());
+							if(g!=null)
+								g.forceInterrupt();
+							event.getSender().sendMessage("已经暂停正在进行的游戏！");
+						}else if(command.startsWith("继续游戏")) {
+							Game g=GameUtils.getGames().get(event.getGroup());
+							if(g!=null&&g.isAlive()) {
+								event.getGroup().sendMessage("因为有其他的游戏正在运行，无法继续。");
+								return;
+							}
+				        	FileInputStream fileOut;
+							try {
+								fileOut = new FileInputStream(new File(TableGames.plugin.getDataFolder(),""+event.getGroup()+".game"));
+								ObjectInputStream out = new ObjectInputStream(fileOut);
+								GameUtils.getGames().put(event.getGroup(),(Game) out.readObject());
+							} catch (IOException | ClassNotFoundException e) {
+								// TODO Auto-generated catch block
+								event.getGroup().sendMessage("继续游戏失败！");
+								e.printStackTrace();
+							}
+							
 						}else if(args[0].startsWith("强制报名")) {
 							Game g=GameUtils.getGames().get(event.getGroup());
 							if(g!=null&&g.isAlive())

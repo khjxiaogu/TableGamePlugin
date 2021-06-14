@@ -9,12 +9,17 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
-public class ImagePrintStream implements Appendable{
+public class ImagePrintStream implements Appendable,Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7505991592374812133L;
 	LinkedList<StringBuilder> sbs=new LinkedList<>();
 	protected void newLine() {
 		sbs.add(new StringBuilder());

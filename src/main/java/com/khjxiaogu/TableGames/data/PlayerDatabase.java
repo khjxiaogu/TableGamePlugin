@@ -63,7 +63,7 @@ public class PlayerDatabase {
 			return setData(qq,gs.toJson(datacls));
 		}
 	}
-	String createPoM = "CREATE TABLE IF NOT EXISTS profile (" + 
+	static final String createPoM = "CREATE TABLE IF NOT EXISTS profile (" + 
 			"qq   TEXT       NOT NULL, " + // 用户ID
 	        "game TEXT       NOT NULL, " + // 游戏名称
 	        "data TEXT       NOT NULL DEFAULT '{}', " + // 游戏数据json

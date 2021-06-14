@@ -1,23 +1,41 @@
 package com.khjxiaogu.TableGames.werewolf;
 
+import com.khjxiaogu.TableGames.AbstractPlayer;
+
 import net.mamoe.mirai.contact.Member;
 
-public class GraveKeeper extends Villager{
+public class GraveKeeper extends Villager {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public GraveKeeper(WerewolfGame game, AbstractPlayer p) {
+		super(game, p);
+	}
 
 	public GraveKeeper(WerewolfGame werewolfGame, Member member) {
 		super(werewolfGame, member);
 	}
 
 	@Override
+	public String getJobDescription() {
+		return "你属于神阵营，你在第二天晚上开始可以查看前一天白天投票死者是否狼人。";
+	}
+
+	@Override
 	public void onTurn() {
-		if(game.lastVoteOut!=null) {
-			game.logger.logSkill(this,game.lastVoteOut,"守墓人查验");
-			if(game.lastVoteOut.getFraction()==Fraction.Wolf)
+		if (game.lastVoteOut != null) {
+			game.logger.logSkill(this, game.lastVoteOut, "守墓人查验");
+			if (game.lastVoteOut.getFraction() == Fraction.Wolf) {
 				super.sendPrivate("上一个驱逐的是狼人");
-			else
+			} else {
 				super.sendPrivate("上一个驱逐的是好人");
-		}else
+			}
+		} else {
 			super.sendPrivate("前一天没有驱逐人");
+		}
 	}
 
 	@Override
@@ -34,6 +52,5 @@ public class GraveKeeper extends Villager{
 	public int getTurn() {
 		return 2;
 	}
-	
 
 }

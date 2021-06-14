@@ -1,8 +1,10 @@
 package com.khjxiaogu.TableGames;
 
-import com.khjxiaogu.TableGames.MessageListener.MsgType;
+import java.io.Serializable;
+
 import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.data.Message;
@@ -10,14 +12,21 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
 
-public class BotPlayer implements AbstractPlayer {
-	int rbid;
-	String nameCard;
-	Group gp;
-	public BotPlayer(int botId,Group in) {
+public class BotPlayer implements AbstractPlayer,Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3890210129608510286L;
+	protected int rbid;
+	protected String nameCard;
+	transient protected Group gp;
+	transient Game sg;
+	transient protected Object roleObject;
+	public BotPlayer(int botId,Group in,Game g) {
 		rbid=botId;
 		nameCard="机器人"+rbid;
 		gp=in;
+		sg=g;
 	}
 
 	@Override
@@ -27,16 +36,20 @@ public class BotPlayer implements AbstractPlayer {
 
 	@Override
 	public void sendPublic(String str) {
+		sg.getScheduler().executeLater(()->{
 		onPublic(str);
+		},500);
 		gp.sendMessage(getAt().plus(str));
 	}
 
 	@Override
 	public void sendPublic(Message str) {
+		sg.getScheduler().executeLater(()->{
 		if(str instanceof MessageChain)
 			onPublic(Utils.getPlainText((MessageChain) str));
 		else
 			onPublic(str.contentToString());
+		},500);
 		gp.sendMessage(getAt().plus(str));
 	}
 	/**
@@ -56,6 +69,19 @@ public class BotPlayer implements AbstractPlayer {
 	}
 	public void sendAsBot(String msg) {
 		ListenerUtils.dispatch(getId(),MsgType.PRIVATE,new MessageChainBuilder().append(msg).asMessageChain());
+	}
+	public void sendAtAsBot(String msg) {
+		sendBotMessage(msg);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ListenerUtils.dispatch(getId(),MsgType.AT,new MessageChainBuilder().append(msg).asMessageChain());
+	}
+	public void sendBotMessage(String msg) {
+		gp.sendMessage(this.nameCard+"：\n"+msg);
 	}
 	@Override
 	public Message getAt() {
@@ -88,6 +114,17 @@ public class BotPlayer implements AbstractPlayer {
 	@Override
 	public long getId() {
 		return 100+rbid;
+	}
+
+	@Override
+	public void bind(Object obj) {
+		roleObject=obj;
+	}
+
+	@Override
+	public void setGame(Game g) {
+		sg=g;
+		gp=g.getGroup();
 	}
 
 }

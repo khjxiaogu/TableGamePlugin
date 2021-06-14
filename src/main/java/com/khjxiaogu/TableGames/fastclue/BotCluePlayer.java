@@ -9,7 +9,7 @@ public class BotCluePlayer extends BotPlayer {
 	static Random trnd=new Random();
 	Random botrandom=new Random(trnd.nextLong());
 	public BotCluePlayer(int botId,FastClueGame in) {
-		super(botId, in.getGroup());
+		super(botId, in.getGroup(),in);
 		game=in;
 	}
 

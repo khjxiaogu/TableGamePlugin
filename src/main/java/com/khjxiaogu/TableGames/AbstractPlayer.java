@@ -13,4 +13,6 @@ public interface AbstractPlayer {
 	public void tryMute();
 	public void tryUnmute();
 	public long getId();
+	public void bind(Object obj);
+	public void setGame(Game g);
 }

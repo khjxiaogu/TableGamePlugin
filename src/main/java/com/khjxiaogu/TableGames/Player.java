@@ -1,10 +1,16 @@
 package com.khjxiaogu.TableGames;
 
+import java.io.Serializable;
+
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.message.data.Message;
 
-public class Player implements AbstractPlayer{
-	private AbstractPlayer member;
+public class Player implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8489601792669124710L;
+	protected AbstractPlayer member;
 	public Player(Member member) {
 		this.member = new HumanPlayer(member);
 	}
@@ -40,6 +46,12 @@ public class Player implements AbstractPlayer{
 	}
 	public long getId() {
 		return member.getId();
+	}
+	public final void bind(Object obj) {
+		member.bind(obj);
+	}
+	public void setGame(Game g) {
+		member.setGame(g);
 	}
 }
 
