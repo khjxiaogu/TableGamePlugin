@@ -10,5 +10,5 @@ public class RoleCard extends Card {
 	String getName() {
 		return game.getPlayer(id).getNameCard();
 	}
-	
+
 }

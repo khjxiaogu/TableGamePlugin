@@ -25,7 +25,28 @@ import com.khjxiaogu.TableGames.spwarframe.events.RevalEvent;
 import com.khjxiaogu.TableGames.spwarframe.events.SavedEvent;
 import com.khjxiaogu.TableGames.spwarframe.events.SkillEvent;
 import com.khjxiaogu.TableGames.spwarframe.events.SystemEvent;
-import com.khjxiaogu.TableGames.spwarframe.role.*;
+import com.khjxiaogu.TableGames.spwarframe.role.BaiYY;
+import com.khjxiaogu.TableGames.spwarframe.role.ChangSQ;
+import com.khjxiaogu.TableGames.spwarframe.role.DuanXC;
+import com.khjxiaogu.TableGames.spwarframe.role.FeiCY;
+import com.khjxiaogu.TableGames.spwarframe.role.GuiHF;
+import com.khjxiaogu.TableGames.spwarframe.role.GuoHY;
+import com.khjxiaogu.TableGames.spwarframe.role.HeYZ;
+import com.khjxiaogu.TableGames.spwarframe.role.JiCR;
+import com.khjxiaogu.TableGames.spwarframe.role.JiangTX;
+import com.khjxiaogu.TableGames.spwarframe.role.QiLY;
+import com.khjxiaogu.TableGames.spwarframe.role.QinMeng;
+import com.khjxiaogu.TableGames.spwarframe.role.RanH;
+import com.khjxiaogu.TableGames.spwarframe.role.RanXY;
+import com.khjxiaogu.TableGames.spwarframe.role.Role;
+import com.khjxiaogu.TableGames.spwarframe.role.ShenTT;
+import com.khjxiaogu.TableGames.spwarframe.role.TangHY;
+import com.khjxiaogu.TableGames.spwarframe.role.TongL;
+import com.khjxiaogu.TableGames.spwarframe.role.WangXH;
+import com.khjxiaogu.TableGames.spwarframe.role.YangYQ;
+import com.khjxiaogu.TableGames.spwarframe.role.YaoFX;
+import com.khjxiaogu.TableGames.spwarframe.role.YaoFY;
+import com.khjxiaogu.TableGames.spwarframe.role.ZhuLY;
 import com.khjxiaogu.TableGames.spwarframe.skill.Skill;
 import com.khjxiaogu.TableGames.spwarframe.skill.SkillType;
 
@@ -70,8 +91,9 @@ public class GameManager implements EventBus{
 		}
 		@Override
 		public void accept(Event t) {
-			if(accept.test(t))
+			if(accept.test(t)) {
 				inner.accept((T) t);
+			}
 		}
 	}
 	Platform p;
@@ -81,22 +103,23 @@ public class GameManager implements EventBus{
 	}
 	public GameManager(Platform p,int seed) {
 		this.p=p;
-		
+
 		this.seed=seed;
 	}
 	public void setMemberCount(int cnt) {
 		rnd=new Random(seed);
 		roles.clear();
-		List<Class<? extends Role>> sl=new ArrayList<>(rs.values());
-		
-		
+		List<Class<? extends Role>> sl=new ArrayList<>(GameManager.rs.values());
+
+
 		Collections.shuffle(sl,rnd);
 		int boss=rnd.nextInt(cnt);
 		for(int i=0;i<cnt;i++) {
 			try {
 				Role cur=sl.get(i).getConstructor(GameManager.class).newInstance(this);
-				if(i<3)
+				if(i<3) {
 					cur.setLeader();
+				}
 				if(i%3==0) {
 					cur.setFraction(Fraction.FOG);
 				}else if(i%3==1) {
@@ -122,12 +145,14 @@ public class GameManager implements EventBus{
 	public void start() {
 		StringBuilder sb=new StringBuilder("在场角色：");
 		List<String> sl=new ArrayList<>(roles.size());
-		for(Role role:roles)
+		for(Role role:roles) {
 			sl.add(role.getName());
+		}
 		Collections.shuffle(sl);
-		for(String s:sl)
+		for(String s:sl) {
 			sb.append(s).append(" ");
-		
+		}
+
 		for(Role r:roles) {
 			if(r.isLeader()) {
 				sb.append("\n").append(r.getFraction().getName()).append("：").append(r.getPlayer()).append("角色是").append(r.getName());
@@ -136,8 +161,9 @@ public class GameManager implements EventBus{
 			desc.append("你的角色是：").append(r.getName()).append(" 阵营是：").append(r.getFraction().getName()).append(" 技能列表：");
 			for(Skill sk:r.getAllSkills()) {
 				desc.append("\n").append(sk.getName()).append("：").append(sk.getDesc()).append(" ");
-				if(sk.getType()!=SkillType.PASSIVE)
+				if(sk.getType()!=SkillType.PASSIVE) {
 					desc.append(sk.getMaxRemain()).append("次");
+				}
 			}
 			if(r.isBoss()) {
 				desc.append("\n你是境主");
@@ -151,8 +177,8 @@ public class GameManager implements EventBus{
 	boolean started=true;
 	public void sendAll(String message) {p.sendAll(message);}
 	public void sendAllLong(String message) {p.sendAllLong(message);}
-	LinkedList<Event> fireNext=new LinkedList<Event>();
-	LinkedList<Event> firing=new LinkedList<Event>();
+	LinkedList<Event> fireNext=new LinkedList<>();
+	LinkedList<Event> firing=new LinkedList<>();
 	boolean eventProceed=false;
 	long seed;
 	Random rnd;
@@ -160,31 +186,31 @@ public class GameManager implements EventBus{
 	Map<Consumer<?>,EventConsumer<?>>hooks=new LinkedHashMap<>();
 	static Map<String,Class<? extends Role>> rs=new HashMap<>();
 	public static void addRole(Role role) {
-		rs.put(role.getName(),role.getClass());
+		GameManager.rs.put(role.getName(),role.getClass());
 	}
 	static {
 		GameManager dummy=new GameManager(null);
-		addRole(new BaiYY(dummy));
-		addRole(new ChangSQ(dummy));
-		addRole(new DuanXC(dummy));
-		addRole(new FeiCY(dummy));
-		addRole(new GuiHF(dummy));
-		addRole(new GuoHY(dummy));
-		addRole(new HeYZ(dummy));
-		addRole(new JiangTX(dummy));
-		addRole(new JiCR(dummy));
-		addRole(new QiLY(dummy));
-		addRole(new QinMeng(dummy));
-		addRole(new RanH(dummy));
-		addRole(new RanXY(dummy));
-		addRole(new ShenTT(dummy));
-		addRole(new TangHY(dummy));
-		addRole(new TongL(dummy));
-		addRole(new WangXH(dummy));
-		addRole(new YangYQ(dummy));
-		addRole(new YaoFX(dummy));
-		addRole(new YaoFY(dummy));
-		addRole(new ZhuLY(dummy));
+		GameManager.addRole(new BaiYY(dummy));
+		GameManager.addRole(new ChangSQ(dummy));
+		GameManager.addRole(new DuanXC(dummy));
+		GameManager.addRole(new FeiCY(dummy));
+		GameManager.addRole(new GuiHF(dummy));
+		GameManager.addRole(new GuoHY(dummy));
+		GameManager.addRole(new HeYZ(dummy));
+		GameManager.addRole(new JiangTX(dummy));
+		GameManager.addRole(new JiCR(dummy));
+		GameManager.addRole(new QiLY(dummy));
+		GameManager.addRole(new QinMeng(dummy));
+		GameManager.addRole(new RanH(dummy));
+		GameManager.addRole(new RanXY(dummy));
+		GameManager.addRole(new ShenTT(dummy));
+		GameManager.addRole(new TangHY(dummy));
+		GameManager.addRole(new TongL(dummy));
+		GameManager.addRole(new WangXH(dummy));
+		GameManager.addRole(new YangYQ(dummy));
+		GameManager.addRole(new YaoFX(dummy));
+		GameManager.addRole(new YaoFY(dummy));
+		GameManager.addRole(new ZhuLY(dummy));
 	}
 	public List<Role> roles=new ArrayList<>();
 	Role boss;
@@ -192,31 +218,41 @@ public class GameManager implements EventBus{
 	public final static long skillwait=60000;
 	int turns=0;
 	//register event listeners
+	@Override
 	public <T extends Event> void RegisterListener(Role of,Class<T> ev,Consumer<T> listener) {
 		listeners.put(listener,new EventConsumer<>(listener,evt->evt.isTargeting(of)&&ev.isInstance(evt)));
 	}
+	@Override
 	public <T extends Event> void RegisterListener(Class<T> ev,Consumer<T> listener) {
 		listeners.put(listener,new EventConsumer<>(listener,evt->ev.isInstance(evt)));
 	}
+	@Override
 	public void RegisterListener(Role of,Consumer<Event> listener) {
 		listeners.put(listener,new EventConsumer<>(listener,evt->evt.isTargeting(of)));
 	}
+	@Override
 	public void RegisterListener(Consumer<Event> listener) {
 		listeners.put(listener,new EventConsumer<>(listener,evt->true));
 	}
+	@Override
 	public void RemoveListener(Consumer<? extends Event> listener) {
 		listeners.remove(listener);
 	}
+	@Override
 	public void CheckEvents(Consumer<Event> checker) {
-		for(Event f:firing)
+		for(Event f:firing) {
 			checker.accept(f);
+		}
 	}
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends Event> void CheckEvents(Class<T> ev,Consumer<T> checker) {
 		for(Event f:firing)
-			if(ev.isInstance(f))
+			if(ev.isInstance(f)) {
 				checker.accept((T) f);
+			}
 	}
+	@Override
 	public void fireEventLater(Event ev) {
 		fireNext.add(ev);
 	}
@@ -224,6 +260,7 @@ public class GameManager implements EventBus{
 		isBossShowup=true;
 		p.sendAll("境主现身！");
 	}
+	@Override
 	public boolean fireEvent(Event ev) {
 		for(EventConsumer<?> ec:listeners.values()) {
 			ec.accept(ev);
@@ -235,7 +272,7 @@ public class GameManager implements EventBus{
 			return false;
 		firing.add(ev);
 		return true;
-		
+
 	}
 	public void onDayTurn() {
 		firing.removeIf(f->{
@@ -248,8 +285,9 @@ public class GameManager implements EventBus{
 			}
 			if(f.isCanceled())return true;
 			if(f.isRejected()) {
-				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent())
+				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent()) {
 					((SkillEvent) f).getSkill().retainRemain();
+				}
 				return true;
 			}
 			return false;
@@ -268,8 +306,8 @@ public class GameManager implements EventBus{
 				p.getBr().askDaySkill();
 			}
 		}
-		this.sendAll("现在是白天交流回合，时长5分钟");
-		
+		sendAll("现在是白天交流回合，时长5分钟");
+
 		waitForSkill(300000);
 		for(Role p:roles) {
 			if(p.isAlive()) {
@@ -294,31 +332,32 @@ public class GameManager implements EventBus{
 			}
 			if(f.isCanceled())return true;
 			if(f.isRejected()) {
-				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent())
+				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent()) {
 					((SkillEvent) f).getSkill().retainRemain();
+				}
 				return true;
 			}
 			return false;
 		});
-		this.sendAll("现在是杀人技回合");
+		sendAll("现在是杀人技回合");
 		for(Role p:roles) {
 			if(p.isAlive())
 				if(p.askAttackSkill()) {
-					this.waitForSkill(skillwait);
+					waitForSkill(GameManager.skillwait);
 					p.removeListener();
 					p.sendMessage("您的回合已经结束。");
 				}
 		}
 		if(boss.isAlive())
 			if(boss.askAttackSkill()) {
-				this.waitForSkill(skillwait);
+				waitForSkill(GameManager.skillwait);
 				boss.removeListener();
 				boss.sendMessage("您的回合已经结束。");
 			}
 		onSpecialSkillTurn();
 	}
 	public void onSpecialSkillTurn() {
-		
+
 		firing.removeIf(f->{
 			if(f instanceof SystemEvent) {
 				if(((SystemEvent) f).toExecute==GameTurn.SPECIAL) {
@@ -329,32 +368,33 @@ public class GameManager implements EventBus{
 			}
 			if(f.isCanceled())return true;
 			if(f.isRejected()) {
-				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent())
+				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent()) {
 					((SkillEvent) f).getSkill().retainRemain();
+				}
 				return true;
 			}
 			return false;
 		});
-		this.sendAll("现在是特殊技回合");
+		sendAll("现在是特殊技回合");
 		for(Role p:roles) {
 			if(p.isAlive())
-			if(p.askSpecialSkill()) {
-				this.waitForSkill(skillwait);
-				p.removeListener();
-				p.sendMessage("您的回合已经结束。");
-			}
+				if(p.askSpecialSkill()) {
+					waitForSkill(GameManager.skillwait);
+					p.removeListener();
+					p.sendMessage("您的回合已经结束。");
+				}
 		}
 		if(boss.isAlive())
 			if(boss.askSpecialSkill()) {
-				this.waitForSkill(skillwait);
+				waitForSkill(GameManager.skillwait);
 				boss.removeListener();
 				boss.sendMessage("您的回合已经结束。");
 			}
 		onInterruptSkillTurn();
 	}
 	public void onInterruptSkillTurn() {
-		
-		Set<Skill> li=new HashSet<Skill>();
+
+		Set<Skill> li=new HashSet<>();
 		firing.removeIf(f->{
 			if(f instanceof SystemEvent) {
 				if(((SystemEvent) f).toExecute==GameTurn.INTERRUPT) {
@@ -365,8 +405,9 @@ public class GameManager implements EventBus{
 			}
 			if(f.isCanceled())return true;
 			if(f.isRejected()) {
-				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent())
+				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent()) {
 					((SkillEvent) f).getSkill().retainRemain();
+				}
 				return true;
 			}
 			if(f instanceof SkillEvent) {
@@ -374,40 +415,41 @@ public class GameManager implements EventBus{
 			}
 			return false;
 		});
-		this.sendAll("现在是干扰技回合");
+		sendAll("现在是干扰技回合");
 		ArrayList<Skill> toinpt=new ArrayList<>(li);
 		for(Role p:roles) {
 			if(p.isAlive())
-			if(p.askInterruptSkill(toinpt)) {
-				this.waitForSkill(skillwait);
-				p.removeListener();
-				p.sendMessage("您的回合已经结束。");
-			}
+				if(p.askInterruptSkill(toinpt)) {
+					waitForSkill(GameManager.skillwait);
+					p.removeListener();
+					p.sendMessage("您的回合已经结束。");
+				}
 		}
 		if(boss.isAlive())
 			if(boss.askInterruptSkill(toinpt)) {
-				this.waitForSkill(skillwait);
+				waitForSkill(GameManager.skillwait);
 				boss.removeListener();
 				boss.sendMessage("您的回合已经结束。");
 			}
 		onSavedSkillTurn();
 	}
 	public void onSavedSkillTurn() {
-		
+
 		Map<Role,DiedEvent> toDie=new HashMap<>();
-		PriorityQueue<Event> pq=new PriorityQueue<Event>((ev1,ev2)->ev1.getPriority()-ev2.getPriority());
+		PriorityQueue<Event> pq=new PriorityQueue<>((ev1,ev2)->ev1.getPriority()-ev2.getPriority());
 		firing.removeIf(f->{
 			if(f instanceof SystemEvent) {
 				if(((SystemEvent) f).toExecute==GameTurn.SAVE) {
 					f.executeEvent(this);
 					return true;
-				}	
+				}
 				return false;
 			}
 			if(f.isCanceled())return true;
 			if(f.isRejected()) {
-				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent())
+				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent()) {
 					((SkillEvent) f).getSkill().retainRemain();
+				}
 				return true;
 			}
 			if(f instanceof DiedEvent) {
@@ -415,8 +457,8 @@ public class GameManager implements EventBus{
 				return true;
 			}
 			if(!(f instanceof SkillEvent))return false;
-				pq.add(f);
-				return true;
+			pq.add(f);
+			return true;
 		});
 		for(Event f:pq) {
 			f.executeEvent(this);
@@ -428,28 +470,29 @@ public class GameManager implements EventBus{
 					toDie.put(ke.getTarget(),de);
 				}
 				de.populateKill(ke);
-			}	
+			}
 		}
-		this.sendAll("现在是救人技回合");
+		sendAll("现在是救人技回合");
 		for(Role p:roles) {
 			if(p.isAlive())
-			if(p.askSaveSkill(toDie.keySet())) {
-				this.waitForSkill(skillwait);
-				p.removeListener();
-				p.sendMessage("您的回合已经结束。");
-			}
+				if(p.askSaveSkill(toDie.keySet())) {
+					waitForSkill(GameManager.skillwait);
+					p.removeListener();
+					p.sendMessage("您的回合已经结束。");
+				}
 		}
 		if(boss.isAlive())
 			if(boss.askSaveSkill(toDie.keySet())) {
-				this.waitForSkill(skillwait);
+				waitForSkill(GameManager.skillwait);
 				boss.removeListener();
 				boss.sendMessage("您的回合已经结束。");
 			}
 		firing.removeIf(f->{
 			if(f.isCanceled())return true;
 			if(f.isRejected()) {
-				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent())
+				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent()) {
 					((SkillEvent) f).getSkill().retainRemain();
+				}
 				return true;
 			}
 			if(f instanceof RebornEvent&&!((RebornEvent) f).getTarget().isAlive()) {
@@ -466,18 +509,19 @@ public class GameManager implements EventBus{
 			return false;
 		});
 		for(DiedEvent de:toDie.values()) {
-			this.fireEvent(de);
+			fireEvent(de);
 		}
 		List<DeadAnnounceEvent> daes=new LinkedList<>();
 		firing.removeIf(f->{
 			if(f.isCanceled())return true;
 			if(f.isRejected()) {
-				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent())
+				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent()) {
 					((SkillEvent) f).getSkill().retainRemain();
+				}
 				return true;
 			}
 			if(f instanceof DiedEvent) {
-				
+
 				((DiedEvent) f).getTarget().lastkill=((DiedEvent) f).getKillBy();
 				if(((DiedEvent) f).getKillBy().size()==1&&((DiedEvent) f).getKillBy().get(0).getSource()==((DiedEvent) f).getTarget()) {
 				}else {
@@ -491,18 +535,19 @@ public class GameManager implements EventBus{
 			return false;
 		});
 		for(DeadAnnounceEvent dae:daes) {
-			this.fireEvent(dae);
+			fireEvent(dae);
 			dae.getTarget().kill();
 		}
-		
+
 		StringBuilder deadann=new StringBuilder("死亡名单：\n");
 		int numd=daes.size();
 		Map<Role,DeadAnnounceEvent>prep=new HashMap<>();
 		firing.removeIf(f->{
 			if(f.isCanceled())return true;
 			if(f.isRejected()) {
-				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent())
+				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent()) {
 					((SkillEvent) f).getSkill().retainRemain();
+				}
 				return true;
 			}
 			if(f instanceof DeadAnnounceEvent) {
@@ -517,8 +562,9 @@ public class GameManager implements EventBus{
 		firing.removeIf(f->{
 			if(f.isCanceled())return true;
 			if(f.isRejected()) {
-				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent())
+				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent()) {
 					((SkillEvent) f).getSkill().retainRemain();
+				}
 				return true;
 			}
 			if(f instanceof DeadAnnounceEvent) {
@@ -532,8 +578,9 @@ public class GameManager implements EventBus{
 			}
 			return false;
 		});
-		if(numd>0)
-			this.sendAllLong(deadann.toString());
+		if(numd>0) {
+			sendAllLong(deadann.toString());
+		}
 		if(VictoryPending())return;
 		turns++;
 		onDayTurn();
@@ -543,26 +590,28 @@ public class GameManager implements EventBus{
 		int sc=0;
 		int fc=0;
 		for(Role r:roles) {
-			if(r.isAlive())
+			if(r.isAlive()) {
 				switch(r.getFraction()) {
 				case FOG:fc++;break;
 				case SNOW:sc++;break;
 				case MAPLE:mc++;break;
 				}
+			}
 		}
 		int tl=(mc==0?1:0)+(sc==0?1:0)+(fc==0?1:0);
 		if(tl>=2) {
-			if(mc!=0)
+			if(mc!=0) {
 				announceVictory(Fraction.MAPLE);
-			else if(fc!=0)
+			} else if(fc!=0) {
 				announceVictory(Fraction.FOG);
-			else if(sc!=0)
+			} else if(sc!=0) {
 				announceVictory(Fraction.SNOW);
-			else
+			} else {
 				announceVictory(null);
+			}
 			return true;
 		}
-		if((!isBossShowup)&&turns>=8) {
+		if(!isBossShowup&&turns>=8) {
 			if(mc>sc) {
 				if(mc>fc) {
 					announceVictory(Fraction.MAPLE);
@@ -603,8 +652,9 @@ public class GameManager implements EventBus{
 		sb.append("阵营胜利！");
 		for(Role r:roles) {
 			sb.append("\n").append(r.getPlayer()).append(" ").append(r.getName()).append(" 属于").append(r.getFraction().getName()).append("境").append(" ").append(r.isAlive()?"存活":"死亡");
-			if(r.isBoss())
+			if(r.isBoss()) {
 				sb.append(" 是境主");
+			}
 		}
 		sb.append("\n游戏种子：").append(seed);
 		p.sendAllLong(sb.toString());
@@ -617,12 +667,12 @@ public class GameManager implements EventBus{
 				return true;
 			}
 			return false;
-		});			
+		});
 	}
 	public void waitForSkill(long time) {
 		p.waitTime(time);
 	}
-	
+
 	public void skipSkillWait() {
 		p.skipWait();
 	}
@@ -630,8 +680,9 @@ public class GameManager implements EventBus{
 	@Override
 	public <T extends Event> void HookEvents(Role of, Class<T> ev, Consumer<T> listener) {
 		for(Event f:firing)
-			if(ev.isInstance(f)&&f.isTargeting(of))
+			if(ev.isInstance(f)&&f.isTargeting(of)) {
 				listener.accept((T) f);
+			}
 		hooks.put(listener,new EventConsumer<>(listener,evt->evt.isTargeting(of)&&ev.isInstance(evt)));
 	}
 
@@ -639,23 +690,26 @@ public class GameManager implements EventBus{
 	@Override
 	public <T extends Event> void HookEvents(Class<T> ev, Consumer<T> listener) {
 		for(Event f:firing)
-			if(ev.isInstance(f))
+			if(ev.isInstance(f)) {
 				listener.accept((T) f);
+			}
 		hooks.put(listener,new EventConsumer<>(listener,evt->ev.isInstance(evt)));
 	}
 
 	@Override
 	public void HookEvents(Role of, Consumer<Event> listener) {
 		for(Event f:firing)
-			if(f.isTargeting(of))
+			if(f.isTargeting(of)) {
 				listener.accept(f);
+			}
 		hooks.put(listener,new EventConsumer<>(listener,evt->evt.isTargeting(of)));
 	}
 
 	@Override
 	public void HookEvents(Consumer<Event> listener) {
-		for(Event f:firing)
+		for(Event f:firing) {
 			listener.accept(f);
+		}
 		hooks.put(listener,new EventConsumer<>(listener,evt->true));
 	}
 
@@ -673,6 +727,6 @@ public class GameManager implements EventBus{
 		}catch(Exception e) {
 			throw new RoleNotExistException(role);
 		}
-		
+
 	}
 }

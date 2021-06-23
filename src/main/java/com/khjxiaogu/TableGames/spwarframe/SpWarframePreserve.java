@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.spwarframe;
 
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.utils.PreserveInfo;
 
-import net.mamoe.mirai.contact.Group;
 
 public class SpWarframePreserve extends PreserveInfo<SpWarframe> {
 
-	public SpWarframePreserve(Group g) {
+	public SpWarframePreserve(AbstractRoom g) {
 		super(g);
 	}
 

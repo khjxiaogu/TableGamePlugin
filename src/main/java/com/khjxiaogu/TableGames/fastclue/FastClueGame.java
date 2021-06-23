@@ -8,15 +8,17 @@ import java.util.Random;
 
 import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.fastclue.Card.CardType;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.utils.GameUtils;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.utils.WaitThread;
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.At;
 
 public class FastClueGame extends Game {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 369644854817118583L;
 	Random rnd=new Random();
 	List<Card> weapons=new ArrayList<>();//凶器卡
 	List<CluePlayer> players=new ArrayList<>();//玩家
@@ -34,7 +36,7 @@ public class FastClueGame extends Game {
 	int cpp;//每个玩家分到卡片数量
 	int tcp;//总玩家数
 	int botnum=0;//机器人ID
-	public FastClueGame(Group group, int cplayer) {
+	public FastClueGame(AbstractRoom group, int cplayer) {
 		super(group, cplayer,4);
 		tcp=cplayer;
 		putCards(cplayer);
@@ -45,8 +47,9 @@ public class FastClueGame extends Game {
 		int is=0;
 		for(String room:roomnames) {
 			Room e=new Room(room,is++);
-			if(last!=null)
+			if(last!=null) {
 				last.next=e;
+			}
 			last=e;
 			rooms.add(e);
 			roomcard.add(e.present);
@@ -55,8 +58,8 @@ public class FastClueGame extends Game {
 		Collections.shuffle(roomcard);
 		Rroom=roomcard.remove(0);
 		allcard.addAll(roomcard);
-		
-		
+
+
 		List<Card> rolecard=new ArrayList<>();
 		for(int i=0;i<cplayer;i++) {
 			RoleCard rc=new RoleCard(this,i);
@@ -66,7 +69,7 @@ public class FastClueGame extends Game {
 		Collections.shuffle(rolecard);
 		Rrole=rolecard.remove(0);
 		allcard.addAll(rolecard);
-		
+
 		is=0;
 		List<Card> weaponcard=new ArrayList<>();
 		for(String weapon:weaponnames) {
@@ -80,29 +83,30 @@ public class FastClueGame extends Game {
 		cpp=allcard.size()/cplayer;
 		Collections.shuffle(allcard);
 	}
-	public FastClueGame(Group g,int cplayer,Map<String,String> sets) {
+	public FastClueGame(AbstractRoom g,int cplayer,Map<String,String> sets) {
 		super(g,cplayer,4);
-		
-		if(sets.containsKey("机器人"))
+
+		if(sets.containsKey("机器人")) {
 			cplayer+=Integer.parseInt(sets.get("机器人"));
-		else if(sets.containsKey("人数")) {
+		} else if(sets.containsKey("人数")) {
 			int tplayer=Integer.parseInt(sets.get("人数"));
 			int botnm=tplayer-cplayer;
 			cplayer=tplayer;
-			while(--botnm>=0)
+			while(--botnm>=0) {
 				addBot();
+			}
 		}
 		tcp=cplayer;
 		putCards(cplayer);
 	}
 	@Override
-	public boolean addMember(Member mem) {
-		if(this.getPlayerById(mem.getId())!=null) {
-			this.sendPublicMessage(new At(mem).plus("你已经报名了！"));
+	public boolean addMember(AbstractPlayer mem) {
+		if(getPlayerById(mem.getId())!=null) {
+			mem.sendPublic("你已经报名了！");
 			return false;
 		}
 		if(!GameUtils.tryAddMember(mem.getId())) {
-			this.sendPublicMessage(new At(mem).plus("你已参加其他游戏！"));
+			mem.sendPublic("你已参加其他游戏！");
 			return true;
 		}
 		if(tcp!=players.size()) {
@@ -111,7 +115,7 @@ public class FastClueGame extends Game {
 					int min=players.size();
 					CluePlayer cp=new CluePlayer(this,mem);
 					players.add(cp);
-					
+
 					cp.sendPrivate("已经报名");
 					String nc=cp.getNameCard();
 					if(nc.indexOf('|')!=-1) {
@@ -162,7 +166,7 @@ public class FastClueGame extends Game {
 				int min=players.size();
 				CluePlayer cp=new CluePlayer(this,++botnum);
 				players.add(cp);
-				
+
 				cp.sendPrivate("已经报名");
 				String nc=cp.getNameCard();
 				if(nc.indexOf('|')!=-1) {
@@ -196,7 +200,7 @@ public class FastClueGame extends Game {
 					int min=players.size();
 					CluePlayer cp=new CluePlayer(this,++botnum);
 					players.add(cp);
-					
+
 					cp.sendPrivate("已经报名");
 					String nc=cp.getNameCard();
 					if(nc.indexOf('|')!=-1) {
@@ -282,14 +286,14 @@ public class FastClueGame extends Game {
 			}
 		}
 		result.append("\n正确答案：").append(Rrole.getName()).append(" 在 ").append(Rroom.getName()).append(" 使用 ").append(Rweapon.getName()).append(" 杀人。");
-		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.getGroup()));
+		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),getGroup()));
 		doFinalize();
 	}
 	@Override
 	protected void doFinalize() {
 		alive=false;
 		for(CluePlayer p:players) {
-			ListenerUtils.releaseListener(p.getId());
+			p.releaseListener();
 			GameUtils.RemoveMember(p.getId());
 			String nc=p.getNameCard();
 			if(nc.indexOf('|')!=-1) {
@@ -315,7 +319,7 @@ public class FastClueGame extends Game {
 			}
 		}
 		result.append("\n正确答案：").append(Rrole.getName()).append(" 在 ").append(Rroom.getName()).append(" 使用 ").append(Rweapon.getName()).append(" 杀人。");
-		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.getGroup()));
+		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),getGroup()));
 		doFinalize();
 	}
 

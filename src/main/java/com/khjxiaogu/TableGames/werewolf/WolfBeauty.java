@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class WolfBeauty extends Werewolf {
 	/**
@@ -30,9 +30,7 @@ public class WolfBeauty extends Werewolf {
 
 	int pid=-1;
 
-	public WolfBeauty(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	@Override
 	public String getJobDescription() {
@@ -41,11 +39,11 @@ public class WolfBeauty extends Werewolf {
 
 	@Override
 	public void onTurn() {
-		this.pid=-1;
+		pid=-1;
 		super.StartTurn();
 		sendPrivate(game.getAliveList());
 		super.sendPrivate("狼美人，你可以魅惑一个好人。\n格式：“魅惑 qq号或者游戏号码”\n如：“魅惑 1”\n如果放弃魅惑，则无需发送任何内容，等待时间结束即可。");
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -67,9 +65,9 @@ public class WolfBeauty extends Werewolf {
 					}
 					game.logger.logSkill(this, p, "狼美人魅惑");
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+					super.releaseListener();
 					if (!(p instanceof Tramp)) {
-						this.pid = game.getIdByPlayer(p);
+						pid = game.getIdByPlayer(p);
 					}
 					super.sendPrivate(p.getMemberString() + "获得了魅惑！");
 				} catch (Throwable t) {
@@ -87,7 +85,7 @@ public class WolfBeauty extends Werewolf {
 			Villager p=game.getPlayerById(pid);
 			if(p==null||p.isDead)return;
 			game.logger.logSkill(p, this, "殉情");
-			super.sendPublic(p.getAt().plus("殉情了。"));
+			p.sendPublic("殉情了。");
 			game.kill(p,DiedReason.Love);
 			game.logger.logDeath(p, DiedReason.Love);
 		}
@@ -111,7 +109,7 @@ public class WolfBeauty extends Werewolf {
 			Villager p=game.getPlayerById(pid);
 			if(p==null||p.isDead)return;
 			game.logger.logSkill(p, this, "殉情");
-			super.sendPublic(p.getAt().plus("殉情了。"));
+			p.sendPublic("殉情了。");
 			game.kill(p,DiedReason.Love);
 			game.logger.logDeath(p, DiedReason.Love);
 		}

@@ -1,11 +1,11 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class HiddenWolf extends Villager {
 
@@ -28,9 +28,7 @@ public class HiddenWolf extends Villager {
 		super(game, p);
 	}
 
-	public HiddenWolf(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	@Override
 	public String getJobDescription() {
@@ -58,9 +56,8 @@ public class HiddenWolf extends Villager {
 				return false;
 		}
 		for (Villager inno : game.playerlist) {
-			if (inno == this) {
+			if (inno == this)
 				return true;
-			}
 			if (inno.getFraction() == Fraction.Wolf && !inno.isDead)
 				return false;
 		}
@@ -83,7 +80,7 @@ public class HiddenWolf extends Villager {
 		sendPrivate(game.getAliveList());
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -100,7 +97,7 @@ public class HiddenWolf extends Villager {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+					super.releaseListener();
 					game.WolfVote(this, p);
 					game.logger.logSkill(this, p, "狼人投票");
 					super.sendPrivate("已投票给 " + p.getMemberString());
@@ -109,7 +106,7 @@ public class HiddenWolf extends Villager {
 				}
 			} else if (content.startsWith("放弃")) {
 				EndTurn();
-				ListenerUtils.releaseListener(super.getId());
+				super.releaseListener();
 				game.NoVote(this);
 				super.sendPrivate("已放弃");
 			}

@@ -2,6 +2,11 @@ package com.khjxiaogu.TableGames.werewolf;
 
 public class BearBot extends GenericBot {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 528608808684822537L;
+
 	public BearBot(int botId, WerewolfGame gam) {
 		super(botId, gam);
 	}

@@ -63,16 +63,16 @@ public class PlayerDatabase {
 			return setData(qq,gs.toJson(datacls));
 		}
 	}
-	static final String createPoM = "CREATE TABLE IF NOT EXISTS profile (" + 
+	static final String createPoM = "CREATE TABLE IF NOT EXISTS profile (" +
 			"qq   TEXT       NOT NULL, " + // 用户ID
-	        "game TEXT       NOT NULL, " + // 游戏名称
-	        "data TEXT       NOT NULL DEFAULT '{}', " + // 游戏数据json
-	        "PRIMARY KEY (qq,game) ON CONFLICT FAIL" + ");";// 创建请求记录表
+			"game TEXT       NOT NULL, " + // 游戏名称
+			"data TEXT       NOT NULL DEFAULT '{}', " + // 游戏数据json
+			"PRIMARY KEY (qq,game) ON CONFLICT FAIL" + ");";// 创建请求记录表
 	Connection database;
 	public static Map<String,Class<? extends GenericPlayerData<?>>> datacls=new HashMap<>();
 	static {
-		datacls.put("狼人杀",WerewolfPlayerData.class);
-		datacls.put("谁是卧底",UnderCoverPlayerData.class);
+		PlayerDatabase.datacls.put("狼人杀",WerewolfPlayerData.class);
+		PlayerDatabase.datacls.put("谁是卧底",UnderCoverPlayerData.class);
 	}
 	public PlayerDatabase(File datapath) {
 		try {
@@ -84,7 +84,7 @@ public class PlayerDatabase {
 		TableGames.plugin.getLogger().info("正在链接SQLITE信息数据库...");
 		try {
 			database = DriverManager.getConnection("jdbc:sqlite:" + new File(datapath, "profile.db"));
-			database.createStatement().execute(createPoM);
+			database.createStatement().execute(PlayerDatabase.createPoM);
 		} catch (Exception e) {
 			TableGames.plugin.getLogger().error(e);
 			TableGames.plugin.getLogger().error("信息数据库初始化失败！");
@@ -96,7 +96,7 @@ public class PlayerDatabase {
 			ps.setString(2,game);
 			try(ResultSet rs=ps.executeQuery()){
 				if(rs.next())
-					return JsonParser.parseString(rs.getString(1)).getAsJsonObject();	
+					return JsonParser.parseString(rs.getString(1)).getAsJsonObject();
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -120,11 +120,11 @@ public class PlayerDatabase {
 		return false;
 	}
 	public GenericPlayerData<?> getPlayer(long qq,String game) {
-		return gs.fromJson(this.getData(qq, game),datacls.get(game));
+		return gs.fromJson(getData(qq, game),PlayerDatabase.datacls.get(game));
 	}
 	public GenericPlayerData<?>[] getPlayers(String game) {
 		List<GenericPlayerData<?>> ll=new LinkedList<>();
-		Class<? extends GenericPlayerData<?>> dcls=datacls.get(game);
+		Class<? extends GenericPlayerData<?>> dcls=PlayerDatabase.datacls.get(game);
 		try(PreparedStatement ps=database.prepareStatement("SELECT data FROM profile WHERE game = ?")){
 			ps.setString(1,game);
 			try(ResultSet rs=ps.executeQuery()){

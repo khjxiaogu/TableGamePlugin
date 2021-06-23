@@ -1,14 +1,12 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.message.Text;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
-
-import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.PlainText;
 
 public class DarkWolf extends Werewolf {
 
@@ -26,10 +24,6 @@ public class DarkWolf extends Werewolf {
 		super(game, p);
 	}
 
-	public DarkWolf(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
-
 	@Override
 	public String getRole() {
 		return "狼王";
@@ -45,9 +39,9 @@ public class DarkWolf extends Werewolf {
 		sendPrivate(game.getAliveList());
 		super.sendPrivate("狼王，你死了，你可以选择打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
 		asked = true;
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if ((dir == DiedReason.Vote || game.isFirstNight) && type == MsgType.AT) {
-				ListenerUtils.releaseListener(super.getId());
+				super.releaseListener();
 				game.skipWait(WaitReason.DieWord);
 			}
 			if (type != MsgType.PRIVATE)
@@ -70,11 +64,11 @@ public class DarkWolf extends Werewolf {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+					super.releaseListener();
 					if (dir == DiedReason.Vote || dir == DiedReason.Explode) {
-						ListenerUtils.registerListener(super.getId(), (msgx, typex) -> {
+						super.registerListener((msgx, typex) -> {
 							if (typex == MsgType.AT) {
-								ListenerUtils.releaseListener(super.getId());
+								super.releaseListener();
 								game.skipWait(WaitReason.DieWord);
 							}
 						});
@@ -82,7 +76,7 @@ public class DarkWolf extends Werewolf {
 					hasGun = false;
 					super.sendPrivate("你杀死了" + p.getMemberString());
 					game.logger.logSkill(this, p, "狼王杀死");
-					super.sendPublic(new PlainText("死亡，同时带走了").plus(p.getAt()));
+					super.sendPublic(new Text("死亡，同时带走了").asMessage().append(p.getAt()));
 					p.isDead = true;
 					game.kill(p, DiedReason.DarkWolf);
 				} catch (Throwable t) {
@@ -93,6 +87,7 @@ public class DarkWolf extends Werewolf {
 			}
 		});
 	}
+	@Override
 	public boolean shouldWaitDeathSkill() {
 		return true;
 	}

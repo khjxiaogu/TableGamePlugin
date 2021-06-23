@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class Knight extends Villager {
 	/**
@@ -75,9 +75,9 @@ public class Knight extends Villager {
 						nk.isSkillUsed = true;
 						game.sendPublicMessage(p.getMemberString() + "是恶灵骑士，同归于尽，进入黑夜。");
 						game.getScheduler().execute(()->{
-						p.onDied(DiedReason.Knight);
-						game.kill(this, DiedReason.Reflect);
-						game.skipDay();
+							p.onDied(DiedReason.Knight);
+							game.kill(this, DiedReason.Reflect);
+							game.skipDay();
 						});
 						return;
 					}
@@ -86,8 +86,8 @@ public class Knight extends Villager {
 					game.logger.logDeath(p, DiedReason.Knight);
 					game.sendPublicMessage(p.getMemberString() + "是狼人，被骑士杀死，进入黑夜。");
 					game.getScheduler().execute(()->{
-					p.onDied(DiedReason.Knight);
-					game.skipDay();
+						p.onDied(DiedReason.Knight);
+						game.skipDay();
 					});
 				} else {
 					isDead = true;
@@ -113,7 +113,7 @@ public class Knight extends Villager {
 	@Override
 	public void addDaySkillListener() {
 		if (hasSkill) {
-			ListenerUtils.registerListener(getId(), (msgx, typex) -> {
+			super.registerListener( (msgx, typex) -> {
 				if (typex == MsgType.PRIVATE) {
 					String content = Utils.getPlainText(msgx);
 					doDaySkillPending(content);
@@ -122,8 +122,6 @@ public class Knight extends Villager {
 		}
 	}
 
-	public Knight(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 }

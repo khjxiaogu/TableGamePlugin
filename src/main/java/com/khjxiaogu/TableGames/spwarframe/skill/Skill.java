@@ -2,8 +2,8 @@ package com.khjxiaogu.TableGames.spwarframe.skill;
 
 import java.util.List;
 
-import com.google.gson.JsonArray;
 import com.khjxiaogu.TableGames.spwarframe.GameManager;
+import com.khjxiaogu.TableGames.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.CantSaveException;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.CantSelfException;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.InvalidInterruptedTargetException;
@@ -12,7 +12,6 @@ import com.khjxiaogu.TableGames.spwarframe.Exceptions.InvalidSkillTargetExceptio
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.RoleDiedException;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.RoleNotExistException;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.SkillException;
-import com.khjxiaogu.TableGames.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.spwarframe.events.Event;
 import com.khjxiaogu.TableGames.spwarframe.role.Role;
 
@@ -35,7 +34,7 @@ public abstract class Skill {
 	 * @return true, if skill is not to be removed<br>
 	 *         如果技能无需被移除，返回true。
 	 */
-	public boolean onTurnStart() { return true; };
+	public boolean onTurnStart() { return true; }
 
 	public Skill(GameManager game, Role owner) {
 		this.owner = owner;
@@ -56,16 +55,17 @@ public abstract class Skill {
 	 *         如果技能无需被移除，返回true。
 	 */
 	public boolean onBeforeTurnEnd() {
-		if (locked > 0)
+		if (locked > 0) {
 			locked--;
+		}
 		return true;
-	};
+	}
 
 	public boolean onSkillCall(List<String> params) {
 		if (available()) {
 			try {
-				if(this.onSkillUse(params)) {
-					this.reduceRemain();
+				if(onSkillUse(params)) {
+					reduceRemain();
 				}else{
 					owner.sendMessage("技能发动失败！");
 					return false;
@@ -105,15 +105,16 @@ public abstract class Skill {
 	 * @return true, if skill is not to be removed<br>
 	 *         如果技能无需被移除，返回true。
 	 */
-	public boolean onTurnEnd() { return true; };
+	public boolean onTurnEnd() { return true; }
 
 	/**
 	 * Calls on effect pending.<br>
 	 * 技能生效判定时调用
 	 */
 	public void reduceRemain() {
-		if (remain > 0)
+		if (remain > 0) {
 			remain--;
+		}
 	}
 
 	/**
@@ -124,7 +125,7 @@ public abstract class Skill {
 	 *         如果可用，返回true。
 	 */
 	public boolean available() { return locked == 0 && remain > 0; }
-	
+
 	public boolean isUsableOn(GameTurn turn) {
 		return turn.isAvailableFor(getType());
 	}
@@ -192,7 +193,7 @@ public abstract class Skill {
 	 *               设置剩余次数为的值
 	 */
 	public void setRemain(int remain) { this.remain = remain; }
-	public void retainRemain() { this.remain++; }
+	public void retainRemain() { remain++; }
 	public String[] getSpecialParamType() {
 		return null;
 	}
@@ -207,6 +208,6 @@ public abstract class Skill {
 	}
 	public void ensureInterruptType(SkillType st) throws SkillException {
 		if(st==getType())return;
-		throw new InvalidInterruptedTargetException(this.getName());
+		throw new InvalidInterruptedTargetException(getName());
 	}
 }

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SeerBot extends GenericBot {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2331883521284417873L;
 	List<Villager> checked = new ArrayList<>();
 	Villager tocheck;
 	boolean toexpose = false;

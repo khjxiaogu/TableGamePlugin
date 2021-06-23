@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.werewolf;
 
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.utils.PreserveInfo;
 
-import net.mamoe.mirai.contact.Group;
 
 public class WerewolfPreserve extends PreserveInfo<WerewolfGame> {
 
-	public WerewolfPreserve(Group g) {
+	public WerewolfPreserve(AbstractRoom g) {
 		super(g);
 	}
 

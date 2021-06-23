@@ -1,12 +1,10 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
-
-import net.mamoe.mirai.contact.Member;
 
 public class Witch extends Villager {
 	/**
@@ -20,10 +18,6 @@ public class Witch extends Villager {
 
 	boolean hasPoison = true;
 	boolean hasHeal = true;
-
-	public Witch(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
 
 	@Override
 	public String getJobDescription() {
@@ -57,7 +51,7 @@ public class Witch extends Villager {
 		sb.append("你可以使用其中一瓶\n如：“救 1”，\n");
 		sb.append("你有一分钟的考虑时间。\n如果不需要使用药，无需发送任何内容，等待时间结束即可。");
 		super.sendPrivate(sb.toString());
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -74,7 +68,7 @@ public class Witch extends Villager {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+					super.releaseListener();
 					if (p instanceof NightmareKnight) {
 						NightmareKnight nk = (NightmareKnight) p;
 						if (!nk.isSkillUsed) {
@@ -111,7 +105,7 @@ public class Witch extends Villager {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+					super.releaseListener();
 					p.isSavedByWitch = true;
 					hasHeal = false;
 					increaseSkilledAccuracy(-p.onSkilledAccuracy());

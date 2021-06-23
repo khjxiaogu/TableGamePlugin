@@ -1,8 +1,8 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class Elder extends Villager {
 	/**
@@ -30,11 +30,6 @@ public class Elder extends Villager {
 	}
 
 	boolean lifeUsed = false;
-
-	public Elder(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
-
 	@Override
 	public Fraction getFraction() {
 		return Fraction.Innocent;

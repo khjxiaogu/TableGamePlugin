@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.fastclue;
 
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.utils.PreserveInfo;
 
-import net.mamoe.mirai.contact.Group;
 
 public class FastCluePreserve extends PreserveInfo<FastClueGame> {
 
-	public FastCluePreserve(Group g) {
+	public FastCluePreserve(AbstractRoom g) {
 		super(g);
 	}
 

@@ -1,8 +1,6 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-
-import net.mamoe.mirai.contact.Member;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 
 public class Bear extends Villager {
 
@@ -23,10 +21,6 @@ public class Bear extends Villager {
 
 	public Bear(WerewolfGame game, AbstractPlayer p) {
 		super(game, p);
-	}
-
-	public Bear(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
 	}
 
 	@Override

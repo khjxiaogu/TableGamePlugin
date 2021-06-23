@@ -1,9 +1,11 @@
 package com.khjxiaogu.TableGames;
 
 import java.io.Serializable;
-
-import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.Message;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.message.IMessage;
+import com.khjxiaogu.TableGames.platform.message.Message;
+import com.khjxiaogu.TableGames.platform.mirai.MiraiListenerUtils;
+import com.khjxiaogu.TableGames.utils.MessageListener;
 
 public class Player implements Serializable{
 	/**
@@ -11,11 +13,8 @@ public class Player implements Serializable{
 	 */
 	private static final long serialVersionUID = 8489601792669124710L;
 	protected AbstractPlayer member;
-	public Player(Member member) {
-		this.member = new HumanPlayer(member);
-	}
 	public Player(AbstractPlayer p) {
-		this.member = p;
+		member = p;
 	}
 	public void sendPrivate(String str) {
 		member.sendPrivate(str);
@@ -26,7 +25,7 @@ public class Player implements Serializable{
 	public void sendPublic(Message msg) {
 		member.sendPublic(msg);
 	}
-	public Message getAt() {
+	public IMessage getAt() {
 		return member.getAt();
 	}
 	public String getMemberString() {
@@ -34,6 +33,12 @@ public class Player implements Serializable{
 	}
 	public void setNameCard(String s) {
 		member.setNameCard(s);
+	}
+	public void registerListener(MessageListener msgc) {
+		member.registerListener(msgc);
+	}
+	public void releaseListener() {
+		member.releaseListener();
 	}
 	public String getNameCard() {
 		return member.getNameCard();

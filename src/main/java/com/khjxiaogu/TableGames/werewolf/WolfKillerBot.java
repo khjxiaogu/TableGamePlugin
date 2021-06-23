@@ -5,6 +5,11 @@ import java.util.List;
 
 public class WolfKillerBot extends GenericBot {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6435365143630077164L;
+
 	public WolfKillerBot(int botId, WerewolfGame gam) {
 		super(botId, gam);
 	}

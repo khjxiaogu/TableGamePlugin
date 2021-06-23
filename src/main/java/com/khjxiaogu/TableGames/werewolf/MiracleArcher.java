@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class MiracleArcher extends Villager {
 	/**
@@ -15,9 +15,7 @@ public class MiracleArcher extends Villager {
 	private static final long serialVersionUID = 1L;
 	private int lastkillId;
 
-	public MiracleArcher(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	public MiracleArcher(WerewolfGame game, AbstractPlayer p) {
 		super(game, p);
@@ -44,7 +42,7 @@ public class MiracleArcher extends Villager {
 				"奇迹弓手，你可以射一个人，格式：“射 qq号或者游戏号码”；你可以保护一个人，格式：“保护 qq号或者游戏号码”，如果不需要使用技能，无需发送任何内容，等待时间结束即可。\n");
 		sb.append("你有一分钟的考虑时间。\n");
 		super.sendPrivate(sb.toString());
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -61,7 +59,7 @@ public class MiracleArcher extends Villager {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+					super.releaseListener();
 					if (p instanceof NightmareKnight) {
 						NightmareKnight nk = (NightmareKnight) p;
 						if (!nk.isSkillUsed) {
@@ -81,7 +79,7 @@ public class MiracleArcher extends Villager {
 						game.kill(this, DiedReason.Shoot_s);
 					}
 
-					ListenerUtils.releaseListener(getId());
+					super.releaseListener();
 					super.EndTurn();
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“射 qq号或者游戏号码”！");

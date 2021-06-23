@@ -1,13 +1,15 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
-import com.khjxiaogu.TableGames.BotPlayer;
+import com.khjxiaogu.TableGames.platform.mirai.MiraiBotPlayer;
 
-public class DeadBot extends BotPlayer {
+public class DeadBot extends MiraiBotPlayer {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5613603875937581111L;
 	WerewolfGame game;
 	static Random rnx = new SecureRandom();
 	public static final String talkKey = "五分钟时间进行陈述";
@@ -37,7 +39,7 @@ public class DeadBot extends BotPlayer {
 	@Override
 	public void sendAtAsBot(String msg) {
 		game.getScheduler().executeLater(() -> {
-			super.sendAtAsBot("@" + game.getGroup().getBotAsMember().getNameCard() + msg);
+			super.sendAtAsBot("@" + game.getGroup().getHostNameCard() + msg);
 		}, 6000);
 	}
 

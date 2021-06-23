@@ -5,6 +5,11 @@ import java.util.List;
 
 public class DarkWolfBot extends WereWolfBot {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1186211298249593774L;
+
 	@Override
 	public void onPrivate(String msg) {
 		if (msg.contains("你可以选择打死另一个人")) {

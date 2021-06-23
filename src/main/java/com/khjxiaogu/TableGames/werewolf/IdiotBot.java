@@ -2,6 +2,11 @@ package com.khjxiaogu.TableGames.werewolf;
 
 public class IdiotBot extends GenericBot {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8568641646529938940L;
+
 	public IdiotBot(int botId, WerewolfGame gam) {
 		super(botId, gam);
 	}

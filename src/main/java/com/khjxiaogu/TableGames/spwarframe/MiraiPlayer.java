@@ -4,18 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.HumanPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 
-import net.mamoe.mirai.contact.Member;
-
 public class MiraiPlayer implements Player {
 	AbstractPlayer intern;
-	public MiraiPlayer(Member mem) {
-		intern=new HumanPlayer(mem);
+	public MiraiPlayer(AbstractPlayer mem) {
+		intern=mem;
 	}
 	@Override
 	public String getName() {
@@ -27,7 +23,7 @@ public class MiraiPlayer implements Player {
 	}
 	@Override
 	public void listenMessage(Consumer<List<String>> msgc) {
-		ListenerUtils.registerListener(intern.getId(),(msg,msgtype)->{
+		intern.registerListener((msg,msgtype)->{
 			if(msgtype==MsgType.PRIVATE) {
 				msgc.accept(Arrays.asList(Utils.getPlainText(msg).split(" ")));
 			}
@@ -35,7 +31,7 @@ public class MiraiPlayer implements Player {
 	}
 	@Override
 	public void removeListener() {
-		ListenerUtils.releaseListener(intern.getId());
+		intern.releaseListener();
 	}
 	@Override
 	public void makeSpeak() {

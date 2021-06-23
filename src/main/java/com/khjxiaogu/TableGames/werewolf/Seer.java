@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class Seer extends Villager {
 
@@ -19,9 +19,7 @@ public class Seer extends Villager {
 		super(game, p);
 	}
 
-	public Seer(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	@Override
 	public String getJobDescription() {
@@ -33,7 +31,7 @@ public class Seer extends Villager {
 		super.StartTurn();
 		sendPrivate(game.getAliveList());
 		super.sendPrivate("预言家，你可以查验一个人，请私聊选择查验的人，你有一分钟的考虑时间\n格式：“查验 qq号或者游戏号码”\n如：“查验 1”");
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -50,7 +48,7 @@ public class Seer extends Villager {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+					super.releaseListener();
 					game.logger.logSkill(this, p, "查验");
 					super.sendPrivate(p.getMemberString() + "是" + p.getPredictorRole());
 					if (p instanceof NightmareKnight) {

@@ -12,10 +12,10 @@ import com.khjxiaogu.TableGames.TableGames;
 
 public class PlayerCreditData {
 
-	String createPoM = "CREATE TABLE IF NOT EXISTS profile (" + 
+	String createPoM = "CREATE TABLE IF NOT EXISTS profile (" +
 			"qq   TEXT PRIMARY KEY ON CONFLICT FAIL, " + // 用户ID
-	        "data TEXT       NOT NULL DEFAULT '{}' " + // 游戏数据json
-	        ");";// 创建请求记录表
+			"data TEXT       NOT NULL DEFAULT '{}' " + // 游戏数据json
+			");";// 创建请求记录表
 	Connection database;
 	public ConcurrentHashMap<Long,PlayerCredit> creditCache=new ConcurrentHashMap<>();
 	public PlayerCreditData(File datapath) {
@@ -41,7 +41,7 @@ public class PlayerCreditData {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 				creditCache.entrySet().removeIf(ac->{
 					ac.getValue().unusedsince++;
 					if(!ac.getValue().hasChange()) {

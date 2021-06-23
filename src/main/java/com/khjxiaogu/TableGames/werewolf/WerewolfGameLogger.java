@@ -2,10 +2,12 @@ package com.khjxiaogu.TableGames.werewolf;
 
 import java.io.Serializable;
 
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.utils.ImagePrintStream;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
-import net.mamoe.mirai.contact.Contact;
 
 public class WerewolfGameLogger implements Serializable{
 	/**
@@ -45,7 +47,10 @@ public class WerewolfGameLogger implements Serializable{
 		gamelog.append("========第").append(day).append("天").append(name).append("========").println();
 	}
 
-	public void sendLog(Contact ct) {
-		ct.sendMessage(ct.uploadImage(gamelog.asImage()));
+	public void sendLog(AbstractPlayer ct) {
+		ct.sendPrivate(new Image(gamelog.asImage()));
+	}
+	public void sendLog(AbstractRoom ar) {
+		ar.sendMessage(new Image(gamelog.asImage()));
 	}
 }

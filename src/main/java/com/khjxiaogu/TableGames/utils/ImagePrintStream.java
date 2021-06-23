@@ -32,142 +32,145 @@ public class ImagePrintStream implements Appendable,Serializable{
 		sbs.peekLast().append(b);
 	}
 
-	
+
 	public void print(char c) {
 		sbs.peekLast().append(c);
 	}
 
-	
+
 	public void print(int i) {
 		sbs.peekLast().append(i);
 	}
 
-	
+
 	public void print(long l) {
 		sbs.peekLast().append(l);
 	}
 
-	
+
 	public void print(float f) {
 		sbs.peekLast().append(f);
 	}
 
-	
+
 	public void print(double d) {
 		sbs.peekLast().append(d);
 	}
 
-	
+
 	public void print(char[] s) {
 		sbs.peekLast().append(s);
 	}
 
-	
+
 	public void print(String s) {
 		sbs.peekLast().append(s);
 	}
 
-	
+
 	public void print(Object obj) {
 		sbs.peekLast().append(obj);
 	}
 
-	
+
 	public void println() {
 		newLine();
 	}
 
-	
+
 	public void println(boolean x) {
 		sbs.peekLast().append(x);
 		newLine();
 	}
 
-	
+
 	public void println(char x) {
 		sbs.peekLast().append(x);
 		newLine();
 	}
 
-	
+
 	public void println(int x) {
 		sbs.peekLast().append(x);
 		newLine();
 	}
 
-	
+
 	public void println(long x) {
 		sbs.peekLast().append(x);
 		newLine();
 	}
 
-	
+
 	public void println(float x) {
 		sbs.peekLast().append(x);
 		newLine();
 	}
 
-	
+
 	public void println(double x) {
 		sbs.peekLast().append(x);
 		newLine();
 	}
 
-	
+
 	public void println(char[] x) {
 		sbs.peekLast().append(x);
 		newLine();
 	}
 
-	
+
 	public void println(String x) {
 		sbs.peekLast().append(x);
 		newLine();
 	}
 
-	
+
 	public void println(Object x) {
 		sbs.peekLast().append(x);
 		newLine();
 	}
 
-	
+
 	public ImagePrintStream printf(String format, Object... args) {
 		sbs.peekLast().append(String.format(format, args));
 		return this;
 	}
 
-	
+
 	public ImagePrintStream printf(Locale l, String format, Object... args) {
 		sbs.peekLast().append(String.format(l, format, args));
 		return this;
 	}
 
-	
+
 	public ImagePrintStream format(String format, Object... args) {
 		sbs.peekLast().append(String.format(format, args));
 		return this;
 	}
 
-	
+
 	public ImagePrintStream format(Locale l, String format, Object... args) {
 		sbs.peekLast().append(String.format(l, format, args));
 		return this;
 	}
 
-	
+
+	@Override
 	public ImagePrintStream append(CharSequence csq) {
 		sbs.peekLast().append(csq);
 		return this;
 	}
 
-	
+
+	@Override
 	public ImagePrintStream append(CharSequence csq, int start, int end) {
 		sbs.peekLast().append(csq, start, end);
 		return this;
 	}
 
-	
+
+	@Override
 	public ImagePrintStream append(char c) {
 		sbs.peekLast().append(c);
 		return this;
@@ -188,7 +191,7 @@ public class ImagePrintStream implements Appendable,Serializable{
 			lines[i++]=l.toString();
 		}
 		int height = fm.getHeight() * lines.length;
-		
+
 		for (String line : lines) {
 			Rectangle2D r2d = fm.getStringBounds(line, g2d);
 			width = Math.max(width, (int) (r2d.getWidth() - r2d.getX()));
@@ -211,7 +214,7 @@ public class ImagePrintStream implements Appendable,Serializable{
 		g2d.setColor(Color.BLACK);
 		i = 0;
 		for (String line : lines) {
-			g2d.drawString(line, 0, fm.getAscent() + fm.getHeight() * (i++));
+			g2d.drawString(line, 0, fm.getAscent() + fm.getHeight() * i++);
 		}
 		g2d.dispose();
 		return img;

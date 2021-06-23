@@ -2,7 +2,6 @@ package com.khjxiaogu.TableGames.spwarframe.events;
 
 import com.khjxiaogu.TableGames.spwarframe.GameManager;
 import com.khjxiaogu.TableGames.spwarframe.role.Role;
-import com.khjxiaogu.TableGames.spwarframe.skill.Skill;
 
 public class ExposeEvent extends Event {
 	Role target;
@@ -21,7 +20,7 @@ public class ExposeEvent extends Event {
 	@Override
 	protected void doExecute(GameManager room) {
 		target.expose();
-		room.sendAll(this.target.getPlayer()+"的阵营是"+this.target.getFraction().getName()+"，身份是"+this.target.getName());
+		room.sendAll(target.getPlayer()+"的阵营是"+target.getFraction().getName()+"，身份是"+target.getName());
 		super.doExecute(room);
 	}
 	@Override

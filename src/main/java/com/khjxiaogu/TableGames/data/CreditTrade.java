@@ -17,16 +17,16 @@ public class CreditTrade {
 	public CreditTrade(int pt, String itm, int cnt) {
 		this.pt = pt;
 		this.itm = itm;
-		this.dn=itm;
+		dn=itm;
 		this.cnt = cnt;
-		trades.add(this);
+		CreditTrade.trades.add(this);
 	}
 	public CreditTrade(int pt, String itm,String dn, int cnt) {
 		this.pt = pt;
 		this.itm = itm;
 		this.dn=dn;
 		this.cnt = cnt;
-		trades.add(this);
+		CreditTrade.trades.add(this);
 	}
 	public boolean execute(long qq) {
 		PlayerCredit pcd=TableGames.credit.get(qq);
@@ -36,17 +36,19 @@ public class CreditTrade {
 		}
 		return false;
 	}
+	@Override
 	public String toString() {
 		StringBuilder sb=new StringBuilder(dn);
-		if(cnt>1)
+		if(cnt>1) {
 			sb.append("x").append(cnt);
+		}
 		sb.append(":").append(pt).append("积分");
-		return sb.toString();  
+		return sb.toString();
 	}
 	public static BufferedImage getList() {
 		ImagePrintStream ips=new ImagePrintStream();
 		int i=0;
-		for(CreditTrade ct:trades) {
+		for(CreditTrade ct:CreditTrade.trades) {
 			ips.append(++i).append("、").println(ct.toString());
 		}
 		ips.println("输入@我 购买 序号 来购买物品");

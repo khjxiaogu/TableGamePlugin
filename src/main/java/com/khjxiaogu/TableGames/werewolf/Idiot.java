@@ -1,9 +1,9 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class Idiot extends Villager {
 	/**
@@ -20,9 +20,7 @@ public class Idiot extends Villager {
 		super(game, p);
 	}
 
-	public Idiot(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	@Override
 	public String getJobDescription() {

@@ -9,7 +9,7 @@ package com.khjxiaogu.TableGames.utils;
  * time: 2020年10月18日
  */
 public class WaitThread {
-	
+
 	/**
 	 * 被强制中断时抛出的异常
 	 *
@@ -23,26 +23,26 @@ public class WaitThread {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		
+
 	}
 	private Thread waiting;
 	private boolean terminate=false;
 	private Object waitlock=new Object();
-	
+
 	/**
 	 * Instantiates a new WaitThread.<br>
 	 * 新建一个WaitThread类<br>
 	 */
 	public WaitThread() {
 	}
-	
+
 	/**
 	 * 使当前线程等待。<br>.
 	 *
 	 * @param millis the millis<br>毫秒
 	 * @exception TerminatedException 如果terminateWait方法被调用
 	 */
-	public void startWait(long millis) {	
+	public void startWait(long millis) {
 		try {
 			synchronized(waitlock){
 				waiting=Thread.currentThread();
@@ -62,7 +62,7 @@ public class WaitThread {
 			}
 		}
 	}
-	
+
 	/**
 	 * 停止等待，但是不抛出异常。<br>
 	 */
@@ -76,7 +76,7 @@ public class WaitThread {
 			}
 		}
 	}
-	
+
 	/**
 	 * 结束对等待线程的追踪，不停止等待<br>
 	 */
@@ -86,7 +86,7 @@ public class WaitThread {
 			waiting=null;
 		}
 	}
-	
+
 	/**
 	 * 停止等待，抛出异常以便进一步处理。<br>
 	 */
@@ -97,7 +97,7 @@ public class WaitThread {
 				Thread td=waiting;
 				waiting=null;
 				td.interrupt();
-				
+
 			}
 		}
 	}

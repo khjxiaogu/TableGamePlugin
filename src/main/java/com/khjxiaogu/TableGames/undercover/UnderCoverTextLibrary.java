@@ -30,23 +30,24 @@ public class UnderCoverTextLibrary {
 	static Random rnd=new Random();
 	public static int read(InputStream is) {
 		Scanner sc = null;
-		ps.clear();
+		UnderCoverTextLibrary.ps.clear();
 		try {
 			InputStreamReader isr=new InputStreamReader(is,StandardCharsets.UTF_8);
 			sc=new Scanner(isr);
 			while(sc.hasNextLine()) {
 				String[] ss=sc.nextLine().split(",");
-				ps.add(new WordPair(ss[0],ss[1]));
+				UnderCoverTextLibrary.ps.add(new WordPair(ss[0],ss[1]));
 			}
 		}finally {
-			if(sc!=null)
+			if(sc!=null) {
 				sc.close();
+			}
 		}
-		return ps.size();
+		return UnderCoverTextLibrary.ps.size();
 	}
 	public static WordPair getRandomPair() {
-		WordPair orig=ps.get(rnd.nextInt(ps.size()));
-		if(rnd.nextBoolean())
+		WordPair orig=UnderCoverTextLibrary.ps.get(UnderCoverTextLibrary.rnd.nextInt(UnderCoverTextLibrary.ps.size()));
+		if(UnderCoverTextLibrary.rnd.nextBoolean())
 			return orig.getReversed();
 		return orig;
 	}

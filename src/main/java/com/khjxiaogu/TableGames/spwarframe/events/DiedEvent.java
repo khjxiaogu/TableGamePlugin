@@ -12,7 +12,7 @@ public class DiedEvent extends Event {
 	public DiedEvent(Role target,KillEvent by) { super();this.target=target;killBy.add(by); }
 	public DiedEvent(Role target, List<KillEvent> by) {
 		this.target=target;
-		this.killBy.addAll(by);
+		killBy.addAll(by);
 	}
 	public Role getTarget() {
 		return target;

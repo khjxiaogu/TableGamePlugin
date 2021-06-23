@@ -1,9 +1,9 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class NightmareKnight extends Werewolf {
 	/**
@@ -32,9 +32,7 @@ public class NightmareKnight extends Werewolf {
 
 	boolean isSkillUsed = false;
 
-	public NightmareKnight(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	@Override
 	public boolean shouldSurvive(DiedReason dir) {

@@ -12,5 +12,5 @@ public class SavedEvent extends SkillEvent {
 		this.saved = saved;
 	}
 	public SavedEvent(Role source, Role target, Skill skill) { super(source, target, skill); }
-	
+
 }

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WitchBot extends GenericBot {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 741149304485873268L;
 	boolean selfrescue = false;
 	boolean usedrescue = false;
 	boolean exposed = false;

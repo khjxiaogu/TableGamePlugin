@@ -1,7 +1,5 @@
 package com.khjxiaogu.TableGames.spwarframe.Exceptions;
 
-import com.khjxiaogu.TableGames.spwarframe.role.Role;
-
 public class RoleNotExistException extends InvalidSkillTargetException {
 
 	/**

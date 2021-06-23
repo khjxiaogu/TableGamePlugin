@@ -1,11 +1,9 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
-
-import net.mamoe.mirai.contact.Member;
 
 public class Crow extends Villager {
 
@@ -23,10 +21,6 @@ public class Crow extends Villager {
 		super(game, p);
 	}
 
-	public Crow(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
-
 	@Override
 	public void onTurn() {
 		super.StartTurn();
@@ -34,7 +28,7 @@ public class Crow extends Villager {
 		sendPrivate(game.getAliveList());
 		super.sendPrivate(
 				"你可以诅咒一个人，让他在明天的投票之中被额外投一票。\n请私聊选择诅咒的人，你有60秒的考虑时间。\n格式：“诅咒 qq号或者游戏号码”\n如果无需诅咒，则无需发送任何内容，等待时间结束即可。");
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -55,7 +49,7 @@ public class Crow extends Villager {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+super.releaseListener();
 					increaseSkilledAccuracy(p.onVotedAccuracy());
 					game.logger.logSkill(this, p, "诅咒");
 					game.cursed = p;

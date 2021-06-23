@@ -1,14 +1,13 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.message.Text;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 
-import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.PlainText;
 
 public class Hunter extends Villager {
 	/**
@@ -42,7 +41,7 @@ public class Hunter extends Villager {
 	public void onDieSkill(DiedReason dir) {
 		super.StartTurn();
 		// dr = dir;
-		
+
 		sendPrivate(game.getAliveList());
 		if (!game.isDayTime) {
 			super.sendPrivate("猎人，你死了，你可以选择翻牌并开枪打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n如果不需要，则等待时间结束即可。");
@@ -50,17 +49,16 @@ public class Hunter extends Villager {
 			super.sendPrivate("猎人，你死了，你可以选择翻牌并开枪打死另一个人，也可以不开枪\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”。\n如果放弃开枪，请输入：“放弃”。");
 		}
 		asked = true;
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type == MsgType.AT) {
-				if((dir == DiedReason.Vote || dir == DiedReason.Explode)) {
+				if(dir == DiedReason.Vote || dir == DiedReason.Explode) {
 					if(hasGun) {
 						super.sendPrivate("你还没选择发动技能，如果不需要发动，请手动输入“放弃”，否则不能结束遗言！");
 						return;
 					}
-				}else if (!game.isFirstNight) {
+				}else if (!game.isFirstNight)
 					return;
-				}
-				ListenerUtils.releaseListener(getId());
+				super.releaseListener();
 				game.skipWait(WaitReason.DieWord);
 			}
 			if (type != MsgType.PRIVATE)
@@ -83,11 +81,11 @@ public class Hunter extends Villager {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+					super.releaseListener();
 					if (dir == DiedReason.Vote || dir == DiedReason.Explode) {
-						ListenerUtils.registerListener(super.getId(), (msgx, typex) -> {
+						super.registerListener( (msgx, typex) -> {
 							if (typex == MsgType.AT) {
-								ListenerUtils.releaseListener(getId());
+								super.releaseListener();
 								game.skipWait(WaitReason.DieWord);
 							}
 						});
@@ -107,9 +105,9 @@ public class Hunter extends Villager {
 					}
 					increaseSkilledAccuracy(p.onSkilledAccuracy());
 					if (!hasDarkWolf) {
-						super.sendPublic(new PlainText("死亡，身份是猎人，同时带走了").plus(p.getAt()));
+						super.sendPublic(new Text("死亡，身份是猎人，同时带走了").asMessage().append(p.getAt()));
 					} else {
-						super.sendPublic(new PlainText("死亡，同时带走了").plus(p.getAt()));
+						super.sendPublic(new Text("死亡，同时带走了").asMessage().append(p.getAt()));
 					}
 					p.isDead = true;
 					game.kill(p, DiedReason.Hunter);
@@ -122,6 +120,7 @@ public class Hunter extends Villager {
 			}
 		});
 	}
+	@Override
 	public boolean shouldWaitDeathSkill() {
 		return true;
 	}
@@ -142,9 +141,7 @@ public class Hunter extends Villager {
 		return Fraction.God;
 	}
 
-	public Hunter(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	@Override
 	public int getTurn() {

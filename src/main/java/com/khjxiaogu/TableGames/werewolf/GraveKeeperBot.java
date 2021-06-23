@@ -1,6 +1,10 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 public class GraveKeeperBot extends GenericBot {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3372771051275452272L;
 	String checked = null;
 	boolean exposed = false;
 

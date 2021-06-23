@@ -13,40 +13,39 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.utils.WaitThread.TerminatedException;
-
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.contact.Member;
 
 public class KExecutor implements ExecutorService {
 	ExecutorService exec;
-	Group tosend;
+	AbstractRoom tosend;
 	/**
-	 * @param nthread  
-	 * @param group 
+	 * @param nthread
+	 * @param group
 	 */
-	public KExecutor(int nthread, Group group) {
+	public KExecutor(int nthread, AbstractRoom group) {
 		exec=new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-                0L, TimeUnit.MILLISECONDS,
-                new SynchronousQueue<Runnable>());
+				0L, TimeUnit.MILLISECONDS,
+				new SynchronousQueue<Runnable>());
 		tosend=group;
 	}
 
 	@Override
 	public void execute(Runnable command) {
-		
+
 		exec.execute(()->{try {
 			command.run();
 		}catch(Exception ex) {
-			if(!((ex instanceof TerminatedException)||(ex instanceof InterruptedException))) {
+			if(!(ex instanceof TerminatedException||ex instanceof InterruptedException)) {
 				ByteArrayOutputStream baos=new ByteArrayOutputStream();
 				ex.printStackTrace(new PrintStream(baos));
-				Member author=tosend.get(1905387052L);
+				AbstractPlayer author=tosend.get(1905387052L);
 				if(author!=null) {
-					author.sendMessage(baos.toString());
+					author.sendPrivate(baos.toString());
 				}else {
-					tosend.getOwner().sendMessage("哎呀，机器人出错了！请把以下信息报告给作者以便于修复。");
-					tosend.getOwner().sendMessage(baos.toString());
+					tosend.getOwner().sendPrivate("哎呀，机器人出错了！请把以下信息报告给作者以便于修复。");
+					tosend.getOwner().sendPrivate(baos.toString());
 				}
 			}
 			throw ex;

@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.undercover;
 
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.utils.PreserveInfo;
 
-import net.mamoe.mirai.contact.Group;
 
 public class UnderCoverPreserve extends PreserveInfo<UnderCoverGame> {
 
-	public UnderCoverPreserve(Group g) {
+	public UnderCoverPreserve(AbstractRoom g) {
 		super(g);
 	}
 

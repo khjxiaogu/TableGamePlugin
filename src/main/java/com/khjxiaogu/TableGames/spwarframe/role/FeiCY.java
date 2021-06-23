@@ -3,10 +3,10 @@ package com.khjxiaogu.TableGames.spwarframe.role;
 import java.util.List;
 
 import com.khjxiaogu.TableGames.spwarframe.GameManager;
+import com.khjxiaogu.TableGames.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.InvalidSkillParamException;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.InvalidSkillTargetException;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.SkillException;
-import com.khjxiaogu.TableGames.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.spwarframe.events.KillEvent;
 import com.khjxiaogu.TableGames.spwarframe.events.RoleRevalEvent;
 import com.khjxiaogu.TableGames.spwarframe.events.SkillEvent;
@@ -79,7 +79,7 @@ public class FeiCY extends Role {
 				List<KillEvent> kevs = ((SkillEvent) ev).getTarget().lastkill;
 				Role src = kevs.get(kevs.size() - 1).getSource();
 				game.sendAll("上次杀死" + target.getPlayer() + "的人身份为" + src.getPlayer() + "，角色为" + src.getRevalPlayer()
-						+ "，阵营为" + src.getRevalFraction() + "。");
+				+ "，阵营为" + src.getRevalFraction() + "。");
 			}));
 		}
 

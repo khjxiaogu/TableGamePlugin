@@ -1,9 +1,9 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class HardWolf extends Werewolf {
 
@@ -31,8 +31,6 @@ public class HardWolf extends Werewolf {
 		super(game, p);
 	}
 
-	public HardWolf(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 }

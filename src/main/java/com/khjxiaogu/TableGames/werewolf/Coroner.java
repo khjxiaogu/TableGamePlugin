@@ -1,8 +1,6 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-
-import net.mamoe.mirai.contact.Member;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 
 public class Coroner extends Villager {
 
@@ -10,11 +8,6 @@ public class Coroner extends Villager {
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-
-	public Coroner(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
-
 	public Coroner(WerewolfGame game, AbstractPlayer p) {
 		super(game, p);
 	}
@@ -31,8 +24,8 @@ public class Coroner extends Villager {
 			for (Villager me : game.tokill) {
 				game.logger.logSkill(this, me, "验尸官查验");
 				sb.append("\n").append(me.getMemberString()).append(" 是")
-						.append(me.getFraction() == Fraction.Wolf ? "狼人" : "好人").append("，死于")
-						.append(me.getEffectiveDiedReason().desc);
+				.append(me.getFraction() == Fraction.Wolf ? "狼人" : "好人").append("，死于")
+				.append(me.getEffectiveDiedReason().desc);
 			}
 		} else {
 			sb.append("昨晚无死者");

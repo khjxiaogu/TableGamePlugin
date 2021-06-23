@@ -8,7 +8,7 @@ public class FractionRevalEvent extends RevalEvent {
 
 	@Override
 	protected void doExecute(GameManager room) {
-		this.getSource().sendMessage(this.getTarget().getPlayer()+"的阵营是"+this.getTarget().getRevalFraction());
+		getSource().sendMessage(getTarget().getPlayer()+"的阵营是"+getTarget().getRevalFraction());
 		super.doExecute(room);
 	}
 

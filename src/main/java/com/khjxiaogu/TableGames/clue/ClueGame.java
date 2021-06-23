@@ -7,15 +7,19 @@ import java.util.Random;
 
 import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.clue.Card.CardType;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.utils.GameUtils;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.utils.WaitThread;
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.At;
+
 
 public class ClueGame extends Game {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8126731305809945361L;
 	Random rnd=new Random();
 	List<Card> weapons=new ArrayList<>();//凶器卡
 	List<CluePlayer> players=new ArrayList<>();//玩家
@@ -32,7 +36,7 @@ public class ClueGame extends Game {
 	boolean alive=true;//游戏是否存活
 	int cpp;//每个玩家分到卡片数量
 	int tcp;//总玩家数
-	public ClueGame(Group group, int cplayer) {
+	public ClueGame(AbstractRoom group, int cplayer) {
 		super(group, cplayer,4);
 		tcp=cplayer;
 		List<Card> roomcard=new ArrayList<>();
@@ -40,8 +44,9 @@ public class ClueGame extends Game {
 		int is=0;
 		for(String room:roomnames) {
 			Room e=new Room(room,is++);
-			if(last!=null)
+			if(last!=null) {
 				last.next=e;
+			}
 			last=e;
 			rooms.add(e);
 			roomcard.add(e.present);
@@ -50,8 +55,8 @@ public class ClueGame extends Game {
 		Collections.shuffle(roomcard);
 		Rroom=roomcard.remove(0);
 		allcard.addAll(roomcard);
-		
-		
+
+
 		List<Card> rolecard=new ArrayList<>();
 		for(int i=0;i<cplayer;i++) {
 			RoleCard rc=new RoleCard(this,i);
@@ -61,7 +66,7 @@ public class ClueGame extends Game {
 		Collections.shuffle(rolecard);
 		Rrole=rolecard.remove(0);
 		allcard.addAll(rolecard);
-		
+
 		is=0;
 		List<Card> weaponcard=new ArrayList<>();
 		for(String weapon:weaponnames) {
@@ -77,13 +82,13 @@ public class ClueGame extends Game {
 	}
 
 	@Override
-	public boolean addMember(Member mem) {
-		if(this.getPlayerById(mem.getId())!=null) {
-			this.sendPublicMessage(new At(mem).plus("你已经报名了！"));
+	public boolean addMember(AbstractPlayer mem) {
+		if(getPlayerById(mem.getId())!=null) {
+			mem.sendPublic("你已经报名了！");
 			return false;
 		}
 		if(!GameUtils.tryAddMember(mem.getId())) {
-			this.sendPublicMessage(new At(mem).plus("你已参加其他游戏！"));
+			mem.sendPublic("你已参加其他游戏！");
 			return true;
 		}
 		if(roles.size()>0) {
@@ -92,7 +97,7 @@ public class ClueGame extends Game {
 					int min=players.size();
 					CluePlayer cp=new CluePlayer(this,mem);
 					players.add(cp);
-					
+
 					cp.sendPrivate("已经报名");
 					String nc=cp.getNameCard();
 					if(nc.indexOf('|')!=-1) {
@@ -198,14 +203,14 @@ public class ClueGame extends Game {
 			}
 		}
 		result.append("\n正确答案：").append(Rrole.getName()).append(" 在 ").append(Rroom.getName()).append(" 使用 ").append(Rweapon.getName()).append(" 杀人。");
-		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.getGroup()));
+		this.sendPublicMessage(new Image(Utils.textAsImage(result.toString())));
 		doFinalize();
 	}
 	@Override
 	protected void doFinalize() {
 		alive=false;
 		for(CluePlayer p:players) {
-			ListenerUtils.releaseListener(p.getId());
+			p.releaseListener();
 			GameUtils.RemoveMember(p.getId());
 			String nc=p.getNameCard();
 			if(nc.indexOf('|')!=-1) {
@@ -231,7 +236,7 @@ public class ClueGame extends Game {
 			}
 		}
 		result.append("\n正确答案：").append(Rrole.getName()).append(" 在 ").append(Rroom.getName()).append(" 使用 ").append(Rweapon.getName()).append(" 杀人。");
-		this.sendPublicMessage(Utils.sendTextAsImage(result.toString(),this.getGroup()));
+		this.sendPublicMessage(new Image(Utils.textAsImage(result.toString())));
 		doFinalize();
 	}
 

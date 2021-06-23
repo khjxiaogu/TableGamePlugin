@@ -1,6 +1,10 @@
 package com.khjxiaogu.TableGames.werewolf;
 
 public class ElderBot extends GenericBot {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3837205811213497566L;
 	boolean exposed = false;
 	boolean lostlife = false;
 

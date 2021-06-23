@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class Werewolf extends Villager {
 
@@ -25,9 +25,7 @@ public class Werewolf extends Villager {
 		return 1;
 	}
 
-	public Werewolf(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	@Override
 	public void onTurnStart() {
@@ -54,7 +52,7 @@ public class Werewolf extends Villager {
 		if (s.startsWith("自爆")) {
 			try {
 				super.sendPublic("是狼人，自爆了，进入黑夜。");
-				game.logger.logRaw(this.getNameCard()+"自爆了");
+				game.logger.logRaw(getNameCard()+"自爆了");
 				game.getScheduler().execute(() -> {
 					game.removeAllListeners();
 					game.preSkipDay();
@@ -79,7 +77,7 @@ public class Werewolf extends Villager {
 
 	@Override
 	public void addDaySkillListener() {
-		ListenerUtils.registerListener(getId(), (msgx, typex) -> {
+		super.registerListener( (msgx, typex) -> {
 			if (typex == MsgType.PRIVATE) {
 				String content = Utils.getPlainText(msgx);
 				doDaySkillPending(content);
@@ -96,7 +94,7 @@ public class Werewolf extends Villager {
 		sendPrivate(game.getAliveList());
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -113,8 +111,8 @@ public class Werewolf extends Villager {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
-					ListenerUtils.registerListener(super.getId(), (msgx, typex) -> {
+					super.releaseListener();
+					super.registerListener( (msgx, typex) -> {
 						if (typex != MsgType.PRIVATE)
 							return;
 						String contentx = Utils.getPlainText(msgx);
@@ -142,7 +140,7 @@ public class Werewolf extends Villager {
 				}
 			} else if (content.startsWith("放弃")) {
 				EndTurn();
-				ListenerUtils.releaseListener(super.getId());
+				super.releaseListener();
 				game.NoVote(this);
 				super.sendPrivate("已放弃");
 			}

@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class Tramp extends Villager {
 
@@ -19,9 +19,7 @@ public class Tramp extends Villager {
 		super(game, p);
 	}
 
-	public Tramp(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	@Override
 	public String getJobDescription() {
@@ -31,15 +29,16 @@ public class Tramp extends Villager {
 	@Override
 	public void onDied(DiedReason dir, boolean shouldCheckSkill) {
 		// dr = dir;
-		if(shouldCheckSkill)
+		if(shouldCheckSkill) {
 			onSheriffSkill();
+		}
 		isDead = true;
 		onBeforeTalk();
 		game.logger.logRaw(getNameCard() + " 老流氓出局");
 		sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时@我结束你的讲话。");
-		ListenerUtils.registerListener(getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type == MsgType.AT) {
-				ListenerUtils.releaseListener(getId());
+				super.releaseListener();
 				game.skipWait(WaitReason.DieWord);
 			}
 		});

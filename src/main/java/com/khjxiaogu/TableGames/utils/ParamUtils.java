@@ -10,24 +10,24 @@ import java.util.function.Function;
 public class ParamUtils {
 	private static Map<Class<?>,Function<String,?>> parsers=new HashMap<>();
 	private static <T> void loadParser(Class<T> type,Function<String,T> parser) {
-		parsers.put(type,parser);
+		ParamUtils.parsers.put(type,parser);
 	}
 	static {
-		loadParser(long.class,e->Long.parseLong(e));
-		loadParser(int.class,e->Integer.parseInt(e));
-		loadParser(String.class,e->e);
-		loadParser(double.class,e->Double.parseDouble(e));
-		loadParser(boolean.class,e->Boolean.parseBoolean(e));
-		loadParser(float.class,e->Float.parseFloat(e));
-		loadParser(char.class,e->(char)Integer.parseInt(e));
-		loadParser(short.class,e->Short.parseShort(e));
+		ParamUtils.loadParser(long.class,e->Long.parseLong(e));
+		ParamUtils.loadParser(int.class,e->Integer.parseInt(e));
+		ParamUtils.loadParser(String.class,e->e);
+		ParamUtils.loadParser(double.class,e->Double.parseDouble(e));
+		ParamUtils.loadParser(boolean.class,e->Boolean.parseBoolean(e));
+		ParamUtils.loadParser(float.class,e->Float.parseFloat(e));
+		ParamUtils.loadParser(char.class,e->(char)Integer.parseInt(e));
+		ParamUtils.loadParser(short.class,e->Short.parseShort(e));
 	}
 	public static List<String> loadParams(Object ob) {
-		List<String> ret=new ArrayList<String>();
+		List<String> ret=new ArrayList<>();
 		Class<?> c=ob.getClass();
 		while(c!=null) {
 			for(Field f:c.getDeclaredFields()) {
-				if(parsers.containsKey(f.getType())) {
+				if(ParamUtils.parsers.containsKey(f.getType())) {
 					ret.add(f.getName());
 				}
 			}
@@ -61,7 +61,7 @@ public class ParamUtils {
 			while(c!=Object.class&&c!=null) {
 				for(Field f:c.getDeclaredFields()) {
 					if(f.getName().equals(p)) {
-						Function<String,?> parser=parsers.get(f.getType());
+						Function<String,?> parser=ParamUtils.parsers.get(f.getType());
 						if(parser!=null) {
 							f.setAccessible(true);
 							try {

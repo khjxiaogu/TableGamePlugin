@@ -1,6 +1,6 @@
 package com.khjxiaogu.TableGames.utils;
 
-import net.mamoe.mirai.message.data.MessageChain;
+import com.khjxiaogu.TableGames.platform.message.Message;
 
 @FunctionalInterface
 public interface MessageListener{
@@ -9,5 +9,5 @@ public interface MessageListener{
 		PRIVATE,
 		PUBLIC,
 	}
-	public void handle(MessageChain msg,MsgType type);
+	void handle(Message msg,MsgType type);
 }

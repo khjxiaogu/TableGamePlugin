@@ -21,10 +21,11 @@ public class UnderCoverPlayerData implements GenericPlayerData<UnderCoverPlayerD
 	}
 	public void log(boolean isSpy,boolean Spywin,boolean isOut) {
 		total++;
-		if(isOut)
+		if(isOut) {
 			out++;
-		else
+		} else {
 			alive++;
+		}
 		if(isSpy) {
 			if(Spywin) {
 				winasspy++;
@@ -33,10 +34,11 @@ public class UnderCoverPlayerData implements GenericPlayerData<UnderCoverPlayerD
 				loseasspy++;
 				loses++;
 			}
-			if(isOut)
+			if(isOut) {
 				outasspy++;
-			else
+			} else {
 				aliveasspy++;
+			}
 		}else {
 			if(Spywin) {
 				loseasanno++;
@@ -45,10 +47,11 @@ public class UnderCoverPlayerData implements GenericPlayerData<UnderCoverPlayerD
 				winasanno++;
 				wins++;
 			}
-			if(isOut)
+			if(isOut) {
 				outasanno++;
-			else
+			} else {
 				aliveasanno++;
+			}
 		}
 	}
 	@Override

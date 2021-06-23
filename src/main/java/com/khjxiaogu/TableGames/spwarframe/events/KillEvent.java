@@ -10,10 +10,10 @@ public class KillEvent extends SkillEvent {
 
 	@Override
 	protected void doExecute(GameManager room) {
-		if(this.getSource()!=this.getTarget()) {
-			this.getSource().addKillCount();
+		if(getSource()!=getTarget()) {
+			getSource().addKillCount();
 		}
 		super.doExecute(room);
 	}
-	
+
 }

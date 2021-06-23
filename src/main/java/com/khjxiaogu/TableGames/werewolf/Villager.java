@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.message.Message;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 
-import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.MessageChain;
+
 
 public class Villager extends com.khjxiaogu.TableGames.Player implements Serializable {
 	/**
@@ -50,11 +50,6 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 	transient Behaviour desc;
 	transient Behaviour dead;
 	transient Behaviour[] skills = new Behaviour[4];
-
-	public Villager(WerewolfGame werewolfGame, Member member) {
-		super(member);
-		game = werewolfGame;
-	}
 
 	public Villager(WerewolfGame game, AbstractPlayer p) {
 		super(p);
@@ -98,9 +93,9 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 	public void onDayTime() {
 		onBeforeTalk();
 		sendPublic("你有五分钟时间进行陈述。\n可以随时@我结束你的讲话。");
-		ListenerUtils.registerListener(getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type == MsgType.AT) {
-				ListenerUtils.releaseListener(getId());
+				super.releaseListener();
 				addDaySkillListener();
 				game.skipWait(WaitReason.State);
 			} else if (type == MsgType.PRIVATE) {
@@ -109,7 +104,7 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 		});
 		game.startWait(300000, WaitReason.State);
 		onFinishTalk();
-	};
+	}
 
 	/**
 	 * @param plainText
@@ -129,12 +124,12 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 		sendPrivate(game.getAliveList());
 		super.sendPrivate("请私聊投票要驱逐的人，你有2分钟的考虑时间\n格式：“投票 qq号或者游戏号码”\n如：“投票 1”\n弃票请输入“弃权”");
 		game.vu.addToVote(this);
-		ListenerUtils.registerListener(getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type == MsgType.PRIVATE) {
 				String content = Utils.getPlainText(msg);
 				if (content.startsWith("弃权")) {
 					isVoteTurn = false;
-					ListenerUtils.releaseListener(getId());
+					super.releaseListener();
 					this.sendPublic("已弃权。");
 					sendPrivate("你已弃权");
 					game.NoVote(this);
@@ -155,7 +150,7 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 							return;
 						}
 						isVoteTurn = false;
-						ListenerUtils.releaseListener(super.getId());
+						super.releaseListener();
 						increaseVoteAccuracy(p.onVotedAccuracy());
 						game.logger.logSkill(this, p, "投票");
 						super.sendPrivate("已投票给 " + p.getMemberString());
@@ -173,7 +168,7 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 		return false;
 	}
 	public void onWolfTurn() {
-	};
+	}
 
 	public boolean shouldSurvive(DiedReason dir) {
 		if (dir == DiedReason.Hunt)
@@ -184,19 +179,19 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 	}
 
 	/**
-	 * @param dir  
+	 * @param dir
 	 */
 	public void onDieSkill(DiedReason dir) {
 
 		// dr = dir;
-	};
+	}
 	@FunctionalInterface
 	public interface DoSelect{
-		public boolean select(List<Villager> canTalk,Villager lastDeath,Villager sheriff,List<Villager> all);
+		boolean select(List<Villager> canTalk,Villager lastDeath,Villager sheriff,List<Villager> all);
 	}
 	public static Map<String,DoSelect> orders=new HashMap<>();
 	static {
-		orders.put("警后", (l,a,b,c)->{
+		Villager.orders.put("警后", (l,a,b,c)->{
 			Villager cur=b.next;
 			while(b!=cur) {
 				l.add(cur);
@@ -205,7 +200,7 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 			l.add(b);
 			return true;
 		});
-		orders.put("警前", (l,a,b,c)->{
+		Villager.orders.put("警前", (l,a,b,c)->{
 			Villager cur=b.prev;
 			while(b!=cur) {
 				l.add(cur);
@@ -214,45 +209,49 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 			l.add(b);
 			return true;
 		});
-		orders.put("死后", (l,a,b,c)->{
+		Villager.orders.put("死后", (l,a,b,c)->{
 			if(a==null)return false;
 			Villager cur=a.next;
 			while(a!=cur) {
-				if(cur!=b)
+				if(cur!=b) {
 					l.add(cur);
+				}
 				cur=cur.next;
 			}
 			l.add(b);
 			return true;
 		});
-		orders.put("死前", (l,a,b,c)->{
+		Villager.orders.put("死前", (l,a,b,c)->{
 			if(a==null)return false;
 			Villager cur=a.prev;
 			while(a!=cur) {
-				if(cur!=b)
+				if(cur!=b) {
 					l.add(cur);
+				}
 				cur=cur.prev;
 			}
 			l.add(b);
 			return true;
 		});
-		orders.put("顺序", (l,a,b,c)->{
+		Villager.orders.put("顺序", (l,a,b,c)->{
 			Villager ft=c.get(0);
 			Villager cur=ft;
 			do{
-				if(cur!=b)
+				if(cur!=b) {
 					l.add(cur);
+				}
 				cur=cur.next;
 			}while(ft!=cur);
 			l.add(b);
 			return true;
 		});
-		orders.put("倒序", (l,a,b,c)->{
+		Villager.orders.put("倒序", (l,a,b,c)->{
 			Villager ft=c.get(c.size()-1);
 			Villager cur=ft;
 			do{
-				if(cur!=b)
+				if(cur!=b) {
 					l.add(cur);
+				}
 				cur=cur.prev;
 			}while(ft!=cur);
 			l.add(b);
@@ -262,21 +261,21 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 	public boolean onSelectOrder(Villager lastDeath) {
 		if(!isSheriff)return false;
 		this.sendPublic("请选择发言顺序。");
-		this.sendPrivate("请回复选择发言顺序：警后、警前、死后、死前、顺序、倒序。\n" + 
+		sendPrivate("请回复选择发言顺序：警后、警前、死后、死前、顺序、倒序。\n" +
 				"你有30秒时间选择。");
 		game.canTalk.clear();
-		ListenerUtils.registerListener(getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type == MsgType.PRIVATE) {
 				String content = Utils.getPlainText(msg);
-				DoSelect sel=orders.get(content);
+				DoSelect sel=Villager.orders.get(content);
 				if(sel==null) {
-					this.sendPrivate("发言顺序不存在，请重新输入！");
+					sendPrivate("发言顺序不存在，请重新输入！");
 					return;
 				}
-				if(sel.select(game.canTalk, lastDeath,this,game.playerlist))
-					this.sendPrivate("选择成功！");
-				else {
-					this.sendPrivate("发言顺序不可用，请重新输入！");
+				if(sel.select(game.canTalk, lastDeath,this,game.playerlist)) {
+					sendPrivate("选择成功！");
+				} else {
+					sendPrivate("发言顺序不可用，请重新输入！");
 					return;
 				}
 				game.sendPublicMessage("当前发言顺序："+content);
@@ -284,22 +283,22 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 			}
 		});
 		game.startWait(30000,WaitReason.Generic);
-		ListenerUtils.releaseListener(getId());
+		super.releaseListener();
 		if(game.canTalk.isEmpty()) {
-			orders.get("顺序").select(game.canTalk, lastDeath,this,game.playerlist);
+			Villager.orders.get("顺序").select(game.canTalk, lastDeath,this,game.playerlist);
 		}
 		return true;
 	}
 	public void onSheriffSkill() {
 		if(isSheriff) {
 			this.sendPublic("请警长选择警徽的处置方式。");
-			this.sendPrivate("警长，你死了，你有1分钟时间决定警徽去向，如果要传给某人，可以使用：“传给 qq号或者游戏号码”给该玩家警徽。\n" + 
+			sendPrivate("警长，你死了，你有1分钟时间决定警徽去向，如果要传给某人，可以使用：“传给 qq号或者游戏号码”给该玩家警徽。\n" +
 					"否则，可以使用“撕毁”撕毁警徽。\n");
-			ListenerUtils.registerListener(super.getId(), (msg, type) -> onSheriffSkillListener(msg,type));
+			super.registerListener( (msg, type) -> onSheriffSkillListener(msg,type));
 			game.startWait(60000,WaitReason.Generic);
 		}
 	}
-	public void onSheriffSkillListener(MessageChain msg,MsgType type) {
+	public void onSheriffSkillListener(Message msg,MsgType type) {
 		if(isSheriff) {
 			if (type != MsgType.PRIVATE)
 				return;
@@ -316,7 +315,7 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 						super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入。");
 						return;
 					}
-					this.isSheriff=false;
+					isSheriff=false;
 					increaseVoteAccuracy(-p.onVotedAccuracy());
 					game.logger.logSkill(this, p, "警徽给");
 					super.sendPrivate("已传 " + p.getMemberString());
@@ -327,10 +326,10 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 					super.sendPrivate("发生错误，正确格式为：“传给 qq号或者游戏号码”！");
 				}
 			} else if (content.startsWith("撕毁")) {
-				game.logger.logRaw(this.getNameCard()+"撕毁了警徽");
+				game.logger.logRaw(getNameCard()+"撕毁了警徽");
 				super.sendPrivate("你撕毁了警徽。");
 				super.sendPublic("撕毁了警徽");
-				this.isSheriff=false;
+				isSheriff=false;
 				game.skipWait(WaitReason.Generic);
 			}
 		}
@@ -345,46 +344,46 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 
 	public void onSelectSheriff() {
 		super.sendPrivate("当前是警长竞选环节，如果要竞选警长，请在60秒内发送“竞选”，否则请发送“放弃”");
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
 			if (content.startsWith("竞选")) {
 				super.sendPrivate("你参加了竞选。");
-				ListenerUtils.releaseListener(super.getId());
+				super.releaseListener();
 				game.sherifflist.add(this);
 			} else if (content.startsWith("放弃")) {
 				super.sendPrivate("你放弃了竞选。");
-				ListenerUtils.releaseListener(super.getId());
+				super.releaseListener();
 			}
 		});
 		return;
 	}
 	public void onBeforeSheriffState() {
 		sendPrivate("在竞选投票开始前，你随时都可以私聊发送“退选”进行退选。");
-		ListenerUtils.registerListener(getId(), (msgx, typex) ->SheriffDeselect(msgx,typex));
+		super.registerListener( (msgx, typex) ->SheriffDeselect(msgx,typex));
 	}
 	public void onSheriffState() {
-		this.onBeforeTalk();
+		onBeforeTalk();
 		sendPublic("你有五分钟时间进行竞选发言。\n可以随时@我结束你的讲话。");
-		ListenerUtils.registerListener(getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type == MsgType.AT) {
-				ListenerUtils.releaseListener(getId());
-				ListenerUtils.registerListener(getId(), (msgx, typex) ->SheriffDeselect(msgx,typex));
+				super.releaseListener();
+				super.registerListener( (msgx, typex) ->SheriffDeselect(msgx,typex));
 				game.skipWait(WaitReason.State);
 			}else if(type==MsgType.PRIVATE&&Utils.getPlainText(msg).startsWith("退选")) {
-				game.logger.logRaw(this.getNameCard()+"已退选");
+				game.logger.logRaw(getNameCard()+"已退选");
 				this.sendPublic("已退选");
 				game.sherifflist.remove(this);
 				game.skipWait(WaitReason.State);
 			}
 		});
 		game.startWait(300000, WaitReason.State);
-		this.onFinishTalk();
-	};
-	public void SheriffDeselect(MessageChain msg, MsgType type) {
+		onFinishTalk();
+	}
+	public void SheriffDeselect(Message msg, MsgType type) {
 		if(type==MsgType.PRIVATE&&Utils.getPlainText(msg).startsWith("退选")) {
-			game.logger.logRaw(this.getNameCard()+"已退选");
+			game.logger.logRaw(getNameCard()+"已退选");
 			this.sendPublic("已退选");
 			game.sherifflist.remove(this);
 		}
@@ -398,11 +397,11 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 		sendPrivate(sb.toString());
 		super.sendPrivate("请私聊投票选择的警长，你有2分钟的考虑时间\n格式：“投票 qq号或者游戏号码”\n如：“投票 1”\n弃票请输入“弃权”");
 		game.vu.addToVote(this);
-		ListenerUtils.registerListener(getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type == MsgType.PRIVATE) {
 				String content = Utils.getPlainText(msg);
 				if (content.startsWith("弃权")) {
-					ListenerUtils.releaseListener(getId());
+					super.releaseListener();
 					this.sendPublic("已弃权。");
 					sendPrivate("你已弃权");
 					game.NoVote(this);
@@ -418,7 +417,7 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 							super.sendPrivate("选择的qq号或者游戏号码非选择对象，请重新输入。");
 							return;
 						}
-						ListenerUtils.releaseListener(super.getId());
+						super.releaseListener();
 						increaseVoteAccuracy(-p.onVotedAccuracy());
 						game.logger.logSkill(this, p, "投票");
 						super.sendPrivate("已投票给 " + p.getMemberString());
@@ -430,25 +429,26 @@ public class Villager extends com.khjxiaogu.TableGames.Player implements Seriali
 				}
 			}
 		});
-	};
+	}
 
 	public void onDied(DiedReason dir) {
-		this.populateDiedReason(dir);
+		populateDiedReason(dir);
 		onDied(dir, true);
 	}
 
 	public void onDied(DiedReason dir, boolean shouldCheckSkill) {
 		// dr = dir;
-		if(shouldCheckSkill)
+		if(shouldCheckSkill) {
 			onSheriffSkill();
+		}
 		if (game.isFirstNight || dir.hasDiedWord) {
 			isDead = true;
 			onBeforeTalk();
 			sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时@我结束你的讲话。");
 			if (!shouldCheckSkill || !onDiePending(dir)) {
-				ListenerUtils.registerListener(getId(), (msg, type) -> {
+				super.registerListener( (msg, type) -> {
 					if (type == MsgType.AT) {
-						ListenerUtils.releaseListener(getId());
+						super.releaseListener();
 						game.skipWait(WaitReason.DieWord);
 					}
 				});

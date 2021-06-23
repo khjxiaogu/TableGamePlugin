@@ -1,12 +1,11 @@
 package com.khjxiaogu.TableGames.clue;
 
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.utils.PreserveInfo;
-
-import net.mamoe.mirai.contact.Group;
 
 public class CluePreserve extends PreserveInfo<ClueGame> {
 
-	public CluePreserve(Group g) {
+	public CluePreserve(AbstractRoom g) {
 		super(g);
 	}
 

@@ -1,16 +1,14 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
-import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
-import net.mamoe.mirai.contact.Member;
+import com.khjxiaogu.TableGames.utils.Utils;
+
 
 public class Fox extends Villager {
 
-	public Fox(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	public Fox(WerewolfGame game, AbstractPlayer p) {
 		super(game, p);
@@ -32,7 +30,7 @@ public class Fox extends Villager {
 		if(!canSkill)return;
 		sendPrivate(game.getAliveList());
 		super.sendPrivate("狐狸，你可以选择查验一个人，请私聊选择查验的人，你有一分钟的考虑时间\n格式：“查验 qq号或者游戏号码”\n如：“查验 1”");
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -49,11 +47,11 @@ public class Fox extends Villager {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+					super.releaseListener();
 					game.logger.logSkill(this, p, "查验");
 					if(p.getFraction()==Fraction.Wolf) {
 						game.logger.logRaw("狐狸查到狼人");
-						this.sendPrivate("三人中存在狼人。");
+						sendPrivate("三人中存在狼人。");
 						return;
 					}
 					Villager pt = p;
@@ -64,7 +62,7 @@ public class Fox extends Villager {
 						}
 						if (pt.getFraction() == Fraction.Wolf) {
 							game.logger.logRaw("狐狸查到狼人");
-							this.sendPrivate("三人中存在狼人。");
+							sendPrivate("三人中存在狼人。");
 							return;
 						}
 						break;
@@ -77,13 +75,13 @@ public class Fox extends Villager {
 						}
 						if (pt.getFraction() == Fraction.Wolf) {
 							game.logger.logRaw("狐狸查到狼人");
-							this.sendPrivate("三人中存在狼人。");
+							sendPrivate("三人中存在狼人。");
 							return;
 						}
 						break;
 					}
 					canSkill=false;
-					this.sendPrivate("三人中不存在狼人，你失去了技能。");
+					sendPrivate("三人中不存在狼人，你失去了技能。");
 					game.logger.logRaw("狐狸失去技能");
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“查验 qq号或者游戏号码”！");

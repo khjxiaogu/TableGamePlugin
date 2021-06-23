@@ -12,7 +12,7 @@ public class PlayerCredit {
 	Boolean changed=false;
 	int unusedsince=0;
 	public PlayerCredit() {
-		
+
 	}
 	public void load(JsonObject jo) {
 		synchronized (changed) {
@@ -61,10 +61,11 @@ public class PlayerCredit {
 		synchronized (changed) {
 			int crn=items.getOrDefault(name,0);
 			crn-=count;
-			if(crn>0)
+			if(crn>0) {
 				items.put(name,crn);
-			else
+			} else {
 				items.remove(name);
+			}
 			changed=true;
 			unusedsince=0;
 			return crn;
@@ -75,10 +76,11 @@ public class PlayerCredit {
 			int crn=items.getOrDefault(name,0);
 			if(crn<count)return crn-count;
 			crn-=count;
-			if(crn>0)
+			if(crn>0) {
 				items.put(name,crn);
-			else
+			} else {
 				items.remove(name);
+			}
 			changed=true;
 			unusedsince=0;
 			return crn;
@@ -95,7 +97,7 @@ public class PlayerCredit {
 			point+=count;
 			changed=true;
 			unusedsince=0;
-			return normalizedb(point);
+			return PlayerCredit.normalizedb(point);
 		}
 	}
 	public double removePT(double count){
@@ -103,36 +105,38 @@ public class PlayerCredit {
 			point-=count;
 			changed=true;
 			unusedsince=0;
-			return normalizedb(point);
+			return PlayerCredit.normalizedb(point);
 		}
 	}
 	public double withdrawPT(double count){
 		synchronized (changed) {
-			if(point<count)return normalizedb(point-count);
+			if(point<count)return PlayerCredit.normalizedb(point-count);
 			point-=count;
 			changed=true;
 			unusedsince=0;
-			return normalizedb(point);
+			return PlayerCredit.normalizedb(point);
 		}
 	}
 	public double getPT() {
 		synchronized (changed) {
 			unusedsince=0;
-			return normalizedb(point);
+			return PlayerCredit.normalizedb(point);
 		}
 	}
+	@Override
 	public String toString() {
 		StringBuilder sb=new StringBuilder();
 		sb.append("当前积分：").append(point);
 		sb.append("\n持有物品：\n");
-		if(items.isEmpty())
+		if(items.isEmpty()) {
 			sb.append("空");
-		else
+		} else {
 			synchronized (changed) {
 				for(Map.Entry<String,Integer> je:items.entrySet()) {
 					sb.append(je.getKey()).append(" x").append(je.getValue());
 				}
 			}
+		}
 		return sb.toString();
 	}
 }

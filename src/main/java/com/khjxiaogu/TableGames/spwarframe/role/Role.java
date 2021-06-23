@@ -7,14 +7,14 @@ import java.util.function.Consumer;
 
 import com.khjxiaogu.TableGames.spwarframe.FakePlayer;
 import com.khjxiaogu.TableGames.spwarframe.GameManager;
+import com.khjxiaogu.TableGames.spwarframe.GameManager.Fraction;
+import com.khjxiaogu.TableGames.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.spwarframe.Player;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.CantSaveException;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.InvalidInterruptedTargetException;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.InvalidSkillParamException;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.RoleDiedException;
 import com.khjxiaogu.TableGames.spwarframe.Exceptions.SkillException;
-import com.khjxiaogu.TableGames.spwarframe.GameManager.Fraction;
-import com.khjxiaogu.TableGames.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.spwarframe.events.DeadAnnounceEvent;
 import com.khjxiaogu.TableGames.spwarframe.events.Event;
 import com.khjxiaogu.TableGames.spwarframe.events.FractionRevalEvent;
@@ -218,7 +218,7 @@ public abstract class Role {
 	public void setLeader() {
 		if(isLeader)return;
 		isLeader = true;
-		this.expose();
+		expose();
 		new RevalSkill(room, this);
 	}
 	public void setBoss() {
@@ -352,7 +352,7 @@ public abstract class Role {
 		for (Role s : todie) {
 			avail.append("\n").append(s.getName());
 		}
-		this.sendMessage(avail.toString());
+		sendMessage(avail.toString());
 		askSkills(sks, true);
 		return true;
 	}
@@ -387,7 +387,9 @@ public abstract class Role {
 					if (ss.available())
 						if (!ss.onSkillCall(s.subList(1, s.size()))) {
 							owner.sendMessage("您仍可继续使用技能。");
-						}else if(canSkip) onSkillUsed();
+						}else if(canSkip) {
+							onSkillUsed();
+						}
 					break;
 				}
 			}
@@ -395,9 +397,9 @@ public abstract class Role {
 	}
 
 	public void onSkillUsed() {
-		
+
 		room.skipSkillWait();
-	};
+	}
 
 	public Skill getInterruptSkillByNum(String num) throws SkillException {
 		int n = Integer.parseInt(num);
@@ -439,7 +441,7 @@ public abstract class Role {
 			});
 			room.waitForSkill(6000);
 			owner.removeListener();
-		}	
+		}
 	}
 	public void removeListener() {
 		owner.removeListener();

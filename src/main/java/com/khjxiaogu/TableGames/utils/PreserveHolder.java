@@ -15,10 +15,10 @@ public class PreserveHolder {
 
 	@SuppressWarnings("unchecked")
 	public static <T extends PreserveInfo<?>> T getPreserve(Group g, Class<T> type) {
-		Map<Class<? extends PreserveInfo<?>>, PreserveInfo<?>> mc = ps.get(g);
+		Map<Class<? extends PreserveInfo<?>>, PreserveInfo<?>> mc = PreserveHolder.ps.get(g);
 		if (mc == null) {
 			mc = new ConcurrentHashMap<>();
-			ps.put(g, mc);
+			PreserveHolder.ps.put(g, mc);
 		}
 		PreserveInfo<?> pi = mc.get(type);
 		if (pi == null) {

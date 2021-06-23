@@ -5,6 +5,11 @@ import java.util.List;
 
 public class HunterBot extends GenericBot {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3383979975144505139L;
+
 	public HunterBot(int botId, WerewolfGame gam) {
 		super(botId, gam);
 	}

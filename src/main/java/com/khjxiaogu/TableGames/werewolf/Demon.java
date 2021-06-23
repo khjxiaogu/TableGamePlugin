@@ -1,27 +1,26 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
-import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class Demon extends Werewolf {
+
+	public Demon(WerewolfGame game, AbstractPlayer p) {
+		super(game, p);
+	}
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public Demon(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
 
-	public Demon(WerewolfGame werewolfGame,AbstractPlayer member) {
-		super(werewolfGame, member);
-	}
+
 
 	@Override
 	public double onVotedAccuracy() {
@@ -45,7 +44,7 @@ public class Demon extends Werewolf {
 		super.StartTurn();
 		sendPrivate(game.getAliveList());
 		super.sendPrivate("恶魔，你可以查验一个人是否神职。\n格式：“查验 qq号或者游戏号码”\n如：“查验 1”");
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -67,8 +66,8 @@ public class Demon extends Werewolf {
 					}
 					game.logger.logSkill(this, p, "恶魔查验");
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
-					super.sendPrivate(p.getMemberString()+"是"+(p.getFraction()==Fraction.God?"神职":(p.getFraction()==Fraction.Wolf?"狼人":"平民")));
+					super.releaseListener();
+					super.sendPrivate(p.getMemberString()+"是"+(p.getFraction()==Fraction.God?"神职":p.getFraction()==Fraction.Wolf?"狼人":"平民"));
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“查验 qq号或者游戏号码”！");
 				}

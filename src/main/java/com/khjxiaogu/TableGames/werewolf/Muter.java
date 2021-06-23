@@ -1,17 +1,15 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
-import com.khjxiaogu.TableGames.utils.Utils;
-import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 
-import net.mamoe.mirai.contact.Member;
+import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.Utils;
+
+
 
 public class Muter extends Villager {
 
-	public Muter(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	public Muter(WerewolfGame game, AbstractPlayer p) {
 		super(game, p);
@@ -33,7 +31,7 @@ public class Muter extends Villager {
 		sendPrivate(game.getAliveList());
 		super.sendPrivate(
 				"你可以禁言一个人，让他在明天的发言回合不能发言。\n请私聊选择禁言的人，你有60秒的考虑时间。\n格式：“禁言 qq号或者游戏号码”\n如果无需禁言，则无需发送任何内容，等待时间结束即可。");
-		ListenerUtils.registerListener(super.getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -54,7 +52,7 @@ public class Muter extends Villager {
 						return;
 					}
 					EndTurn();
-					ListenerUtils.releaseListener(super.getId());
+					super.releaseListener();
 					//increaseSkilledAccuracy(p.onVotedAccuracy());
 					game.logger.logSkill(this, p, "禁言");
 					p.isMuted=true;

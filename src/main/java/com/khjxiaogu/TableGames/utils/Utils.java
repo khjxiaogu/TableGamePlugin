@@ -7,20 +7,32 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.awt.image.RenderedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.imageio.ImageIO;
+
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.message.Message;
+
 import net.mamoe.mirai.contact.Contact;
-import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.MessageChain;
+import net.mamoe.mirai.message.data.MessageContent;
 import net.mamoe.mirai.message.data.PlainText;
+import net.mamoe.mirai.utils.ExternalResource;
 
 public class Utils {
 	public static String getPlainText(MessageChain msg) {
-		PlainText pt = msg.first(PlainText.Key);
+		PlainText pt = (PlainText) msg.get(MessageContent.Key);
 		if (pt == null)
 			return "";
 		return pt.getContent().trim();
+	}
+	public static String getPlainText(Message msg) {
+		return msg.getText().trim();
 	}
 
 	public static String removeLeadings(String leading, String orig) {
@@ -28,21 +40,50 @@ public class Utils {
 			return orig.substring(leading.length()).replace(leading, "").trim();
 		return orig;
 	}
+	public static byte[] readAll(InputStream i) throws IOException {
+		ByteArrayOutputStream ba = new ByteArrayOutputStream(16384);
+		int nRead;
+		byte[] data = new byte[4096];
 
+		try {
+			while ((nRead = i.read(data, 0, data.length)) != -1) { ba.write(data, 0, nRead); }
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			throw e;
+		}
+
+		return ba.toByteArray();
+	}
 	public static String percent(double v1, double v2) {
 		long val=Math.round(v1 / v2 * 10000) / 100;
-		if(val>100)
+		if(val>100) {
 			val=100;
-		if(val<0)
-			val=0;
-		if (v2 != 0) {
-			return String.valueOf(val) + "%";
 		}
+		if(val<0) {
+			val=0;
+		}
+		if (v2 != 0)
+			return String.valueOf(val) + "%";
 		return "N/A%";
 	}
-
+	public static ExternalResource ImageResource(RenderedImage img) {
+		try(ByteArrayOutputStream baos=new ByteArrayOutputStream(4096)){
+			ImageIO.write(img,"jpg",baos);
+			return ExternalResource.create(baos.toByteArray());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 	public static Image sendTextAsImage(String text,Contact contact) {
-		return contact.uploadImage(textAsImage(text));
+		return contact.uploadImage(Utils.ImageResource(Utils.textAsImage(text)));
+	}
+	/**
+	 * @param contact  
+	 */
+	public static com.khjxiaogu.TableGames.platform.message.Image sendTextAsImage(String text,AbstractRoom contact) {
+		return new com.khjxiaogu.TableGames.platform.message.Image(Utils.textAsImage(text));
 	}
 	public static BufferedImage textAsImage(String text) {
 		String[] lines = text.split("\n");
@@ -75,42 +116,11 @@ public class Utils {
 		g2d.setColor(Color.BLACK);
 		int i = 0;
 		for (String line : lines) {
-			g2d.drawString(line, 0, fm.getAscent() + fm.getHeight() * (i++));
+			g2d.drawString(line, 0, fm.getAscent() + fm.getHeight() * i++);
 		}
 
 		g2d.dispose();
 		return img;
 	}
-	/*public static void main(String[] args) {
-		String atmsg="Hi,@awa How are you@pwp ";
-		Pattern pat=Pattern.compile("@[^\\s]+");
-		Matcher mc=pat.matcher(atmsg);
-		int last=0;
-		MessageChainBuilder mcb=new MessageChainBuilder();
-		while(mc.find()) {
-			int crn=mc.start();
-			mcb.append(atmsg.substring(last,crn));
-			last=mc.end();
-			mcb.add(getAtByName(mc.group().substring(1)));
-		}
-		System.out.println(mcb.asMessageChain().toString());
-	}*/
-	public static At getAtByName(String name) {
-		Constructor<At> ctor = null;
-		try {
-			ctor = At.class.getDeclaredConstructor(long.class,String.class);
-		} catch (NoSuchMethodException | SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		ctor.setAccessible(true);
-		try {
-			return ctor.newInstance(0, name);
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
+
 }

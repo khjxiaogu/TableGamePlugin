@@ -1,8 +1,8 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class GraveKeeper extends Villager {
 
@@ -15,9 +15,7 @@ public class GraveKeeper extends Villager {
 		super(game, p);
 	}
 
-	public GraveKeeper(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	@Override
 	public String getJobDescription() {

@@ -5,9 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.khjxiaogu.TableGames.BotPlayer;
+import com.khjxiaogu.TableGames.platform.mirai.MiraiBotPlayer;
 
-public class GenericBot extends BotPlayer {
+public class GenericBot extends MiraiBotPlayer {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6801990493391227114L;
 	WerewolfGame game;
 	static Random rnx = new SecureRandom();
 	public static final String talkKey = "五分钟时间进行陈述";
@@ -75,7 +79,7 @@ public class GenericBot extends BotPlayer {
 	@Override
 	public void sendAtAsBot(String msg) {
 		game.getScheduler().executeLater(() -> {
-			super.sendAtAsBot("@" + game.getGroup().getBotAsMember().getNameCard() + msg);
+			super.sendAtAsBot("@" +game.getGroup().getHostNameCard() + msg);
 		}, 6000);
 	}
 

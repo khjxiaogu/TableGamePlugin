@@ -12,7 +12,7 @@ import com.khjxiaogu.TableGames.Player;
 
 
 public class VoteHelper<T extends Player> {
-	public Map<T,Double> voted=new ConcurrentHashMap<>(); 
+	public Map<T,Double> voted=new ConcurrentHashMap<>();
 	public Set<T> tovote=Collections.newSetFromMap(new ConcurrentHashMap<>());
 	boolean isEnded=true;
 	Thread hintThread;
@@ -33,7 +33,7 @@ public class VoteHelper<T extends Player> {
 		scheduler.execute(()->{
 			hintThread=Thread.currentThread();
 			int it=0;
-			while(tovote.size()>0&&(!isEnded)) {
+			while(tovote.size()>0&&!isEnded) {
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {}
@@ -80,7 +80,7 @@ public class VoteHelper<T extends Player> {
 			if(!tovote.remove(src))return false;
 			double vnum=voted.getOrDefault(id,0D);
 			voted.put(id,vnum+ticket);
-			if(tovote.size()==0) 
+			if(tovote.size()==0)
 				return true;
 			return false;
 		}
@@ -107,8 +107,9 @@ public class VoteHelper<T extends Player> {
 			if(votenum>=4&&lastmax<=1)
 				return vpl;
 			for(Map.Entry<T,Double> p:voted.entrySet()) {
-				if(p.getValue()==lastmax)
+				if(p.getValue()==lastmax) {
 					vpl.add(p.getKey());
+				}
 			}
 			return vpl;
 		}
@@ -123,8 +124,9 @@ public class VoteHelper<T extends Player> {
 			}
 			List<T> vpl=new ArrayList<>();
 			for(Map.Entry<T,Double> p:voted.entrySet()) {
-				if(p.getValue()==lastmax)
+				if(p.getValue()==lastmax) {
 					vpl.add(p.getKey());
+				}
 			}
 			return vpl;
 		}

@@ -5,19 +5,20 @@ import java.util.Collections;
 import java.util.List;
 
 import com.khjxiaogu.TableGames.Game;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary.WordPair;
 import com.khjxiaogu.TableGames.utils.GameUtils;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.utils.VoteHelper;
 import com.khjxiaogu.TableGames.utils.WaitThread;
-import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
-
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.At;
 
 public class UnderCoverHolder extends Game {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6609861527209746162L;
 	boolean isEnded;
 	List<UCPlayer> innos=Collections.synchronizedList(new ArrayList<>());
 	int spycount=1;
@@ -27,7 +28,7 @@ public class UnderCoverHolder extends Game {
 	List<Boolean> wds=Collections.synchronizedList(new ArrayList<>());
 	WaitThread wt=new WaitThread();
 	double pointspool=0;
-	public UnderCoverHolder(Group group, int cplayer) {
+	public UnderCoverHolder(AbstractRoom group, int cplayer) {
 		super(group, cplayer,2);
 		this.cplayer=cplayer;
 		wds.add(true);
@@ -58,8 +59,9 @@ public class UnderCoverHolder extends Game {
 	@Override
 	protected void doFinalize() {
 		isEnded=true;
-		for(UCPlayer in:innos)
+		for(UCPlayer in:innos) {
 			GameUtils.RemoveMember(in.getId());
+		}
 		super.doFinalize();
 	}
 	public UCPlayer getPlayerById(long id) {
@@ -70,16 +72,16 @@ public class UnderCoverHolder extends Game {
 		return null;
 	}
 	@Override
-	public boolean addMember(Member mem) {
-		if(this.getPlayerById(mem.getId())!=null) {
-			this.sendPublicMessage(new At(mem).plus("你已经报名了！"));
+	public boolean addMember(AbstractPlayer mem) {
+		if(getPlayerById(mem.getId())!=null) {
+			mem.sendPublic("你已经报名了！");
 			return false;
 		}
 		if(!GameUtils.tryAddMember(mem.getId())) {
-			this.sendPublicMessage(new At(mem).plus("你已参加其他游戏！"));
+			mem.sendPublic("你已参加其他游戏！");
 			return true;
 		}
-		mem.sendMessage("报名成功！");
+		mem.sendPrivate("报名成功！");
 		synchronized(wds) {
 			if(wds.size()<=0)return false;
 			if(wds.remove(0)) {
@@ -92,7 +94,7 @@ public class UnderCoverHolder extends Game {
 			}
 			return true;
 		}
-		
+
 	}
 
 	private void startGame() {
@@ -105,53 +107,56 @@ public class UnderCoverHolder extends Game {
 		startGame();
 	}
 	public void gameMain() {
-			WordPair wp=UnderCoverTextLibrary.getRandomPair();
-			for(UCPlayer inx:innos) {
-				if(inx.isDead)continue;
-				inx.onGameStart(wp);
-				ListenerUtils.registerListener(inx.getId(),getGroup(),(msg,type)->{
-					if(type==MsgType.AT) {
-						if(Utils.getPlainText(msg).equals("出局")) {
-							ListenerUtils.releaseListener(inx.getId());
-							inx.sendPublic("您已经出局");
-							inx.isDead=true;
-							boolean hasSpy=false;
-							int left=0;
+		WordPair wp=UnderCoverTextLibrary.getRandomPair();
+		for(UCPlayer inx:innos) {
+			if(inx.isDead) {
+				continue;
+			}
+			inx.onGameStart(wp);
+			getGroup().registerListener(inx.getId(),(msg,type)->{
+				if(type==MsgType.AT) {
+					if(Utils.getPlainText(msg).equals("出局")) {
+						getGroup().releaseListener(inx.getId());
+						inx.sendPublic("您已经出局");
+						inx.isDead=true;
+						boolean hasSpy=false;
+						int left=0;
+						for(UCPlayer in:innos) {
+							if(!in.isDead) {
+								left++;
+								hasSpy|=in.isSpy;
+							}
+						}
+						String status="";
+						if(hasSpy) {
+							if(left<=spycount+2) {
+								isEnded=true;
+								status="卧底胜利！";
+							}
+						}else {
+							isEnded=true;
+							status="卧底失败！";
+						}
+						if(isEnded) {
+							StringBuilder gr=new StringBuilder(status).append("\n游戏结果：");
 							for(UCPlayer in:innos) {
-								if(!in.isDead) {
-									left++;
-									hasSpy|=in.isSpy;
-								}
+								in.releaseListener();
+								gr.append("\n").append(in.getMemberString()).append(in.isSpy?" 是卧底":" 不是卧底");
 							}
-							String status="";
-							if(hasSpy) {
-								if(left<=spycount+2) {
-									this.isEnded=true;
-									status="卧底胜利！";
-								}
-							}else {
-								this.isEnded=true;
-								status=("卧底失败！"); 
-							}
-							if(this.isEnded) {
-								StringBuilder gr=new StringBuilder(status).append("\n游戏结果：");
-								for(UCPlayer in:innos) {
-									ListenerUtils.releaseListener(in.getId());
-									gr.append("\n").append(in.getMemberString()).append(in.isSpy?" 是卧底":" 不是卧底");
-								}
-								this.sendPublicMessage(Utils.sendTextAsImage(gr.toString(),this.getGroup()));
-								return;
-							}
-						}else if(Utils.getPlainText(msg).equals("发词")) {
-							WordPair wpx=UnderCoverTextLibrary.getRandomPair();
-							for(UCPlayer in:innos) {
-								if(!in.isDead)
-									in.onGameStart(wpx);
+							this.sendPublicMessage(Utils.sendTextAsImage(gr.toString(),getGroup()));
+							return;
+						}
+					}else if(Utils.getPlainText(msg).equals("发词")) {
+						WordPair wpx=UnderCoverTextLibrary.getRandomPair();
+						for(UCPlayer in:innos) {
+							if(!in.isDead) {
+								in.onGameStart(wpx);
 							}
 						}
 					}
-				});
-			}
+				}
+			});
+		}
 
 
 	}

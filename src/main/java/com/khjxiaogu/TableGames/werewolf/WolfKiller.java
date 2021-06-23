@@ -1,12 +1,12 @@
 package com.khjxiaogu.TableGames.werewolf;
 
-import com.khjxiaogu.TableGames.AbstractPlayer;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
 
-import net.mamoe.mirai.contact.Member;
+
 
 public class WolfKiller extends Villager {
 
@@ -19,9 +19,7 @@ public class WolfKiller extends Villager {
 		super(game, p);
 	}
 
-	public WolfKiller(WerewolfGame werewolfGame, Member member) {
-		super(werewolfGame, member);
-	}
+
 
 	private int lastkillId;
 
@@ -37,7 +35,7 @@ public class WolfKiller extends Villager {
 		super.StartTurn();
 		sendPrivate(game.getAliveList());
 		super.sendPrivate("猎魔人，你可以选择狩猎一个人。\n格式：“猎杀 qq号或者游戏号码”\n或者可以放弃，格式：“放弃”");
-		ListenerUtils.registerListener(getId(), (msg, type) -> {
+		super.registerListener( (msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
@@ -63,14 +61,14 @@ public class WolfKiller extends Villager {
 						game.logger.logSkill(this, p, "猎杀失败");
 						game.kill(this, DiedReason.Hunt_s);
 					}
-					ListenerUtils.releaseListener(getId());
+					super.releaseListener();
 					super.EndTurn();
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“猎杀 qq号或者游戏号码”！");
 				}
 			}
 			if (content.startsWith("放弃")) {
-				ListenerUtils.releaseListener(getId());
+				super.releaseListener();
 				super.sendPrivate("您已经放弃");
 				super.EndTurn();
 			}

@@ -3,24 +3,28 @@ package com.khjxiaogu.TableGames.undercover;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import com.khjxiaogu.TableGames.Game;
+import com.khjxiaogu.TableGames.TableGames;
 import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
+import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.message.At;
+import com.khjxiaogu.TableGames.platform.message.Text;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary.WordPair;
 import com.khjxiaogu.TableGames.utils.GameUtils;
-import com.khjxiaogu.TableGames.utils.ListenerUtils;
+import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.utils.VoteHelper;
 import com.khjxiaogu.TableGames.utils.WaitThread;
-import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
-import com.khjxiaogu.TableGames.TableGames;
 
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.contact.Member;
-import net.mamoe.mirai.message.data.At;
-import net.mamoe.mirai.message.data.MessageChainBuilder;
 
 public class UnderCoverGame extends Game {
-	
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7230131931848872043L;
 	boolean isEnded;
 	List<UCPlayer> innos=Collections.synchronizedList(new ArrayList<>());
 	int spycount=1;
@@ -30,7 +34,7 @@ public class UnderCoverGame extends Game {
 	List<Boolean> wds=Collections.synchronizedList(new ArrayList<>());
 	WaitThread wt=new WaitThread();
 	double pointspool=0;
-	public UnderCoverGame(Group group, int cplayer) {
+	public UnderCoverGame(AbstractRoom group, int cplayer) {
 		super(group, cplayer,2);
 		this.cplayer=cplayer;
 		wds.add(true);
@@ -57,8 +61,9 @@ public class UnderCoverGame extends Game {
 	@Override
 	protected void doFinalize() {
 		isEnded=true;
-		for(UCPlayer in:innos)
+		for(UCPlayer in:innos) {
 			GameUtils.RemoveMember(in.getId());
+		}
 		super.doFinalize();
 	}
 	public UCPlayer getPlayerById(long id) {
@@ -69,16 +74,16 @@ public class UnderCoverGame extends Game {
 		return null;
 	}
 	@Override
-	public boolean addMember(Member mem) {
-		if(this.getPlayerById(mem.getId())!=null) {
-			this.sendPublicMessage(new At(mem).plus("你已经报名了！"));
+	public boolean addMember(AbstractPlayer mem) {
+		if(getPlayerById(mem.getId())!=null) {
+			mem.sendPublic("你已经报名了！");
 			return false;
 		}
 		if(!GameUtils.tryAddMember(mem.getId())) {
-			this.sendPublicMessage(new At(mem).plus("你已参加其他游戏！"));
+			mem.sendPublic("你已参加其他游戏！");
 			return true;
 		}
-		mem.sendMessage("报名成功！");
+		mem.sendPrivate("报名成功！");
 		synchronized(wds) {
 			if(wds.size()<=0)return false;
 			if(wds.remove(0)) {
@@ -91,7 +96,7 @@ public class UnderCoverGame extends Game {
 			}
 			return true;
 		}
-		
+
 	}
 
 	private void startGame() {
@@ -111,27 +116,34 @@ public class UnderCoverGame extends Game {
 				changeWordNeeded=false;
 				WordPair wp=UnderCoverTextLibrary.getRandomPair();
 				for(UCPlayer in:innos) {
-					if(!in.isDead)
+					if(!in.isDead) {
 						in.onGameStart(wp);
+					}
 				}
-			}else
+			} else {
 				changeWordNeeded=true;
+			}
 			for(UCPlayer in:innos) {
-				if(in.isDead)continue;
+				if(in.isDead) {
+					continue;
+				}
 				in.sendPublic("请在1分钟内描述你的词语，可以随时@我结束描述");
-				ListenerUtils.registerListener(in.getId(),getGroup(),(msg,type)->{
-					if(type==MsgType.AT)
+				getGroup().registerListener(in.getId(),(msg,type)->{
+					if(type==MsgType.AT) {
 						wt.stopWait();
+					}
 				});
 				wt.startWait(60000);
-				ListenerUtils.releaseListener(in.getId());
+				getGroup().releaseListener(in.getId());
 			}
 			vu.clear();
 			for(UCPlayer in:innos) {
-				if(in.isDead)continue;
+				if(in.isDead) {
+					continue;
+				}
 				vu.addToVote(in);
-				ListenerUtils.registerListener(in.getId(),getGroup(),(msg,type)->{
-					At at=msg.first(At.Key);
+				getGroup().registerListener(in.getId(),(msg,type)->{
+					At at=msg.first(At.class);
 					if(at==null)return;
 					String content=Utils.getPlainText(msg);
 					if(content.startsWith("投票")) {
@@ -140,16 +152,18 @@ public class UnderCoverGame extends Game {
 							in.sendPublic("选择的玩家非游戏玩家，请重新输入");
 							return;
 						}
-						ListenerUtils.releaseListener(in.getId());
-						in.sendPublic(new MessageChainBuilder().append("已经投票给").append(at).asMessageChain());
-						if(vu.vote(in,p))
+						getGroup().releaseListener(in.getId());
+						in.sendPublic(new Text("已经投票给").asMessage().append(at));
+						if(vu.vote(in,p)) {
 							wt.stopWait();
+						}
 					}else if(type==MsgType.AT&&content.startsWith("弃权")) {
-						ListenerUtils.releaseListener(in.getId());
+						getGroup().releaseListener(in.getId());
 						in.sendPublic("已弃权");
 						vu.giveUp(in);
-						if(vu.finished())
+						if(vu.finished()) {
 							wt.stopWait();
+						}
 					}
 				});
 			}
@@ -167,7 +181,7 @@ public class UnderCoverGame extends Game {
 			boolean hasSpy=false;
 			int left=0;
 			for(UCPlayer in:innos) {
-				ListenerUtils.releaseListener(in.getId());
+				getGroup().releaseListener(in.getId());
 				if(!in.isDead) {
 					left++;
 					hasSpy|=in.isSpy;
@@ -176,7 +190,7 @@ public class UnderCoverGame extends Game {
 			String status="";
 			if(hasSpy) {
 				if(left<=spycount+2) {
-					this.isEnded=true;
+					isEnded=true;
 					status="卧底胜利！";
 					GameData gd=TableGames.db.getGame(getName());
 					double ppp=pointspool/spycount;
@@ -188,8 +202,8 @@ public class UnderCoverGame extends Game {
 					}
 				}
 			}else {
-				this.isEnded=true;
-				status=("卧底失败！"); 
+				isEnded=true;
+				status="卧底失败！";
 				GameData gd=TableGames.db.getGame(getName());
 				double ppp=pointspool/(cplayer-spycount);
 				for(UCPlayer in:innos) {
@@ -199,12 +213,12 @@ public class UnderCoverGame extends Game {
 					gd.setPlayer(in.getId(),ucpd);
 				}
 			}
-			if(this.isEnded) {
+			if(isEnded) {
 				StringBuilder gr=new StringBuilder(status).append("\n游戏结果：");
 				for(UCPlayer in:innos) {
 					gr.append("\n").append(in.getMemberString()).append(in.isSpy?" 是卧底":" 不是卧底");
 				}
-				this.sendPublicMessage(Utils.sendTextAsImage(gr.toString(),this.getGroup()));
+				this.sendPublicMessage(Utils.sendTextAsImage(gr.toString(),getGroup()));
 				break;
 			}
 		}
