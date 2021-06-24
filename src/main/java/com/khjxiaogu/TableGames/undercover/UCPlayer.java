@@ -1,8 +1,8 @@
 package com.khjxiaogu.TableGames.undercover;
 
-import com.khjxiaogu.TableGames.Player;
 import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary.WordPair;
+import com.khjxiaogu.TableGames.utils.Player;
 
 public class UCPlayer extends Player{
 	/**

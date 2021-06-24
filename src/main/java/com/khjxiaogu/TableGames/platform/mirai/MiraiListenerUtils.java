@@ -2,8 +2,8 @@ package com.khjxiaogu.TableGames.platform.mirai;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.platform.message.Message;
+import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 import com.khjxiaogu.TableGames.utils.MessageListener;
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;

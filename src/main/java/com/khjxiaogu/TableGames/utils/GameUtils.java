@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 
 import net.mamoe.mirai.contact.Group;

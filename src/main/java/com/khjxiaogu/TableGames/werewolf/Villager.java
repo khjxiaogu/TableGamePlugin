@@ -17,7 +17,7 @@ import com.khjxiaogu.TableGames.werewolf.WerewolfGame.WaitReason;
 
 
 
-public class Villager extends com.khjxiaogu.TableGames.Player implements Serializable {
+public class Villager extends com.khjxiaogu.TableGames.utils.Player implements Serializable {
 	/**
 	 *
 	 */

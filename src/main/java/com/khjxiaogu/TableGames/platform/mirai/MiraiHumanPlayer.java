@@ -5,9 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.platform.message.At;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
+import com.khjxiaogu.TableGames.utils.Game;
 
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;

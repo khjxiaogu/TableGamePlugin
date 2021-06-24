@@ -1,4 +1,4 @@
-package com.khjxiaogu.TableGames;
+package com.khjxiaogu.TableGames.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

@@ -1,4 +1,4 @@
-package com.khjxiaogu.TableGames;
+package com.khjxiaogu.TableGames.utils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

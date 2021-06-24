@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
-import com.khjxiaogu.TableGames.Player;
-
 
 public class VoteHelper<T extends Player> {
 	public Map<T,Double> voted=new ConcurrentHashMap<>();

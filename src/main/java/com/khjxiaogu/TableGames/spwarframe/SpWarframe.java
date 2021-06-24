@@ -1,9 +1,9 @@
 package com.khjxiaogu.TableGames.spwarframe;
 
-import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.spwarframe.role.Role;
+import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.utils.WaitThread;
 

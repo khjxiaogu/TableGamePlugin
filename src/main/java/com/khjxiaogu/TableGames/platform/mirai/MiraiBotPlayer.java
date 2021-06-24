@@ -2,11 +2,11 @@ package com.khjxiaogu.TableGames.platform.mirai;
 
 import java.io.Serializable;
 
-import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.Message;
 import com.khjxiaogu.TableGames.platform.message.Text;
+import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 
 import net.mamoe.mirai.contact.Group;

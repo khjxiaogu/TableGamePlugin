@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.khjxiaogu.TableGames.Player;
 import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.utils.Player;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 public class CluePlayer extends Player {

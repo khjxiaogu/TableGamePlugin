@@ -1,8 +1,8 @@
 package com.khjxiaogu.TableGames.platform;
 
-import com.khjxiaogu.TableGames.Game;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.mirai.MiraiListenerUtils;
+import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.MessageListener;
 
 
