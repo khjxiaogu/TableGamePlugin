@@ -8,8 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.khjxiaogu.TableGames.platform.AbstractPlayer;
-import com.khjxiaogu.TableGames.platform.message.Message;
-
+import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.TableGames.werewolf.WerewolfGame.DiedReason;
@@ -298,7 +297,7 @@ public class Villager extends com.khjxiaogu.TableGames.utils.Player implements S
 			game.startWait(60000,WaitReason.Generic);
 		}
 	}
-	public void onSheriffSkillListener(Message msg,MsgType type) {
+	public void onSheriffSkillListener(IMessageCompound msg,MsgType type) {
 		if(isSheriff) {
 			if (type != MsgType.PRIVATE)
 				return;
@@ -381,7 +380,7 @@ public class Villager extends com.khjxiaogu.TableGames.utils.Player implements S
 		game.startWait(300000, WaitReason.State);
 		onFinishTalk();
 	}
-	public void SheriffDeselect(Message msg, MsgType type) {
+	public void SheriffDeselect(IMessageCompound msg, MsgType type) {
 		if(type==MsgType.PRIVATE&&Utils.getPlainText(msg).startsWith("退选")) {
 			game.logger.logRaw(getNameCard()+"已退选");
 			this.sendPublic("已退选");

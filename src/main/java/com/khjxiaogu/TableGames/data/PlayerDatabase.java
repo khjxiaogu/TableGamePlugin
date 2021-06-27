@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.khjxiaogu.TableGames.TableGames;
+import com.khjxiaogu.TableGames.platform.mirai.MiraiMain;
 import com.khjxiaogu.TableGames.undercover.UnderCoverPlayerData;
 import com.khjxiaogu.TableGames.werewolf.WerewolfPlayerData;
 
@@ -78,16 +78,16 @@ public class PlayerDatabase {
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
-			TableGames.plugin.getLogger().error("SQLITE链接失败！");
+			MiraiMain.plugin.getLogger().error("SQLITE链接失败！");
 			return;
 		}
-		TableGames.plugin.getLogger().info("正在链接SQLITE信息数据库...");
+		MiraiMain.plugin.getLogger().info("正在链接SQLITE信息数据库...");
 		try {
 			database = DriverManager.getConnection("jdbc:sqlite:" + new File(datapath, "profile.db"));
 			database.createStatement().execute(PlayerDatabase.createPoM);
 		} catch (Exception e) {
-			TableGames.plugin.getLogger().error(e);
-			TableGames.plugin.getLogger().error("信息数据库初始化失败！");
+			MiraiMain.plugin.getLogger().error(e);
+			MiraiMain.plugin.getLogger().error("信息数据库初始化失败！");
 		}
 	}
 	public JsonObject getData(long qq,String game) {

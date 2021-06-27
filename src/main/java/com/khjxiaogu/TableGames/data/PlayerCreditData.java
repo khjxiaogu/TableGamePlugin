@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.JsonParser;
-import com.khjxiaogu.TableGames.TableGames;
+import com.khjxiaogu.TableGames.platform.mirai.MiraiMain;
 
 public class PlayerCreditData {
 
@@ -22,16 +22,16 @@ public class PlayerCreditData {
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch (ClassNotFoundException e) {
-			TableGames.plugin.getLogger().error("SQLITE链接失败！");
+			MiraiMain.plugin.getLogger().error("SQLITE链接失败！");
 			return;
 		}
-		TableGames.plugin.getLogger().info("正在链接SQLITE积分数据库...");
+		MiraiMain.plugin.getLogger().info("正在链接SQLITE积分数据库...");
 		try {
 			database = DriverManager.getConnection("jdbc:sqlite:" + new File(datapath, "credit.db"));
 			database.createStatement().execute(createPoM);
 		} catch (Exception e) {
-			TableGames.plugin.getLogger().error(e);
-			TableGames.plugin.getLogger().error("信息数据库初始化失败！");
+			MiraiMain.plugin.getLogger().error(e);
+			MiraiMain.plugin.getLogger().error("信息数据库初始化失败！");
 		}
 		new Thread(()->{
 			while(true) {

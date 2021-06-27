@@ -14,7 +14,7 @@ public class Text implements IMessage {
 	public void setText(String text) {
 		this.text = text;
 	}
-	public Message asMessage() {
-		return new Message().append(this);
+	public MessageCompound asMessage() {
+		return new MessageCompound().append(this);
 	}
 }

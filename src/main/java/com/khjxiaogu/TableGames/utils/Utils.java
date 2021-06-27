@@ -15,23 +15,45 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
-import com.khjxiaogu.TableGames.platform.message.Message;
-
+import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import net.mamoe.mirai.contact.Contact;
+import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Image;
+import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChain;
-import net.mamoe.mirai.message.data.MessageContent;
 import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.ExternalResource;
 
 public class Utils {
 	public static String getPlainText(MessageChain msg) {
-		PlainText pt = (PlainText) msg.get(MessageContent.Key);
+		/*PlainText pt = (PlainText) msg.get(PlainText.Key);
+		if (pt == null)
+			return "";
+		return pt.getContent().trim();*/
+		PlainText pt = null;
+		for(Message m:msg) {
+			if(m instanceof PlainText)
+				pt=(PlainText) m;
+		}
 		if (pt == null)
 			return "";
 		return pt.getContent().trim();
 	}
-	public static String getPlainText(Message msg) {
+	public static At getAt(MessageChain msg) {
+		for(Message m:msg) {
+			if(m instanceof At)
+				return (At) m;
+		}
+		return null;
+	}
+	public static Image getImage(MessageChain msg) {
+		for(Message m:msg) {
+			if(m instanceof At)
+				return (Image) m;
+		}
+		return null;
+	}
+	public static String getPlainText(IMessageCompound msg) {
 		return msg.getText().trim();
 	}
 

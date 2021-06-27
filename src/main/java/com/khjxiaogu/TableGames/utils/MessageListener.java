@@ -1,6 +1,6 @@
 package com.khjxiaogu.TableGames.utils;
 
-import com.khjxiaogu.TableGames.platform.message.Message;
+import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 
 @FunctionalInterface
 public interface MessageListener{
@@ -9,5 +9,5 @@ public interface MessageListener{
 		PRIVATE,
 		PUBLIC,
 	}
-	void handle(Message msg,MsgType type);
+	void handle(IMessageCompound msg,MsgType type);
 }

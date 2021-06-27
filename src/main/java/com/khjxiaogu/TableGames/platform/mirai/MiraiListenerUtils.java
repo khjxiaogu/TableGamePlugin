@@ -2,7 +2,7 @@ package com.khjxiaogu.TableGames.platform.mirai;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.khjxiaogu.TableGames.platform.message.Message;
+import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 import com.khjxiaogu.TableGames.utils.MessageListener;
@@ -24,7 +24,7 @@ public class MiraiListenerUtils {
 		}
 
 		@Override
-		public void handle(Message msg, MsgType type) {
+		public void handle(IMessageCompound msg, MsgType type) {
 			ml.handle(msg, type);
 		}
 	}
@@ -50,8 +50,8 @@ public class MiraiListenerUtils {
 		MiraiListenerUtils.mls.remove(id);
 	}
 
-	public static boolean dispatch(Long id, MsgType type, Message message) {
-		if (message.getText().startsWith("重置")) {
+	public static boolean dispatch(Long id, MsgType type, IMessageCompound messageCompound) {
+		if (messageCompound.getText().startsWith("重置")) {
 			for (Game g : GameUtils.getGames().values()) {
 				if (g.isAlive())
 					if (g.onReAttach(id)) {
@@ -64,12 +64,12 @@ public class MiraiListenerUtils {
 		System.out.println("dispatching " + id);
 		if (ml == null || !ml.isValid)
 			return false;
-		ml.handle(message, type);
+		ml.handle(messageCompound, type);
 		System.out.println("dispatched " + id);
 		return true;
 	}
 
-	public static boolean dispatch(Long id, Group g, MsgType type, Message msg) {
+	public static boolean dispatch(Long id, Group g, MsgType type, IMessageCompound msg) {
 		MiraiListenerUtils.MessageListenerWrapper ml = MiraiListenerUtils.mls.get(id);
 		if (ml == null || !ml.isValid)
 			return false;

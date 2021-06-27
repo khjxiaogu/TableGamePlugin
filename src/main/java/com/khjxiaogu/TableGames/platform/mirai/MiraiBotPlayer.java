@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
-import com.khjxiaogu.TableGames.platform.message.Message;
+import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
+import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Text;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
@@ -48,8 +49,8 @@ public class MiraiBotPlayer extends MiraiPlayer implements Serializable {
 	@Override
 	public void sendPublic(IMessage str) {
 		sg.getScheduler().executeLater(()->{
-			if(str instanceof Message) {
-				onPublic(((Message) str).getText());
+			if(str instanceof MessageCompound) {
+				onPublic(((IMessageCompound) str).getText());
 			} else if(str instanceof Text) {
 				onPublic(((Text) str).getText());
 			}
@@ -68,7 +69,7 @@ public class MiraiBotPlayer extends MiraiPlayer implements Serializable {
 	public void onPrivate(String msg) {
 
 	}
-	public void sendAsBot(Message msg,MsgType type) {
+	public void sendAsBot(IMessageCompound msg,MsgType type) {
 		MiraiListenerUtils.dispatch(getId(), type, msg);
 	}
 	public void sendAsBot(String msg) {
@@ -134,8 +135,8 @@ public class MiraiBotPlayer extends MiraiPlayer implements Serializable {
 	@Override
 	public void sendPrivate(IMessage str) {
 		sg.getScheduler().executeLater(()->{
-			if(str instanceof Message) {
-				onPrivate(((Message) str).getText());
+			if(str instanceof MessageCompound) {
+				onPrivate(((IMessageCompound) str).getText());
 			} else if(str instanceof Text) {
 				onPrivate(((Text) str).getText());
 			}

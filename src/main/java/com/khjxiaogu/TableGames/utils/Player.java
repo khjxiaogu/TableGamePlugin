@@ -3,7 +3,7 @@ package com.khjxiaogu.TableGames.utils;
 import java.io.Serializable;
 import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
-import com.khjxiaogu.TableGames.platform.message.Message;
+import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.platform.mirai.MiraiListenerUtils;
 
 public class Player implements Serializable{
@@ -21,7 +21,7 @@ public class Player implements Serializable{
 	public void sendPublic(String str) {
 		member.sendPublic(str);
 	}
-	public void sendPublic(Message msg) {
+	public void sendPublic(MessageCompound msg) {
 		member.sendPublic(msg);
 	}
 	public IMessage getAt() {

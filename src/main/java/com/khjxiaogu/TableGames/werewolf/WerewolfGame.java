@@ -16,11 +16,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.khjxiaogu.TableGames.TableGames;
 import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
 import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
-import com.khjxiaogu.TableGames.platform.message.Message;
+import com.khjxiaogu.TableGames.platform.message.MessageCompound;
+import com.khjxiaogu.TableGames.platform.mirai.MiraiMain;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 
@@ -993,7 +993,7 @@ public class WerewolfGame extends Game implements Serializable{
 	}
 	public void onDawn() {
 		try {
-			FileOutputStream fileOut = new FileOutputStream(new File(TableGames.plugin.getDataFolder(),""+getGroup()+".game"));
+			FileOutputStream fileOut = new FileOutputStream(new File(MiraiMain.plugin.getDataFolder(),""+getGroup()+".game"));
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(this);
 		} catch (IOException e) {
@@ -1172,7 +1172,7 @@ public class WerewolfGame extends Game implements Serializable{
 				logger.logTurn(day, "警长同票PK");
 				sameTurn = true;
 				this.sendPublicMessage("同票，请做最终陈述。");
-				Message mcb = new Message();
+				MessageCompound mcb = new MessageCompound();
 				mcb.append("开始投票，请在两分钟内投给以下人物其中之一：\n");
 				canVote.clear();
 				canVote.addAll(ps);
@@ -1428,7 +1428,7 @@ public class WerewolfGame extends Game implements Serializable{
 				logger.logTurn(day, "同票PK");
 				sameTurn = true;
 				this.sendPublicMessage("同票，请做最终陈述。");
-				Message mcb = new Message();
+				MessageCompound mcb = new MessageCompound();
 				mcb.append("开始投票，请在两分钟内投给以下人物其中之一：\n");
 				// muteAll(false);
 				canVote.addAll(ps);
@@ -1550,7 +1550,7 @@ public class WerewolfGame extends Game implements Serializable{
 			logger.title(status);
 			GameData gd = null;
 			if (doStat && playerlist.size() >= 6) {
-				gd = TableGames.db.getGame(getName());
+				gd = MiraiMain.db.getGame(getName());
 			}
 			removeAllListeners();
 			StringBuilder mc = new StringBuilder();
@@ -1580,7 +1580,7 @@ public class WerewolfGame extends Game implements Serializable{
 			if (pointpool > 0&&winpls.size()>0) {
 				int ppp = pointpool / winpls.size();
 				for (Villager p : winpls) {
-					TableGames.credit.get(p.getId()).givePT(ppp);
+					MiraiMain.credit.get(p.getId()).givePT(ppp);
 				}
 
 			}

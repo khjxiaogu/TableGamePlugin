@@ -8,7 +8,7 @@
 	<name>qq多人桌游</name>
 	<build>
 		<finalName>${project.name}-${project.version}</finalName>
-		<sourceDirectory>src</sourceDirectory>
+		<sourceDirectory>src/main/java</sourceDirectory>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -17,21 +17,61 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>templating-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+					<execution>
+						<id>filter-src</id>
+						<goals>
+							<goal>filter-sources</goal>
+						</goals>
+						<configuration>
+							<delimiters>
+								<delimiter>@</delimiter>
+							</delimiters>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <executions> 
+				<execution> <phase>package</phase> <goals> <goal>single</goal> </goals> </execution> 
+				</executions> <configuration> <descriptorRefs> <descriptorRef>jar-with-dependencies</descriptorRef> 
+				</descriptorRefs> <appendAssemblyId>false</appendAssemblyId> </configuration> 
+				</plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.1</version>
+
+				<configuration>
+					<minimizeJar>false</minimizeJar>
+					<createDependencyReducedPom>true</createDependencyReducedPom>
+					<artifactSet>
+						<includes>
+							<include>com.google.code.gson:gson</include>
+							<include>org.xerial:sqlite-jdbc</include>
+						</includes>
+					</artifactSet>
+					<relocations>
+						<relocation>
+							<pattern>com.google.gson</pattern>
+							<shadedPattern>${project.groupId}.${project.artifactId}.gson</shadedPattern>
+						</relocation>
+						<!-- <relocation>
+							<pattern>org.sqlite</pattern>
+							<shadedPattern>${project.groupId}.${project.artifactId}.sqlite</shadedPattern>
+						</relocation>-->
+					</relocations>
+				</configuration>
 				<executions>
 					<execution>
 						<phase>package</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>shade</goal>
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<appendAssemblyId>false</appendAssemblyId>
-				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -64,6 +104,11 @@
 		</plugins>
 	</build>
 	<properties>
+		<mirai.plugin.main>${project.groupId}.${project.artifactId}.platform.mirai.MiraiMain</mirai.plugin.main>
+		<mirai.plugin.author>khjxiaogu</mirai.plugin.author>
+		<mirai.plugin.name>${project.name}</mirai.plugin.name>
+		<mirai.plugin.id>${project.groupId}.mirai.${project.artifactId}</mirai.plugin.id>
+		<mirai.plugin.info>${project.description}</mirai.plugin.info>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
@@ -18,12 +20,40 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
+	private static final Map<Long,MiraiGroup> cache=new HashMap<>();
 	private long RobotId;
 	private long groupId;
 	transient private Group group;
-	public MiraiGroup(Group group) {
+	private MiraiGroup(Group group) {
 		this.group=group;
+	}
+	public static MiraiGroup createInstance(Group g) {
+		MiraiGroup mg=cache.get(g.getId());
+		if(mg!=null)return mg;
+		mg=new MiraiGroup(g);
+		cache.put(g.getId(),mg);
+		return mg;
+	}
+	@Override
+	public int hashCode() {
+		return group.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MiraiGroup other = (MiraiGroup) obj;
+		if (group == null) {
+			if (other.group != null)
+				return false;
+		} else if (!group.equals(other.group))
+			return false;
+		return true;
 	}
 
 	private void readObject(ObjectInputStream aInputStream) throws ClassNotFoundException, IOException

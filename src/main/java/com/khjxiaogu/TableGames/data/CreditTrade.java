@@ -3,7 +3,7 @@ package com.khjxiaogu.TableGames.data;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import com.khjxiaogu.TableGames.TableGames;
+import com.khjxiaogu.TableGames.platform.mirai.MiraiMain;
 import com.khjxiaogu.TableGames.utils.ImagePrintStream;
 
 public class CreditTrade {
@@ -29,7 +29,7 @@ public class CreditTrade {
 		CreditTrade.trades.add(this);
 	}
 	public boolean execute(long qq) {
-		PlayerCredit pcd=TableGames.credit.get(qq);
+		PlayerCredit pcd=MiraiMain.credit.get(qq);
 		if(pcd.withdrawPT(pt)>=0) {
 			pcd.giveItem(itm, cnt);
 			return true;

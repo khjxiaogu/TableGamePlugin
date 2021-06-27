@@ -36,6 +36,28 @@ public class MiraiHumanPlayer extends MiraiPlayer implements Serializable {
 		aOutputStream.writeLong(member.getGroup().getId());
 		aOutputStream.writeLong(member.getId());
 	}
+	@Override
+	public int hashCode() {
+		return member.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MiraiHumanPlayer other = (MiraiHumanPlayer) obj;
+		if (member == null) {
+			if (other.member != null)
+				return false;
+		} else if (!member.equals(other.member))
+			return false;
+		return true;
+	}
+
 	public MiraiHumanPlayer(NormalMember member) {
 		super(member.getGroup());
 		this.member = member;

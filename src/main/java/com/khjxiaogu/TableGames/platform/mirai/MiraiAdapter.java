@@ -3,8 +3,9 @@ package com.khjxiaogu.TableGames.platform.mirai;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.message.At;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
+import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Image;
-import com.khjxiaogu.TableGames.platform.message.Message;
+import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Text;
 
 import net.mamoe.mirai.Bot;
@@ -22,10 +23,7 @@ public class MiraiAdapter {
 
 	private IMessage handleMessage(net.mamoe.mirai.message.data.Message msg,Bot b) {
 		if(msg instanceof MessageChain) {
-			Message rm=new Message();
-			for(net.mamoe.mirai.message.data.Message single:(MessageChain)msg) {
-				rm.append(handleMessage(single,b));
-			}
+			MiraiMessageCompound rm=new MiraiMessageCompound((MessageChain) msg,b);
 			return rm;
 		}else if(msg instanceof PlainText)
 			return new Text(((PlainText)msg).getContent());
@@ -36,9 +34,9 @@ public class MiraiAdapter {
 		return new MiraiPlatformMessage(msg);
 	}
 	private net.mamoe.mirai.message.data.Message handleMessage(IMessage msg,Group g) {
-		if(msg instanceof Message) {
+		if(msg instanceof MessageCompound) {
 			MessageChainBuilder rm=new MessageChainBuilder();
-			for(IMessage single:(Message)msg) {
+			for(IMessage single:(IMessageCompound)msg) {
 				rm.append(handleMessage(single,g));
 			}
 			return rm.asMessageChain();

@@ -1,5 +1,5 @@
-name: ${project.artifactId}
-author: "khjxiaogu"
+name: ${mirai.plugin.name}
+author: ${mirai.plugin.author}
 version: ${project.version}
-main: ${project.groupId}.${project.artifactId}.${project.artifactId}
-info: ""
+main: ${mirai.plugin.main}
+info: ${mirai.plugin.info}

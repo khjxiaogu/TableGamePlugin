@@ -7,9 +7,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
-
-import net.mamoe.mirai.contact.Group;
-
 public class GameUtils {
 
 	static Map<AbstractRoom, Game> gs = new ConcurrentHashMap<>();
@@ -51,7 +48,7 @@ public class GameUtils {
 			}
 			T ng = null;
 			try {
-				ng = class1.getConstructor(Group.class, int.class).newInstance(group, count);
+				ng = class1.getConstructor(AbstractRoom.class, int.class).newInstance(group, count);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				// TODO Auto-generated catch block
@@ -70,7 +67,7 @@ public class GameUtils {
 			}
 			T ng = null;
 			try {
-				ng = gameClass.getConstructor(Group.class, String[].class).newInstance(gp, args);
+				ng = gameClass.getConstructor(AbstractRoom.class, String[].class).newInstance(gp, args);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				// TODO Auto-generated catch block
@@ -89,7 +86,7 @@ public class GameUtils {
 			}
 			T ng = null;
 			try {
-				ng = gameClass.getConstructor(Group.class,int.class,Map.class).newInstance(gp,cplayer, args);
+				ng = gameClass.getConstructor(AbstractRoom.class,int.class,Map.class).newInstance(gp,cplayer, args);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				// TODO Auto-generated catch block

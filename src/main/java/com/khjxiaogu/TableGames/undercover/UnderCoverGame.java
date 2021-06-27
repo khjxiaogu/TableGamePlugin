@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.khjxiaogu.TableGames.TableGames;
 import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
 import com.khjxiaogu.TableGames.platform.AbstractPlayer;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.message.At;
 import com.khjxiaogu.TableGames.platform.message.Text;
+import com.khjxiaogu.TableGames.platform.mirai.MiraiMain;
 import com.khjxiaogu.TableGames.undercover.UnderCoverTextLibrary.WordPair;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
@@ -192,24 +192,24 @@ public class UnderCoverGame extends Game {
 				if(left<=spycount+2) {
 					isEnded=true;
 					status="卧底胜利！";
-					GameData gd=TableGames.db.getGame(getName());
+					GameData gd=MiraiMain.db.getGame(getName());
 					double ppp=pointspool/spycount;
 					for(UCPlayer in:innos) {
 						UnderCoverPlayerData ucpd=gd.getPlayer(in.getId(),UnderCoverPlayerData.class);
 						ucpd.log(in.isSpy,true,in.isDead);
-						TableGames.credit.get(in.getId()).givePT(ppp);
+						MiraiMain.credit.get(in.getId()).givePT(ppp);
 						gd.setPlayer(in.getId(),ucpd);
 					}
 				}
 			}else {
 				isEnded=true;
 				status="卧底失败！";
-				GameData gd=TableGames.db.getGame(getName());
+				GameData gd=MiraiMain.db.getGame(getName());
 				double ppp=pointspool/(cplayer-spycount);
 				for(UCPlayer in:innos) {
 					UnderCoverPlayerData ucpd=gd.getPlayer(in.getId(),UnderCoverPlayerData.class);
 					ucpd.log(in.isSpy,false,in.isDead);
-					TableGames.credit.get(in.getId()).givePT(ppp);
+					MiraiMain.credit.get(in.getId()).givePT(ppp);
 					gd.setPlayer(in.getId(),ucpd);
 				}
 			}
