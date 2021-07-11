@@ -1,6 +1,5 @@
 package com.khjxiaogu.TableGames.utils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -40,58 +39,37 @@ public class GameUtils {
 		return false;
 	}
 
-	public static <T extends Game> T createGame(Class<T> class1, AbstractRoom group, int count) {
+	public static <T extends Game> T createGame(GameCreater<T> gc, AbstractRoom group, int count) {
 		Game g = GameUtils.getGames().get(group);
 		synchronized (GameUtils.getGames()) {
 			if (g != null && g.isAlive()) {
 				g.forceStop();
 			}
-			T ng = null;
-			try {
-				ng = class1.getConstructor(AbstractRoom.class, int.class).newInstance(group, count);
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			T ng = gc.createGame(group, count);
 			GameUtils.getGames().put(group, ng);
 			return ng;
 		}
 	}
 
-	public static <T extends Game> T createGame(Class<T> gameClass, AbstractRoom gp, String... args) {
+	public static <T extends Game> T createGame(GameCreater<T> gc, AbstractRoom gp, String... args) {
 		Game g = GameUtils.getGames().get(gp);
 		synchronized (GameUtils.getGames()) {
 			if (g != null && g.isAlive()) {
 				g.forceStop();
 			}
-			T ng = null;
-			try {
-				ng = gameClass.getConstructor(AbstractRoom.class, String[].class).newInstance(gp, args);
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			T ng =gc.createGame(gp, args);
 			GameUtils.getGames().put(gp, ng);
 			return ng;
 		}
 	}
 
-	public static <T extends Game> T createGame(Class<T> gameClass, AbstractRoom gp,int cplayer,Map<String,String> args) {
+	public static <T extends Game> T createGame(GameCreater<T> gc, AbstractRoom gp,int cplayer,Map<String,String> args) {
 		Game g = GameUtils.getGames().get(gp);
 		synchronized (GameUtils.getGames()) {
 			if (g != null && g.isAlive()) {
 				g.forceStop();
 			}
-			T ng = null;
-			try {
-				ng = gameClass.getConstructor(AbstractRoom.class,int.class,Map.class).newInstance(gp,cplayer, args);
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			T ng = gc.createGame(gp, cplayer, args);
 			GameUtils.getGames().put(gp, ng);
 			return ng;
 		}

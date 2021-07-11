@@ -18,10 +18,6 @@ public class WaitThread {
 	 * time: 2020年10月19日
 	 */
 	public class TerminatedException extends RuntimeException{
-
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 	}

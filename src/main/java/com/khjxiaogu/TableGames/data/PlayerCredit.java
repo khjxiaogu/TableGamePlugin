@@ -5,12 +5,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.khjxiaogu.TableGames.utils.TimeUtil;
 
 public class PlayerCredit {
 	Map<String,Integer> items=new ConcurrentHashMap<>();
 	double point=0;
 	Boolean changed=false;
 	int unusedsince=0;
+	long canPlayIn=0;
 	public PlayerCredit() {
 
 	}
@@ -19,6 +21,8 @@ public class PlayerCredit {
 			if(!jo.has("point"))return;
 			point=jo.get("point").getAsInt();
 			items.clear();
+			if(jo.has("baned"))
+			canPlayIn=jo.get("baned").getAsLong();
 			JsonObject jx=jo.get("items").getAsJsonObject();
 			for(Map.Entry<String,JsonElement> je:jx.entrySet()) {
 				items.put(je.getKey(),je.getValue().getAsInt());
@@ -31,6 +35,7 @@ public class PlayerCredit {
 			jo.addProperty("point",point);
 			JsonObject its=new JsonObject();
 			jo.add("items",its);
+			jo.addProperty("baned", canPlayIn);
 			for(Map.Entry<String,Integer> je:items.entrySet()) {
 				its.addProperty(je.getKey(),je.getValue());
 			}
@@ -38,8 +43,22 @@ public class PlayerCredit {
 			return jo;
 		}
 	}
+	public void addBan(long time) {
+		assumeChange();
+		long now=TimeUtil.getTime();
+		if(canPlayIn>now) 
+			canPlayIn+=time;
+		else
+			canPlayIn=time+now;
+	}
+	public long isBanned() {
+		long now=TimeUtil.getTime();
+		if(canPlayIn>now)
+			return canPlayIn;
+		return 0;
+	}
 	public static double normalizedb(double d) {
-		return Math.round(d*100)/100;
+		return Math.round(d*100)/100D;
 	}
 	public boolean hasChange() {
 		return changed;
@@ -126,17 +145,23 @@ public class PlayerCredit {
 	@Override
 	public String toString() {
 		StringBuilder sb=new StringBuilder();
-		sb.append("当前积分：").append(point);
+		sb.append("当前积分：").append(normalizedb(point));
 		sb.append("\n持有物品：\n");
 		if(items.isEmpty()) {
 			sb.append("空");
 		} else {
 			synchronized (changed) {
 				for(Map.Entry<String,Integer> je:items.entrySet()) {
-					sb.append(je.getKey()).append(" x").append(je.getValue());
+					sb.append(je.getKey()).append(" x").append(je.getValue()).append("\n");
 				}
 			}
 		}
 		return sb.toString();
+	}
+	public void removeBan() {
+		canPlayIn=0;
+	}
+	public boolean hasItem(String name) {
+		return items.getOrDefault(name,0)>0;
 	}
 }

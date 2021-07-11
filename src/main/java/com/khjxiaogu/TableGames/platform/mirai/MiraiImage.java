@@ -9,6 +9,7 @@ import com.khjxiaogu.TableGames.utils.Utils;
 
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.Mirai;
+import net.mamoe.mirai.message.data.FlashImage;
 
 public class MiraiImage extends Image {
 	net.mamoe.mirai.message.data.Image miri;
@@ -17,6 +18,11 @@ public class MiraiImage extends Image {
 	public MiraiImage(net.mamoe.mirai.message.data.Image miri,Bot bot) {
 		this.miri = miri;
 		this.bot=bot;
+	}
+
+	public MiraiImage(FlashImage msg, Bot b) {
+		miri=msg.component1();
+		bot=b;
 	}
 
 	@Override

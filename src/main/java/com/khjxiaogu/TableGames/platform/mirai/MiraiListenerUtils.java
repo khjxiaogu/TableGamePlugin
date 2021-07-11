@@ -2,11 +2,11 @@ package com.khjxiaogu.TableGames.platform.mirai;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.khjxiaogu.TableGames.platform.MessageListener;
+import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
-import com.khjxiaogu.TableGames.utils.MessageListener;
-import com.khjxiaogu.TableGames.utils.MessageListener.MsgType;
 
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
@@ -16,9 +16,9 @@ public class MiraiListenerUtils {
 	static class MessageListenerWrapper implements MessageListener {
 		public MessageListener ml;
 		public boolean isValid = true;
-		public Group from;
+		public long from;
 
-		public MessageListenerWrapper(MessageListener ml, Group from) {
+		public MessageListenerWrapper(MessageListener ml,long from) {
 			this.ml = ml;
 			this.from = from;
 		}
@@ -35,15 +35,15 @@ public class MiraiListenerUtils {
 	}
 
 	public static void registerListener(Long id, Group g, MessageListener ml) {
-		MiraiListenerUtils.mls.put(id, new MiraiListenerUtils.MessageListenerWrapper(ml, g));
+		MiraiListenerUtils.mls.put(id, new MiraiListenerUtils.MessageListenerWrapper(ml, g.getId()));
 	}
 
 	public static void registerListener(Long id, MessageListener ml) {
-		MiraiListenerUtils.mls.put(id, new MiraiListenerUtils.MessageListenerWrapper(ml, null));
+		MiraiListenerUtils.mls.put(id, new MiraiListenerUtils.MessageListenerWrapper(ml,0));
 	}
 
 	public static void registerListener(Member m, MessageListener ml) {
-		MiraiListenerUtils.mls.put(m.getId(), new MiraiListenerUtils.MessageListenerWrapper(ml, m.getGroup()));
+		MiraiListenerUtils.mls.put(m.getId(), new MiraiListenerUtils.MessageListenerWrapper(ml, m.getGroup().getId()));
 	}
 
 	public static void releaseListener(Long id) {
@@ -61,11 +61,11 @@ public class MiraiListenerUtils {
 			return true;
 		}
 		MiraiListenerUtils.MessageListenerWrapper ml = MiraiListenerUtils.mls.get(id);
-		System.out.println("dispatching " + id);
+		//System.out.println("dispatching " + id);
 		if (ml == null || !ml.isValid)
 			return false;
 		ml.handle(messageCompound, type);
-		System.out.println("dispatched " + id);
+		//System.out.println("dispatched " + id);
 		return true;
 	}
 
@@ -73,9 +73,9 @@ public class MiraiListenerUtils {
 		MiraiListenerUtils.MessageListenerWrapper ml = MiraiListenerUtils.mls.get(id);
 		if (ml == null || !ml.isValid)
 			return false;
-		if (!(ml.from == null||g.equals(ml.from)))
+		if (!(ml.from == 0||g.getId()==ml.from))
 			return false;
-		System.out.println("dispatching msg to " + id);
+		//System.out.println("dispatching msg to " + id);
 		ml.handle(msg, type);
 		return true;
 	}

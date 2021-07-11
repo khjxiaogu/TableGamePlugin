@@ -8,8 +8,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
+import com.khjxiaogu.TableGames.platform.UserFunction;
 
-public class VoteHelper<T extends Player> {
+
+public class VoteHelper<T extends UserFunction> {
 	public Map<T,Double> voted=new ConcurrentHashMap<>();
 	public Set<T> tovote=Collections.newSetFromMap(new ConcurrentHashMap<>());
 	boolean isEnded=true;

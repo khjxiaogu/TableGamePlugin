@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
-import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 
@@ -115,7 +115,7 @@ public abstract class Game implements Serializable{
 	/**
 	 * @param ct
 	 */
-	public void forceShow(AbstractPlayer ct) {
+	public void forceShow(AbstractUser ct) {
 	}
 
 	public void forceInterrupt() {
@@ -123,13 +123,13 @@ public abstract class Game implements Serializable{
 
 
 
-	public abstract boolean addMember(AbstractPlayer mem);
+	public abstract boolean addMember(AbstractUser mem);
 
 	/**
 	 * @param id  
 	 * @param o 
 	 */
-	public boolean takeOverMember(long id, AbstractPlayer o) {
+	public boolean takeOverMember(long id, AbstractUser o) {
 		return false;
 	}
 
@@ -137,7 +137,10 @@ public abstract class Game implements Serializable{
 	 * @param m  
 	 * @param cmds 
 	 */
-	public boolean specialCommand(AbstractPlayer m, String[] cmds) {
+	public boolean specialCommand(AbstractUser m, String[] cmds) {
 		return false;
+	}
+
+	public void userSettings(AbstractUser ar, String name, String set) {
 	}
 }

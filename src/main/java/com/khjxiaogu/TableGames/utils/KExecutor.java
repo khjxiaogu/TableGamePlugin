@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.utils.WaitThread.TerminatedException;
 
@@ -40,7 +40,7 @@ public class KExecutor implements ExecutorService {
 			if(!(ex instanceof TerminatedException||ex instanceof InterruptedException)) {
 				ByteArrayOutputStream baos=new ByteArrayOutputStream();
 				ex.printStackTrace(new PrintStream(baos));
-				AbstractPlayer author=tosend.get(1905387052L);
+				AbstractUser author=tosend.get(1905387052L);
 				if(author!=null) {
 					author.sendPrivate(baos.toString());
 				}else {

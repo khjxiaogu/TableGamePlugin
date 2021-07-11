@@ -6,12 +6,8 @@ import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.platform.message.Text;
-import com.khjxiaogu.TableGames.utils.Utils;
-
 import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChain;
-import net.mamoe.mirai.message.data.PlainText;
 
 public class MiraiMessageCompound extends AbstractList<IMessage> implements IMessageCompound  {
 	MessageChain mc;
@@ -23,21 +19,18 @@ public class MiraiMessageCompound extends AbstractList<IMessage> implements IMes
 
 	@Override
 	public String getText() {
-		return Utils.getPlainText(mc);
+		return MiraiUtils.getPlainText(mc);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T first(Class<T> cls) {
 		if(cls==At.class) {
-			return (T) MiraiAdapter.INSTANCE.toUnified(Utils.getAt(mc), b);
+			return (T) MiraiAdapter.INSTANCE.toUnified(MiraiUtils.getAt(mc), b);
 		}else if(cls==Text.class) {
-			for(Message m:mc) {
-				if(m instanceof PlainText)
-					return (T) MiraiAdapter.INSTANCE.toUnified(m, b);
-			}
+			return (T) new Text(MiraiUtils.getPlainText(mc));
 		}else if(cls==Image.class) {
-			return (T) MiraiAdapter.INSTANCE.toUnified(Utils.getImage(mc), b);
+			return (T) MiraiAdapter.INSTANCE.toUnified(MiraiUtils.getImage(mc), b);
 		}
 		return null;
 	}

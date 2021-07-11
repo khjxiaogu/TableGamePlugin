@@ -1,10 +1,13 @@
 package com.khjxiaogu.TableGames.utils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 
 
 public class PreserveHolder {
@@ -34,5 +37,16 @@ public class PreserveHolder {
 		}
 		return (T) pi;
 	}
-
+	@SuppressWarnings("unchecked")
+	public static <T extends PreserveInfo<?>> List<T> getPreserves(AbstractUser u, Class<T> type) {
+		List<T> pivs=new ArrayList<>();
+		for(Map<Class<? extends PreserveInfo<?>>, PreserveInfo<?>> mc:PreserveHolder.ps.values()) {
+			PreserveInfo<?> pi = mc.get(type);
+			if(pi!=null&&pi.hasPreserver(u)) {
+				pivs.add((T) pi);
+			}
+		}
+		
+		return pivs;
+	}
 }

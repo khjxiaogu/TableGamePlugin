@@ -1,6 +1,6 @@
 package com.khjxiaogu.TableGames.platform.message;
 
-import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 
 public class At implements IMessage {
 	long id;
@@ -8,7 +8,7 @@ public class At implements IMessage {
 	public At(long id) {
 		this.id = id;
 	}
-	public At(AbstractPlayer p) {
+	public At(AbstractUser p) {
 		id = p.getId();
 	}
 	public long getId() {

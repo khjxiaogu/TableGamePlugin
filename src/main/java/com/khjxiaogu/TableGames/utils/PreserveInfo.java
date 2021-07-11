@@ -6,18 +6,57 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 
 
 public abstract class PreserveInfo<T extends Game>{
-	Map<AbstractPlayer,Long> topreserve=new ConcurrentHashMap<>();
+	Map<AbstractUser,Long> topreserve=new ConcurrentHashMap<>();
 	AbstractRoom group;
 	Map<String, String> args=null;
+	static class UserItem{
+		AbstractUser user;
+		String item;
+		public UserItem(String item, AbstractUser user) {
+			this.item = item;
+			this.user = user;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = ((item == null) ? 0 : item.hashCode());
+			result = prime * result + ((user == null) ? 0 : user.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			UserItem other = (UserItem) obj;
+			if (item == null) {
+				if (other.item != null)
+					return false;
+			} else if (!item.equals(other.item))
+				return false;
+			if (user == null) {
+				if (other.user != null)
+					return false;
+			} else if (!user.equals(other.user))
+				return false;
+			return true;
+		}
+	}
+	Map<UserItem,String> userset=new ConcurrentHashMap<>();
 	Thread td;
 	public boolean acceled=false;
 	public PreserveInfo(AbstractRoom g) {
@@ -28,13 +67,23 @@ public abstract class PreserveInfo<T extends Game>{
 	protected abstract int getSuitMembers();
 	protected abstract int getMinMembers();
 	protected abstract int getMaxMembers();
-	protected abstract Class<T> getGameClass();
+	protected abstract GameCreater<T> getGameClass();
 	private Timer notificationService=new Timer();
 	public static int KeepAlive=1800;
 	public int AliveCounter=0;
 	public abstract String getName();
 	public boolean enablefake=false;
 	public static Integer prevSize=0;
+	public final boolean addConfig(AbstractUser ar,String item,String set) {
+		if(isAvailableConfig(ar,item,set)) {
+			userset.put(new UserItem(item,ar),set);
+			return true;
+		}
+		return false;
+	}
+	protected boolean isAvailableConfig(AbstractUser ar,String item,String set) {
+		return false;
+	}
 	public int getCurrentNum() {
 		int crn=topreserve.size();
 		if(enablefake&&crn<getMaxMembers()-3) {
@@ -49,13 +98,16 @@ public abstract class PreserveInfo<T extends Game>{
 		if(topreserve.isEmpty())return;
 		AliveCounter--;
 		if(AliveCounter==0) {
-			for(AbstractPlayer m:topreserve.keySet()) {
+			for(AbstractUser m:topreserve.keySet()) {
 				m.sendPrivate("由于超时未能开始，您的预定已被取消。");
 			}
 			this.removeAll();
 		}
 	}
-	public void addPreserver(AbstractPlayer m) {
+	public boolean hasPreserver(AbstractUser m) {
+		return topreserve.containsKey(m);
+	}
+	public void addPreserver(AbstractUser m) {
 		if(getCurrentNum()>=getMaxMembers()) {
 			group.sendMessage(getName()+"当前已经满人！");
 			return;
@@ -70,27 +122,33 @@ public abstract class PreserveInfo<T extends Game>{
 		AliveCounter=PreserveInfo.KeepAlive;
 		if(topreserve.put(m,new Date().getTime()) == null) {
 			m.sendPrivate("预定成功");
-			group.sendMessage(getName()+"当前预定人数："+getCurrentNum()+"\n最低开始人数："+getMinMembers()+"\n欢迎各位预定，格式为“@我 预定"+getName()+"”");
+			sendPersonInfo();
 		} else {
 			m.sendPrivate("您已经预定了。");
 		}
 		synchronized(PreserveInfo.prevSize) {
+			if(getActualCurrentNum()>=getSuitMembers()&&PreserveInfo.prevSize<getSuitMembers()) {
+				group.sendMessage("已达到最佳预定人数，游戏将会在1分钟后开始，还想参加的请抓紧时间预定，格式为“##预定"+getName()+"”");
+				if(!acceled) {
+					td.interrupt();
+				}
+				acceled=true;
+			}else
 			if(getCurrentNum()>=getMinMembers()&&PreserveInfo.prevSize<getMinMembers()) {
-				group.sendMessage("已达到最低预定人数，游戏将会在5分钟后开始，还想参加的请抓紧时间预定，格式为“@我 预定"+getName()+"”");
+				group.sendMessage("已达到最低预定人数，游戏将会在5分钟后开始，还想参加的请抓紧时间预定，格式为“##预定"+getName()+"”");
 				if(getActualCurrentNum()>=getMinMembers()) {
 					onStartPending();
 				} else
 					return;
 			}
-			if(getActualCurrentNum()>=getSuitMembers()&&PreserveInfo.prevSize<getSuitMembers()) {
-				group.sendMessage("已达到最佳预定人数，游戏将会在1分钟后开始，还想参加的请抓紧时间预定，格式为“@我 预定"+getName()+"”");
-				if(!acceled) {
-					td.interrupt();
-				}
-				acceled=true;
-			}
 			PreserveInfo.prevSize=getActualCurrentNum();
 		}
+	}
+	public void sendPersonInfo() {
+		if(getCurrentNum()<getMinMembers())
+			group.sendMessage(getName()+"当前预定人数："+getCurrentNum()+"\n最低开始人数："+getMinMembers()+"\n欢迎预定，格式为“##预定"+getName()+"”\n想玩的都可以预定，本预定会在30分钟后自动取消。");
+		else
+			group.sendMessage(getName()+"当前预定人数："+getCurrentNum()+"\n最低开始人数："+getMinMembers()+"\n欢迎预定，格式为“##预定"+getName()+"”。");
 	}
 	@SuppressWarnings("deprecation")
 	public void removeAll() {
@@ -101,14 +159,14 @@ public abstract class PreserveInfo<T extends Game>{
 		}
 	}
 	public void notifyPreserver() {
-		for(AbstractPlayer m:topreserve.keySet()) {
+		for(AbstractUser m:topreserve.keySet()) {
 			m.sendPrivate(this.getName()+"游戏即将开始，请注意！");
 		}
 	}
 	public String getPreserveList() {
 		StringBuilder sb=new StringBuilder(this.getName());
 		sb.append("预定列表：\n");
-		for(AbstractPlayer m:topreserve.keySet()) {
+		for(AbstractUser m:topreserve.keySet()) {
 			sb.append(m.getNameCard()).append("\n");
 		}
 		return sb.toString();
@@ -128,17 +186,17 @@ public abstract class PreserveInfo<T extends Game>{
 		}
 		return result;
 	}
-	public void removePreserver(AbstractPlayer m) {
+	public void removePreserver(AbstractUser m) {
 		removePreserver(m,false);
 	}
-	public void removePreserver(AbstractPlayer m,boolean force) {
+	public void removePreserver(AbstractUser m,boolean force) {
 		Long crn=topreserve.get(m);
 		if(crn != null)
 		{
 			if(force||new Date().getTime()-crn>180000) {
 				m.sendPrivate("取消预定成功");
 				topreserve.remove(m);
-				group.sendMessage("当前预定人数："+getCurrentNum()+"最低预定人数"+getMinMembers()+"，欢迎各位预定，格式为“@我 预定"+getName()+"”");
+				sendPersonInfo();
 			} else {
 				m.sendPrivate("预定后的三分钟内不能取消预定！");
 			}
@@ -160,10 +218,11 @@ public abstract class PreserveInfo<T extends Game>{
 				try {
 					Thread.sleep(60000);
 					Thread.sleep(60000);
-					group.sendMessage("游戏将会在3分钟后开始，还想参加的请抓紧时间预定，格式为“@我 预定"+getName()+"”");
+					group.sendMessage("游戏将会在3分钟后开始，还想参加的请抓紧时间预定，格式为“##预定"+getName()+"”");
 					Thread.sleep(60000);
 					Thread.sleep(60000);
-					group.sendMessage("游戏将会在1分钟后开始，还想参加的请抓紧时间预定，格式为“@我 预定"+getName()+"”");
+					group.sendMessage("游戏将会在1分钟后开始，还想参加的请抓紧时间预定，格式为“##预定"+getName()+"”");
+					notifyPreserver();
 				} catch (InterruptedException e) {}
 				if(getActualCurrentNum()<getMinMembers())return;
 				acceled=true;
@@ -233,8 +292,12 @@ public abstract class PreserveInfo<T extends Game>{
 		} else {
 			gm=GameUtils.createGame(getGameClass(),group,topreserve.size(),args);
 		}
+		for(Entry<UserItem, String> me:userset.entrySet()) {
+			gm.userSettings(me.getKey().user,me.getKey().item,me.getValue());
+		}
+		userset.clear();
 		args=null;
-		List<AbstractPlayer> mems=new ArrayList<>(topreserve.keySet());
+		List<AbstractUser> mems=new ArrayList<>(topreserve.keySet());
 		topreserve.clear();
 		Collections.shuffle(mems);
 		Collections.reverse(mems);

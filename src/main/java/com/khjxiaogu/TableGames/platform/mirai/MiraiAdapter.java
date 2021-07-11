@@ -9,7 +9,11 @@ import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Text;
 
 import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.User;
+import net.mamoe.mirai.message.data.FlashImage;
+import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
@@ -31,9 +35,12 @@ public class MiraiAdapter {
 			return new At(((net.mamoe.mirai.message.data.At)msg).getTarget());
 		else if(msg instanceof net.mamoe.mirai.message.data.Image)
 			return new MiraiImage((net.mamoe.mirai.message.data.Image) msg,b);
+		else if (msg instanceof FlashImage) {
+			return new MiraiImage((FlashImage)msg,b);
+		}
 		return new MiraiPlatformMessage(msg);
 	}
-	private net.mamoe.mirai.message.data.Message handleMessage(IMessage msg,Group g) {
+	private net.mamoe.mirai.message.data.Message handleMessage(IMessage msg,Contact g) {
 		if(msg instanceof MessageCompound) {
 			MessageChainBuilder rm=new MessageChainBuilder();
 			for(IMessage single:(IMessageCompound)msg) {
@@ -53,7 +60,9 @@ public class MiraiAdapter {
 	public net.mamoe.mirai.message.data.Message toPlatform(IMessage umsg,AbstractRoom r) {
 		return handleMessage(umsg,(Group) r.getInstance());
 	}
-	public net.mamoe.mirai.message.data.Message toPlatform(IMessage umsg,Group r) {
+	public net.mamoe.mirai.message.data.Message toPlatform(IMessage umsg,Contact r) {
 		return handleMessage(umsg,r);
 	}
+
+
 }

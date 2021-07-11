@@ -6,11 +6,10 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.khjxiaogu.TableGames.platform.AbstractPlayer;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.MessageListener;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
-import com.khjxiaogu.TableGames.utils.MessageListener;
 
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
@@ -26,6 +25,10 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 	transient private Group group;
 	private MiraiGroup(Group group) {
 		this.group=group;
+	}
+	@Override
+	public String toString() {
+		return "MiraiGroup(" + group.getBot().getId() + "@" + group.getId() + ")";
 	}
 	public static MiraiGroup createInstance(Group g) {
 		MiraiGroup mg=cache.get(g.getId());
@@ -82,13 +85,15 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 	}
 
 	@Override
-	public AbstractPlayer getOwner() {
-		return new MiraiHumanPlayer(group.getOwner());
+	public AbstractUser getOwner() {
+		return new MiraiHumanUser(group.getOwner());
 	}
 
 	@Override
-	public AbstractPlayer get(long id) {
-		return new MiraiHumanPlayer(group.get(id));
+	public AbstractUser get(long id) {
+		MiraiHumanUser m;
+		m=new MiraiHumanUser(group.get(id));
+		return m;
 	}
 
 	@Override

@@ -7,52 +7,18 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
-import javax.imageio.ImageIO;
-
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.BotUserLogic;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
-import net.mamoe.mirai.contact.Contact;
-import net.mamoe.mirai.message.data.At;
-import net.mamoe.mirai.message.data.Image;
-import net.mamoe.mirai.message.data.Message;
-import net.mamoe.mirai.message.data.MessageChain;
-import net.mamoe.mirai.message.data.PlainText;
-import net.mamoe.mirai.utils.ExternalResource;
 
 public class Utils {
-	public static String getPlainText(MessageChain msg) {
-		/*PlainText pt = (PlainText) msg.get(PlainText.Key);
-		if (pt == null)
-			return "";
-		return pt.getContent().trim();*/
-		PlainText pt = null;
-		for(Message m:msg) {
-			if(m instanceof PlainText)
-				pt=(PlainText) m;
-		}
-		if (pt == null)
-			return "";
-		return pt.getContent().trim();
-	}
-	public static At getAt(MessageChain msg) {
-		for(Message m:msg) {
-			if(m instanceof At)
-				return (At) m;
-		}
-		return null;
-	}
-	public static Image getImage(MessageChain msg) {
-		for(Message m:msg) {
-			if(m instanceof At)
-				return (Image) m;
-		}
-		return null;
-	}
 	public static String getPlainText(IMessageCompound msg) {
 		return msg.getText().trim();
 	}
@@ -88,19 +54,8 @@ public class Utils {
 			return String.valueOf(val) + "%";
 		return "N/A%";
 	}
-	public static ExternalResource ImageResource(RenderedImage img) {
-		try(ByteArrayOutputStream baos=new ByteArrayOutputStream(4096)){
-			ImageIO.write(img,"jpg",baos);
-			return ExternalResource.create(baos.toByteArray());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-	public static Image sendTextAsImage(String text,Contact contact) {
-		return contact.uploadImage(Utils.ImageResource(Utils.textAsImage(text)));
-	}
+
+
 	/**
 	 * @param contact  
 	 */
@@ -144,5 +99,18 @@ public class Utils {
 		g2d.dispose();
 		return img;
 	}
-
+	public static BotUserLogic createLogic(Class<? extends BotUserLogic> logicType,AbstractUser p,Game in) {
+		for(Constructor<?> ctor:logicType.getConstructors()) {
+			if(ctor.getParameterCount()==2)
+				if(ctor.getParameterTypes()[0].isInstance(p)&&ctor.getParameterTypes()[1].isInstance(in))
+					try {
+						return (BotUserLogic) ctor.newInstance(p,in);
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		}
+		throw new RuntimeException();
+	}
 }

@@ -1,10 +1,8 @@
 package com.khjxiaogu.TableGames.data;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import com.khjxiaogu.TableGames.platform.mirai.MiraiMain;
-import com.khjxiaogu.TableGames.utils.ImagePrintStream;
+import com.khjxiaogu.TableGames.platform.GlobalMain;
 
 public class CreditTrade {
 	int pt;
@@ -13,6 +11,10 @@ public class CreditTrade {
 	int cnt;
 	public static ArrayList<CreditTrade> trades=new ArrayList<>();
 	static {
+		new CreditTrade(3,"狼人杀vip券",1);
+		new CreditTrade(10,"狼人杀vip券",4);
+		new CreditTrade(20,"狼人杀vip券",9);
+		new CreditTrade(30,"狼人杀vip券",15);
 	}
 	public CreditTrade(int pt, String itm, int cnt) {
 		this.pt = pt;
@@ -29,7 +31,7 @@ public class CreditTrade {
 		CreditTrade.trades.add(this);
 	}
 	public boolean execute(long qq) {
-		PlayerCredit pcd=MiraiMain.credit.get(qq);
+		PlayerCredit pcd=GlobalMain.credit.get(qq);
 		if(pcd.withdrawPT(pt)>=0) {
 			pcd.giveItem(itm, cnt);
 			return true;
@@ -45,13 +47,13 @@ public class CreditTrade {
 		sb.append(":").append(pt).append("积分");
 		return sb.toString();
 	}
-	public static BufferedImage getList() {
-		ImagePrintStream ips=new ImagePrintStream();
+	public static String getList() {
+		StringBuilder ips=new StringBuilder();
 		int i=0;
 		for(CreditTrade ct:CreditTrade.trades) {
-			ips.append(++i).append("、").println(ct.toString());
+			ips.append(++i).append("、").append(ct.toString()).append("\n");
 		}
-		ips.println("输入@我 购买 序号 来购买物品");
-		return ips.asImage();
+		ips.append("输入@我 购买 序号 来购买物品");
+		return ips.toString();
 	}
 }
