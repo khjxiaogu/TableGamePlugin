@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.khjxiaogu.TableGames.platform.AbstractUser;
-import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.game.undercover.UnderCoverTextLibrary.WordPair;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
@@ -23,7 +23,7 @@ public class UnderCoverHolder extends Game {
 	List<UCPlayer> innos=Collections.synchronizedList(new ArrayList<>());
 	int spycount=1;
 	Integer cplayer;
-	Thread main=new Thread(()->gameMain());
+	Thread main=new Thread(this::gameMain);
 	VoteHelper<UCPlayer> vu=new VoteHelper<>();
 	List<Boolean> wds=Collections.synchronizedList(new ArrayList<>());
 	WaitThread wt=new WaitThread();

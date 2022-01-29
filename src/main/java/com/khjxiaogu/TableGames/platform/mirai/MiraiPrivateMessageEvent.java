@@ -4,9 +4,7 @@ import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.RoomMessageEvent;
 
-import net.mamoe.mirai.event.events.FriendMessageEvent;
 import net.mamoe.mirai.event.events.MessageEvent;
-import net.mamoe.mirai.event.events.StrangerMessageEvent;
 
 public class MiraiPrivateMessageEvent implements RoomMessageEvent {
 	MessageEvent me;

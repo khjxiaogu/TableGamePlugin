@@ -1,7 +1,9 @@
 package com.khjxiaogu.TableGames.platform.mirai;
 
 import java.io.Serializable;
+import java.security.SecureRandom;
 
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MessageListener;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
@@ -13,8 +15,10 @@ public abstract class MiraiUser implements AbstractUser,Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 5656814787243115641L;
+
 	transient Group group;
 	transient protected Object roleObject;
+	
 	@Override
 	public void bind(Object obj) {
 		roleObject=obj;
@@ -27,7 +31,8 @@ public abstract class MiraiUser implements AbstractUser,Serializable {
 	@Override
 	public void sendPublic(String str) {
 		try {
-			group.sendMessage(MiraiAdapter.INSTANCE.toPlatform(getAt(),group).plus(str));
+			
+			SlowUtils.runSlowly(()->group.sendMessage(MiraiAdapter.INSTANCE.toPlatform(getAt(),group).plus(str)));
 		}catch(Exception ex) {
 			while(true) {
 				try {
@@ -44,7 +49,7 @@ public abstract class MiraiUser implements AbstractUser,Serializable {
 	@Override
 	public void sendPublic(IMessage msg) {
 		try {
-			group.sendMessage(MiraiAdapter.INSTANCE.toPlatform(getAt(),group).plus(MiraiAdapter.INSTANCE.toPlatform(msg,group)));
+			SlowUtils.runSlowly(()->group.sendMessage(MiraiAdapter.INSTANCE.toPlatform(getAt(),group).plus(MiraiAdapter.INSTANCE.toPlatform(msg,group))));
 		}catch(Exception ex) {
 			while(true) {
 				try {
@@ -68,5 +73,13 @@ public abstract class MiraiUser implements AbstractUser,Serializable {
 	@Override
 	public Object getRoleObject() {
 		return roleObject;
+	}
+	@Override
+	public long getHostId() {
+		return group.getBot().getId();
+	}
+	@Override
+	public AbstractRoom getRoom() {
+		return MiraiGroup.createInstance(group);
 	}
 }

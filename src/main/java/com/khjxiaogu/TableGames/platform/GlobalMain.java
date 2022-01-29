@@ -1,11 +1,16 @@
 package com.khjxiaogu.TableGames.platform;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,6 +37,7 @@ import com.khjxiaogu.TableGames.game.werewolf.StandardWerewolfCreater;
 import com.khjxiaogu.TableGames.game.werewolf.StandardWerewolfPreserve;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfPreserve;
+import com.khjxiaogu.TableGames.permission.GlobalMatcher;
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.utils.DefaultGameCreater;
 import com.khjxiaogu.TableGames.utils.Game;
@@ -46,6 +52,8 @@ public class GlobalMain {
 	public static PlayerDatabase db;
 	public static PlayerCreditData credit;
 	private static UnifiedLogger logger;
+	public static GlobalMatcher privmatcher=new GlobalMatcher();
+	public static File dataFolder;
 	@FunctionalInterface
 	interface BotCreater{
 		AbstractBotUser createBot(int id,Class<? extends BotUserLogic> logicCls,Game in);
@@ -54,7 +62,8 @@ public class GlobalMain {
 	public static UnifiedLogger getLogger() {
 		return logger;
 	}
-	public static void Init(File dataFolder) {
+	public static void init(File dataFolder) {
+		GlobalMain.dataFolder=dataFolder;
 		GlobalMain.db=new PlayerDatabase(dataFolder);
 		GlobalMain.credit=new PlayerCreditData(dataFolder);
 	}
@@ -69,12 +78,23 @@ public class GlobalMain {
 		GlobalMain.defaultBotCreater = defaultBotCreater;
 	}
 	public static Map<String,BiConsumer<RoomMessageEvent,String[]>> normcmd=new ConcurrentHashMap<>();
+	public static Map<String,String> normhelp=new LinkedHashMap<>();
+	public static Map<String,String> privhelp=new LinkedHashMap<>();
 	public static Map<String,BiConsumer<RoomMessageEvent,String[]>> pvmgcmd=new ConcurrentHashMap<>();
 	public static Map<String,BiConsumer<RoomMessageEvent,String[]>> privcmd=new ConcurrentHashMap<>();
 	public static ExecutorService dispatchexec=Executors.newCachedThreadPool();
 	public static List<String> gameList=new ArrayList<>();
+	public static void addCmd(String cmd,String help,BiConsumer<RoomMessageEvent,String[]> ls) {
+		normcmd.put(cmd,ls);
+		normhelp.put(cmd,help);
+	}
+	public static void addPCmd(String cmd,String help,BiConsumer<RoomMessageEvent,String[]> ls) {
+		privcmd.put(cmd,ls);
+		privhelp.put(cmd,help);
+	}
 	public static <T extends Game> void makeGame(String name,Class<? extends PreserveInfo<T>> preserver,GameCreater<T> gameClass) {
 		gameList.add(name);
+		
 		normcmd.put("预定"+name, (event,command)->{
 			long ban=GlobalMain.credit.get(event.getSender().getId()).isBanned();
 			if(ban==0)
@@ -82,6 +102,7 @@ public class GlobalMain {
 			else
 				event.getRoom().sendMessage("您已被禁赛直到"+new Date(ban).toString());
 		});
+		
 		normcmd.put(name+"预定列表", (event,command)->{
 			event.getRoom().sendMessage(PreserveHolder.getPreserve(event.getRoom(),preserver).getPreserveList());
 		});
@@ -93,6 +114,7 @@ public class GlobalMain {
 				event.getRoom().sendMessage(event.getRoom().get(id).getNameCard()+"的"+GlobalMain.db.getPlayer(id,name).toString());
 			}
 		});
+
 		normcmd.put("取消预定"+name, (event,command)->{
 			PreserveHolder.getPreserve(event.getRoom(),preserver).removePreserver(event.getSender());
 		});
@@ -129,9 +151,9 @@ public class GlobalMain {
 		privcmd.put("强制取消预定"+name,(event,command)->{
 			PreserveHolder.getPreserve(event.getRoom(),preserver).removePreserver(event.getRoom().get(Long.parseLong(command[1])),true);
 		});
-		privcmd.put(name+"统计", (event,command)->{
+		/*privcmd.put(name+"统计", (event,command)->{
 			event.getRoom().sendMessage(event.getSender().getAt().asMessage().append(db.getGame(name).getPlayer(event.getSender().getId(),PlayerDatabase.datacls.get(name)).toString()));
-		});
+		});*/
 		privcmd.put("b"+name, (event,command)->{
 			PreserveInfo<?> pi=PreserveHolder.getPreserve(event.getRoom(),preserver);
 			pi.enablefake=!pi.enablefake;
@@ -151,6 +173,7 @@ public class GlobalMain {
 			GameUtils.createGame(gameClass,event.getRoom(),Arrays.copyOfRange(command,1,command.length));
 			event.getRoom().sendMessage(name+"游戏已经创建，请发送“##报名”来报名。");
 		});
+		
 		pvmgcmd.put(name,(event,command)->{
 			
 			class Ptr{
@@ -170,19 +193,69 @@ public class GlobalMain {
 	}
 
 	static {
-		privcmd.put("揭示",(event,args)->{
+		normhelp.put("预定<游戏名>","参加游戏");
+		normhelp.put("取消预定<游戏名>","退出游戏");
+		normhelp.put("<游戏名>预定列表","查看游戏参加名单");
+		normhelp.put("<游戏名>统计","查看游戏统计");
+		normhelp.put("<游戏名>统计 [qq]","查看他人游戏统计");
+		normhelp.put("<游戏名>","<指令> <参数>游戏特殊指令");
+		privhelp.put("设置<游戏名>参数","<参数>设置游戏参数");
+		privhelp.put("清除<游戏名>参数","清除游戏参数");
+		privhelp.put("强制开始<游戏名>","强行立即开始游戏");
+		privhelp.put("立即开始<游戏名>","尽快开始游戏");
+		privhelp.put("清空<游戏名>预定","清空预定列表");
+		privhelp.put("<游戏名>提醒","提醒玩家开始游戏");
+		privhelp.put("强制预定<游戏名>","<qq>强制玩家参加游戏");
+		privhelp.put("强制取消预定<游戏名>","<qq>强制玩家退出游戏");
+		privhelp.put("开始<游戏名>","<人数>开始固定场");
+		privhelp.put("定制<游戏名>","<参数>开始设置场");
+		addPCmd("揭示","显示游戏的系统信息",(event,args)->{
 			Game g=GameUtils.getGames().get(event.getRoom());
 			if(g!=null&&g.isAlive()) {
 				g.forceShow( event.getSender());
 			}
 		});
-		privcmd.put("跳过",(event,args)->{
+		addPCmd("权限","设置权限", (event,args)->{
+			try {
+				privmatcher.loadString(args[1]);
+				event.getSender().sendPrivate("权限设置成功！");
+			} catch (Exception ex) {
+				event.getSender().sendPrivate("权限设置失败！");
+				//getLogger().warning(ex);
+			}
+		});
+		addPCmd("重载权限","重载权限系统", (event,args)->{
+			try {
+				privmatcher.reload();
+				event.getSender().sendPrivate("权限重载成功！");
+			} catch (Exception ex) {
+				event.getSender().sendPrivate("权限重载失败！");
+				//getLogger().warning(ex);
+			}
+		});
+		addPCmd("设置权限","重配权限系统",(event,args)->{
+			try {
+				privmatcher.rebuildConfig();
+				event.getSender().sendPrivate("权限设置成功！");
+			} catch (Exception ex) {
+				event.getSender().sendPrivate("权限设置失败！");
+				//getLogger().warning(ex);
+			}
+		});
+		addPCmd("测试权限", "测试成员权限",(event,args)->{
+			try {
+				event.getRoom().sendMessage(args[1]+"的权限状态为:"+privmatcher.match(event.getRoom().get(Long.parseLong(args[1]))).name());
+			} catch (Exception ex) {
+				//getLogger().warning(ex);
+			}
+		});
+		addPCmd("跳过","跳过当前等待",(event,args)->{
 			Game g=GameUtils.getGames().get(event.getRoom());
 			if(g!=null&&g.isAlive()) {
 				g.forceSkip();
 			}
 		});
-		privcmd.put("接管",(event,args)->{
+		addPCmd("接管","<游戏号码> <账号>用账号接管游戏成员",(event,args)->{
 			Game g=GameUtils.getGames().get(event.getRoom());
 			if(g!=null&&g.isAlive()) {
 				long m1=Long.parseLong(args[1]);
@@ -206,13 +279,13 @@ public class GlobalMain {
 		privcmd.put("TTI",(event,args)->{
 			event.getRoom().sendMessage(new Image(Utils.textAsImage(String.join(" ",args))));
 		});
-		normcmd.put("查询积分",(event,args)->{
+		addCmd("查询积分","查询积分和物品",(event,args)->{
 			event.getRoom().sendMessage(event.getSender().getAt().asMessage().append(credit.get(event.getSender().getId()).toString()));
 		});
-		normcmd.put("积分商城",(event,args)->{
+		addCmd("积分商城","查看积分商城",(event,args)->{
 			event.getRoom().sendMessage(CreditTrade.getList());
 		});
-		normcmd.put("购买",(event,args)->{
+		addCmd("购买","<序号>购买物品",(event,args)->{
 			int is=Integer.parseInt(args[1]);
 			if(is>CreditTrade.trades.size()+1||is<1) {
 				event.getRoom().sendMessage(event.getSender().getAt().asMessage().append("非法商品序号"));
@@ -224,15 +297,15 @@ public class GlobalMain {
 				event.getRoom().sendMessage(event.getSender().getAt().asMessage().append("购买失败"));
 			}
 		});
-		privcmd.put("给积分",(event,args)->{
+		addPCmd("给积分","<账号> <积分>给予玩家积分",(event,args)->{
 			double crp=GlobalMain.credit.get(Long.parseLong(args[1])).givePT(Double.parseDouble(args[2]));
 			event.getRoom().sendMessage("添加成功，现有"+crp+"积分");
 		});
-		privcmd.put("扣积分",(event,args)->{
+		addPCmd("扣积分","<账号> <积分>扣除玩家积分",(event,args)->{
 			double crp=GlobalMain.credit.get(Long.parseLong(args[1])).removePT(Double.parseDouble(args[2]));
 			event.getRoom().sendMessage("扣除成功，还剩"+crp+"积分");
 		});
-		privcmd.put("禁赛",(event,args)->{
+		addPCmd("禁赛","<账号> <小时>禁赛玩家",(event,args)->{
 			GlobalMain.credit.get(Long.parseLong(args[1])).addBan(1000*3600*Integer.parseInt(args[2]));
 			event.getRoom().sendMessage("已经禁赛到"+new Date(GlobalMain.credit.get(Long.parseLong(args[1])).isBanned()).toString());
 		});
@@ -240,24 +313,24 @@ public class GlobalMain {
 			GlobalMain.credit.get(Long.parseLong(args[1])).removeBan();
 			event.getRoom().sendMessage("已经解除！");
 		});
-		privcmd.put("使用积分",(event,args)->{
+		addPCmd("使用积分","<账号> <积分>减少玩家积分",(event,args)->{
 			double crp;
 			if((crp=GlobalMain.credit.get(Long.parseLong(args[1])).withdrawPT(Integer.parseInt(args[2])))<0) {
 				event.getRoom().sendMessage("扣除失败，积分还差"+-crp+"点");
 			}
 			event.getRoom().sendMessage("扣除成功，还剩"+crp+"积分");
 		});
-		privcmd.put("给物品",(event,args)->{
+		addPCmd("给物品","<账号> <物品名> [数量]给玩家物品",(event,args)->{
 			int cnt=args.length>3?Integer.parseInt(args[3]):1;
 			int crp=GlobalMain.credit.get(Long.parseLong(args[1])).giveItem(args[2],cnt);
 			event.getRoom().sendMessage("添加成功，现有"+crp+"个"+args[2]);
 		});
-		privcmd.put("扣物品",(event,args)->{
+		addPCmd("扣物品","<账号> <物品名> [数量]扣除玩家物品",(event,args)->{
 			int cnt=args.length>3?Integer.parseInt(args[3]):1;
 			int crp=GlobalMain.credit.get(Long.parseLong(args[1])).removeItem(args[2],cnt);
 			event.getRoom().sendMessage("扣除成功，还剩"+crp+"个"+args[2]);
 		});
-		privcmd.put("使用物品",(event,args)->{
+		addPCmd("使用物品","<账号> <物品名> [数量]减少玩家物品",(event,args)->{
 			int crp;
 			int cnt=args.length>3?Integer.parseInt(args[3]):1;
 			if((crp=GlobalMain.credit.get(Long.parseLong(args[1])).withdrawItem(args[2],cnt))<0) {
@@ -265,11 +338,75 @@ public class GlobalMain {
 			}
 			event.getRoom().sendMessage("扣除成功，还剩"+crp+"个"+args[2]);
 		});
-		normcmd.put("游戏列表", (event,args)->{
+		addCmd("游戏列表","查看游戏列表" ,(event,args)->{
 			StringBuilder sb=new StringBuilder("可用的游戏：\n");
 			sb.append(String.join("，",gameList));
 			sb.append("\n欢迎使用“##预定(游戏名)”预定！");
 			event.getRoom().sendMessage(sb.toString());
+		});
+		addCmd("?","查看命令列表",(event,args)->{
+			StringBuilder sb=new StringBuilder("可用的指令：");
+			for(Entry<String, String> i:normhelp.entrySet()) {
+				sb.append("\n").append(i.getKey()).append(" ").append(i.getValue());
+			}
+			event.getRoom().sendMessage(sb.toString());
+			if(privmatcher.match(event.getSender()).isAllowed()) {
+				for(Entry<String, String> i:privhelp.entrySet()) {
+					sb.append("\n").append(i.getKey()).append(" ").append(i.getValue());
+				}
+				event.getSender().sendPrivate(sb.toString());
+			}
+		});
+		addCmd("报名","报名参加当前游戏",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getRoom());
+			if(g!=null&&g.isAlive()) {
+				g.addMember(event.getSender());
+			}
+		});
+		addPCmd("强制开始","强制开始当前游戏",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getRoom());
+			if(g!=null&&g.isAlive()) {
+				g.forceStart();
+			}
+		});
+		addPCmd("停止游戏","强制停止当前游戏",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getRoom());
+			if(g!=null) {
+				g.forceStop();
+			}
+			event.getRoom().sendMessage("已经停止正在进行的游戏！");
+			event.getSender().sendPrivate("已经停止正在进行的游戏！");
+		});
+		addPCmd("暂停游戏","强制停止当前游戏",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getRoom());
+			if(g!=null) {
+				g.forceInterrupt();
+			}
+			event.getSender().sendPrivate("已经暂停正在进行的游戏！");
+		});
+		addPCmd("强制报名","<qq>强制玩家报名当前游戏",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getRoom());
+			if(g!=null&&g.isAlive()) {
+				g.addMember(event.getRoom().get(Long.parseLong(args[1])));
+			}
+		});
+		addPCmd("继续游戏","继续暂停的游戏",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getRoom());
+			if(g!=null&&g.isAlive()) {
+				event.getRoom().sendMessage("因为有其他的游戏正在运行，无法继续。");
+				return;
+			}
+			try(FileInputStream fileOut = new FileInputStream(new File(dataFolder,event.getRoom()+".game"));ObjectInputStream out = new ObjectInputStream(fileOut)){
+				GameUtils.getGames().put(event.getRoom(),(Game) out.readObject());
+			} catch (IOException | ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				event.getRoom().sendMessage("继续游戏失败！");
+				e.printStackTrace();
+			}
+		});
+		addCmd("成语接龙","开始成语接龙",(event,args)->{
+			IdiomSolitare is=GameUtils.createGame(IdiomSolitare::new,event.getRoom(),1);
+			is.startEmpty();
 		});
 		makeGame("狼人杀",WerewolfPreserve.class,new DefaultGameCreater<>(WerewolfGame.class));
 		makeGame("小型狼人杀",MiniWerewolfPreserve.class,new DefaultGameCreater<>(WerewolfGame.class));

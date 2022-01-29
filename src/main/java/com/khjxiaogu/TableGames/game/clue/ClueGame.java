@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.game.clue.Card.CardType;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
@@ -114,7 +114,7 @@ public class ClueGame extends Game {
 					if(tcp==players.size()) {
 						cp.next=players.get(0);
 						this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
-						getScheduler().execute(()->gameStart());
+						getScheduler().execute(this::gameStart);
 					}
 				}
 				return true;

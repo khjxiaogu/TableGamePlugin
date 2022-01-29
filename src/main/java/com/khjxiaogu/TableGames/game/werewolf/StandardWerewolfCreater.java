@@ -11,7 +11,7 @@ public class StandardWerewolfCreater implements GameCreater<WerewolfGame>{
 	static {
 		dconfig.put("屠城","false");
 		dconfig.put("板","标准");
-		dconfig.put("人数","12");
+		
 		dconfig.put("空刀","true");
 	}
 	@Override
@@ -27,7 +27,7 @@ public class StandardWerewolfCreater implements GameCreater<WerewolfGame>{
 	@Override
 	public WerewolfGame createGame(AbstractRoom gp, int cplayer, Map<String, String> args) {
 		args.putAll(dconfig);
-		return new WerewolfGame(gp,12,args);
+		return new WerewolfGame(gp,cplayer,args);
 	}
 
 }

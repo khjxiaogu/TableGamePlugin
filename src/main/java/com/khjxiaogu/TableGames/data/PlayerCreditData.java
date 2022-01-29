@@ -43,12 +43,14 @@ public class PlayerCreditData {
 				}
 
 				creditCache.entrySet().removeIf(ac->{
-					ac.getValue().unusedsince++;
+					
 					if(!ac.getValue().hasChange()) {
+						ac.getValue().unusedsince++;
 						if(ac.getValue().unusedsince>100)
 							return true;
 						return false;
 					}
+					ac.getValue().unusedsince=0;
 					try(PreparedStatement ps=database.prepareStatement("REPLACE INTO profile(qq,data) VALUES(?,?)")){
 						ps.setString(1,String.valueOf(ac.getKey()));
 						ps.setString(2,ac.getValue().save().toString());

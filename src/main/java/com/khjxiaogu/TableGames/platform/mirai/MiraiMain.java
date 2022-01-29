@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.util.function.BiConsumer;
 
@@ -13,12 +12,10 @@ import com.khjxiaogu.TableGames.PluginData;
 import com.khjxiaogu.TableGames.game.idiomsolitare.IdiomLibrary;
 import com.khjxiaogu.TableGames.game.undercover.UnderCoverTextLibrary;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
-import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.RoomMessageEvent;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Text;
-import com.khjxiaogu.TableGames.utils.Game;
-import com.khjxiaogu.TableGames.utils.GameUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
@@ -59,8 +56,8 @@ public class MiraiMain extends JavaPlugin {
 		GlobalMain.setLogger(new MiraiGameLogger(this.getLogger()));
 		//BotConfiguration.getDefault().setProtocol(MiraiProtocol.ANDROID_PHONE);
 		MiraiMain.plugin=this;
-		GlobalMain.Init(super.getDataFolder());
-		
+		GlobalMain.init(super.getDataFolder());
+		GlobalMain.privmatcher.load(this.getDataFolder());
 		try {
 			File f=new File(super.getDataFolder(),"undtext.txt");
 			File f2=new File(super.getDataFolder(),"cyyy.csv");
@@ -102,7 +99,7 @@ public class MiraiMain extends JavaPlugin {
 				}
 					
 				if (hasCmd) {
-					MiraiListenerUtils.dispatch(event.getSender().getId(),event.getGroup(),MsgType.AT,(IMessageCompound) MiraiAdapter.INSTANCE.toUnified(event.getMessage(),event.getBot()));
+					MiraiListenerUtils.dispatch(event.getSender(),event.getGroup(),MsgType.AT,(IMessageCompound) MiraiAdapter.INSTANCE.toUnified(event.getMessage(),event.getBot()));
 					{
 						
 						String[] args=command.split(" ");
@@ -111,61 +108,18 @@ public class MiraiMain extends JavaPlugin {
 						if(bae!=null) {
 							MiraiRoomMessageEvent uev=new MiraiRoomMessageEvent(event);
 							bae.accept(uev,args);
-						}else if(args[0].startsWith("报名")) {
-							Game g=GameUtils.getGames().get(MiraiGroup.createInstance(event.getGroup()));
-							if(g!=null&&g.isAlive()) {
-								g.addMember(new MiraiHumanUser((NormalMember) event.getSender()));
-							}
-						}else if(event.getSender().getPermission().getLevel()>0) {
+						}else if(GlobalMain.privmatcher.match(new MiraiHumanUser((NormalMember) event.getSender())).isAllowed()) {
 							BiConsumer<RoomMessageEvent, String[]> bce=GlobalMain.privcmd.get(args[0]);
 							if(bce!=null) {
 								MiraiRoomMessageEvent uev=new MiraiRoomMessageEvent(event);
 								bce.accept(uev,args);
-							}else if(command.startsWith("强制开始")) {
-								Game g=GameUtils.getGames().get(MiraiGroup.createInstance(event.getGroup()));
-								if(g!=null&&g.isAlive()) {
-									g.forceStart();
-								}
-							}else if(command.startsWith("停止游戏")) {
-								Game g=GameUtils.getGames().get(MiraiGroup.createInstance(event.getGroup()));
-								if(g!=null) {
-									g.forceStop();
-								}
-								event.getGroup().sendMessage("已经停止正在进行的游戏！");
-								event.getSender().sendMessage("已经停止正在进行的游戏！");
-							}else if(command.startsWith("暂停游戏")) {
-								Game g=GameUtils.getGames().get(MiraiGroup.createInstance(event.getGroup()));
-								if(g!=null) {
-									g.forceInterrupt();
-								}
-								event.getSender().sendMessage("已经暂停正在进行的游戏！");
-							}else if(command.startsWith("继续游戏")) {
-								Game g=GameUtils.getGames().get(MiraiGroup.createInstance(event.getGroup()));
-								if(g!=null&&g.isAlive()) {
-									event.getGroup().sendMessage("因为有其他的游戏正在运行，无法继续。");
-									return;
-								}
-								try(FileInputStream fileOut = new FileInputStream(new File(MiraiMain.plugin.getDataFolder(),""+MiraiGroup.createInstance(event.getGroup())+".game"));ObjectInputStream out = new ObjectInputStream(fileOut)){
-									
-									GameUtils.getGames().put(MiraiGroup.createInstance(event.getGroup()),(Game) out.readObject());
-								} catch (IOException | ClassNotFoundException e) {
-									// TODO Auto-generated catch block
-									event.getGroup().sendMessage("继续游戏失败！");
-									e.printStackTrace();
-								}
-
-							}else if(args[0].startsWith("强制报名")) {
-								Game g=GameUtils.getGames().get(MiraiGroup.createInstance(event.getGroup()));
-								if(g!=null&&g.isAlive()) {
-									g.addMember(new MiraiHumanUser(event.getGroup().get(Long.parseLong(args[1]))));
-								}
 							}else if(args[0].startsWith("执行")) {
 								GlobalMain.dispatchexec.execute(()->MiraiListenerUtils.dispatch(Long.parseLong(args[1]),MsgType.valueOf(args[2]),new Text(args[3]).asMessage()));
 							}
 						}
 					}
 				}else {
-					GlobalMain.dispatchexec.execute(()->MiraiListenerUtils.dispatch(event.getSender().getId(),event.getGroup(),MsgType.PUBLIC,(IMessageCompound) MiraiAdapter.INSTANCE.toUnified(event.getMessage(),event.getBot())));
+					GlobalMain.dispatchexec.execute(()->MiraiListenerUtils.dispatch(event.getSender(),event.getGroup(),MsgType.PUBLIC,(IMessageCompound) MiraiAdapter.INSTANCE.toUnified(event.getMessage(),event.getBot())));
 				}
 			}
 			@EventHandler

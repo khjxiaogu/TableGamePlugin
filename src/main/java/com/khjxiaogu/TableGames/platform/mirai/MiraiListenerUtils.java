@@ -1,15 +1,21 @@
 package com.khjxiaogu.TableGames.platform.mirai;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MessageListener;
-import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.platform.MsgType;
+import com.khjxiaogu.TableGames.platform.RoomMessageListener;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
+import net.mamoe.mirai.contact.NormalMember;
 
 public class MiraiListenerUtils {
 
@@ -28,39 +34,51 @@ public class MiraiListenerUtils {
 			ml.handle(msg, type);
 		}
 	}
+	static class RoomMessageListenerWrapper implements RoomMessageListener {
+		public RoomMessageListener ml;
+		public boolean isValid = true;
+		public long from;
 
+		public RoomMessageListenerWrapper(RoomMessageListener ml,long from) {
+			this.ml = ml;
+			this.from = from;
+		}
+
+		@Override
+		public void handle(AbstractUser u,IMessageCompound msg, MsgType type) {
+			ml.handle(u,msg, type);
+		}
+	}
 	public static ConcurrentHashMap<Long, MessageListenerWrapper> mls = new ConcurrentHashMap<>();
-
+	public static List<RoomMessageListenerWrapper> gls = Collections.synchronizedList(new ArrayList<>());
+	
 	public MiraiListenerUtils() {
 	}
-
+	public static void registerListener(Group g, RoomMessageListener ml) {
+		gls.add(new RoomMessageListenerWrapper(ml, g.getId()));
+	}
+	public static void releaseListener(Group g) {
+		gls.removeIf(w->w.from==g.getId());
+	}
 	public static void registerListener(Long id, Group g, MessageListener ml) {
-		MiraiListenerUtils.mls.put(id, new MiraiListenerUtils.MessageListenerWrapper(ml, g.getId()));
+		mls.put(id, new MessageListenerWrapper(ml, g.getId()));
 	}
 
 	public static void registerListener(Long id, MessageListener ml) {
-		MiraiListenerUtils.mls.put(id, new MiraiListenerUtils.MessageListenerWrapper(ml,0));
+		mls.put(id, new MessageListenerWrapper(ml,0));
 	}
 
 	public static void registerListener(Member m, MessageListener ml) {
-		MiraiListenerUtils.mls.put(m.getId(), new MiraiListenerUtils.MessageListenerWrapper(ml, m.getGroup().getId()));
+		mls.put(m.getId(), new MessageListenerWrapper(ml, m.getGroup().getId()));
 	}
 
 	public static void releaseListener(Long id) {
-		MiraiListenerUtils.mls.remove(id);
+		mls.remove(id);
 	}
 
 	public static boolean dispatch(Long id, MsgType type, IMessageCompound messageCompound) {
-		if (messageCompound.getText().startsWith("重置")) {
-			for (Game g : GameUtils.getGames().values()) {
-				if (g.isAlive())
-					if (g.onReAttach(id)) {
-						break;
-					}
-			}
-			return true;
-		}
-		MiraiListenerUtils.MessageListenerWrapper ml = MiraiListenerUtils.mls.get(id);
+		
+		MessageListenerWrapper ml = mls.get(id);
 		//System.out.println("dispatching " + id);
 		if (ml == null || !ml.isValid)
 			return false;
@@ -69,8 +87,10 @@ public class MiraiListenerUtils {
 		return true;
 	}
 
-	public static boolean dispatch(Long id, Group g, MsgType type, IMessageCompound msg) {
-		MiraiListenerUtils.MessageListenerWrapper ml = MiraiListenerUtils.mls.get(id);
+	public static boolean dispatch(Member m, Group g, MsgType type, IMessageCompound msg) {
+		gls.stream().filter(e->e.from==g.getId()).forEach(e->e.handle(new MiraiHumanUser((NormalMember)m),msg, type));
+		
+		MessageListenerWrapper ml = mls.get(m.getId());
 		if (ml == null || !ml.isValid)
 			return false;
 		if (!(ml.from == 0||g.getId()==ml.from))
@@ -81,7 +101,7 @@ public class MiraiListenerUtils {
 	}
 
 	public static void InvalidListeners() {
-		MiraiListenerUtils.mls.values().iterator().forEachRemaining(a -> a.isValid = false);
+		mls.values().forEach(a -> a.isValid = false);
 	}
 
 }

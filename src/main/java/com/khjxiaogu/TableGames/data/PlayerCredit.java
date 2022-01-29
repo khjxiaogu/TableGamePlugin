@@ -159,6 +159,7 @@ public class PlayerCredit {
 		return sb.toString();
 	}
 	public void removeBan() {
+		assumeChange();
 		canPlayIn=0;
 	}
 	public boolean hasItem(String name) {

@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
-import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 public class Witch extends Villager {
@@ -136,7 +136,9 @@ public class Witch extends Villager {
 			return 0.15;
 		return 0;
 	}
-
+	public double onWolfKilledAccuracy() {
+		return 0.5;
+	}
 	@Override
 	public double onSkilledAccuracy() {
 		if (!hasHeal && !hasPoison)

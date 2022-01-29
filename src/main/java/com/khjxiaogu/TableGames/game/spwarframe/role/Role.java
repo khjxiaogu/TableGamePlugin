@@ -7,14 +7,14 @@ import java.util.function.Consumer;
 
 import com.khjxiaogu.TableGames.game.spwarframe.FakePlayer;
 import com.khjxiaogu.TableGames.game.spwarframe.GameManager;
+import com.khjxiaogu.TableGames.game.spwarframe.GameManager.Fraction;
+import com.khjxiaogu.TableGames.game.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.game.spwarframe.Player;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.CantSaveException;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.InvalidInterruptedTargetException;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.InvalidSkillParamException;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.RoleDiedException;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.SkillException;
-import com.khjxiaogu.TableGames.game.spwarframe.GameManager.Fraction;
-import com.khjxiaogu.TableGames.game.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.game.spwarframe.events.DeadAnnounceEvent;
 import com.khjxiaogu.TableGames.game.spwarframe.events.Event;
 import com.khjxiaogu.TableGames.game.spwarframe.events.FractionRevalEvent;

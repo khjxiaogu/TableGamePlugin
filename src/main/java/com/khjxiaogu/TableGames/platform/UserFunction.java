@@ -15,6 +15,12 @@ public class UserFunction implements Serializable{
 	 */
 	private static final long serialVersionUID = 8489601792669124710L;
 	protected AbstractUser member;
+	public AbstractUser getMember() {
+		return member;
+	}
+	public void setMember(AbstractUser member) {
+		this.member = member;
+	}
 	private void readObject(ObjectInputStream aInputStream) throws ClassNotFoundException, IOException
 	{
 		aInputStream.defaultReadObject();

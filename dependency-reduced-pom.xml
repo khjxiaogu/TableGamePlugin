@@ -106,14 +106,66 @@
     <dependency>
       <groupId>net.mamoe</groupId>
       <artifactId>mirai-console</artifactId>
-      <version>2.7-M1</version>
+      <version>2.10.0-RC2</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>kotlin-jvm-blocking-bridge-runtime-jvm</artifactId>
+          <groupId>me.him188</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>kotlin-dynamic-delegation-jvm</artifactId>
+          <groupId>me.him188</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>mirai-console-compiler-annotations-jvm</artifactId>
+          <groupId>net.mamoe</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>yamlkt-jvm</artifactId>
+          <groupId>net.mamoe.yamlkt</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>annotations</artifactId>
+          <groupId>org.jetbrains</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>caller</artifactId>
+          <groupId>io.github.karlatemp</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>kotlinx-coroutines-jdk8</artifactId>
+          <groupId>org.jetbrains.kotlinx</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>net.mamoe</groupId>
-      <artifactId>mirai-core</artifactId>
-      <version>2.7-M1</version>
+      <artifactId>mirai-core-all</artifactId>
+      <version>2.10.0-RC2</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>mirai-core-jvm</artifactId>
+          <groupId>net.mamoe</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>mirai-core-api-jvm</artifactId>
+          <groupId>net.mamoe</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>mirai-core-utils-jvm</artifactId>
+          <groupId>net.mamoe</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>kotlin-stdlib-jdk8</artifactId>
+          <groupId>org.jetbrains.kotlin</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>kotlin-jvm-blocking-bridge-runtime-jvm</artifactId>
+          <groupId>me.him188</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
   <properties>

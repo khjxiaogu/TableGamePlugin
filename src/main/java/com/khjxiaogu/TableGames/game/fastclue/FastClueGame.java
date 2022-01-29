@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.game.fastclue.Card.CardType;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 import com.khjxiaogu.TableGames.utils.Utils;
@@ -132,7 +132,7 @@ public class FastClueGame extends Game {
 					if(tcp==players.size()) {
 						cp.next=players.get(0);
 						this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
-						getScheduler().execute(()->gameStart());
+						getScheduler().execute(this::gameStart);
 					}
 				}
 				return true;
@@ -183,7 +183,7 @@ public class FastClueGame extends Game {
 				if(tcp==players.size()) {
 					cp.next=players.get(0);
 					this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
-					getScheduler().execute(()->gameStart());
+					getScheduler().execute(this::gameStart);
 				}
 			}
 		} catch (IllegalArgumentException
@@ -217,7 +217,7 @@ public class FastClueGame extends Game {
 					if(tcp==players.size()) {
 						cp.next=players.get(0);
 						this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
-						getScheduler().execute(()->gameStart());
+						getScheduler().execute(this::gameStart);
 					}
 				}
 			} catch (IllegalArgumentException

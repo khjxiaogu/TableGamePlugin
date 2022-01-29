@@ -6,12 +6,14 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.message.At;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.utils.Game;
 
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.MemberPermission;
 import net.mamoe.mirai.contact.NormalMember;
 
 
@@ -62,14 +64,14 @@ public class MiraiHumanUser extends MiraiUser implements Serializable {
 	@Override
 	public void sendPrivate(String str) {
 		try {
-			member.sendMessage(str);
+			SlowUtils.runSlowly(()->member.sendMessage(str));
 		}catch(Exception ex) {
 			while(true) {
 				try {
 					Thread.sleep(3000);
 				} catch (InterruptedException e) {}
 				try {
-					member.sendMessage(str);
+					SlowUtils.runSlowly(()->member.sendMessage(str));
 					return;
 				}catch(Exception ex2) {}
 			}
@@ -124,17 +126,26 @@ public class MiraiHumanUser extends MiraiUser implements Serializable {
 	public void sendPrivate(IMessage msg) {
 		net.mamoe.mirai.message.data.Message pmsg=MiraiAdapter.INSTANCE.toPlatform(msg,group);
 		try {
-			member.sendMessage(pmsg);
+			SlowUtils.runSlowly(()->member.sendMessage(pmsg));
 		}catch(Exception ex) {
 			while(true) {
 				try {
 					Thread.sleep(3000);
 				} catch (InterruptedException e) {}
 				try {
-					member.sendMessage(pmsg);
+					SlowUtils.runSlowly(()->member.sendMessage(pmsg));
 					return;
 				}catch(Exception ex2) {}
 			}
+		}
+	}
+	@Override
+	public Permission getPermission() {
+		MemberPermission mp=member.getPermission();
+		switch(mp) {
+		case OWNER:return Permission.SYSTEM;
+		case ADMINISTRATOR:return Permission.ADMIN;
+		default:return Permission.USER;
 		}
 	}
 }

@@ -13,12 +13,15 @@ public interface AbstractUser {
 	String getMemberString();
 	void setNameCard(String s);
 	String getNameCard();
+	AbstractRoom getRoom();
 	void tryMute();
 	void tryUnmute();
 	long getId();
+	long getHostId();
 	void bind(Object obj);
 	void setGame(Game g);
 	void registerListener(MessageListener msgc);
 	void releaseListener();
 	Object getRoleObject();
+	Permission getPermission();
 }

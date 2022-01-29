@@ -2,7 +2,7 @@ package com.khjxiaogu.TableGames.game.werewolf;
 
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
-import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 
@@ -87,7 +87,9 @@ public class WolfKiller extends Villager {
 			return 0.2;
 		return 0.1;
 	}
-
+	public double onWolfKilledAccuracy() {
+		return onSkilledAccuracy();
+	}
 	@Override
 	public boolean shouldReplace(DiedReason src, DiedReason dest) {
 		if (dest != DiedReason.Poison)

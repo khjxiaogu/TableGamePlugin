@@ -1,10 +1,12 @@
 package com.khjxiaogu.TableGames.platform.mirai;
 
 import java.io.Serializable;
+
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
-import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.platform.MsgType;
+import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.MessageCompound;
@@ -93,7 +95,7 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	}
 	@Override
 	public void sendBotMessage(String msg) {
-		super.group.sendMessage(nameCard+"：\n"+msg);
+		SlowUtils.runSlowly(()->super.group.sendMessage(nameCard+"：\n"+msg));
 	}
 	@Override
 	public IMessage getAt() {
@@ -144,6 +146,21 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 				onPrivate(((Text) str).getText());
 			}
 		},500);
+	}
+
+	@Override
+	public AbstractRoom getRoom() {
+		return MiraiGroup.createInstance(group);
+	}
+
+	@Override
+	public long getHostId() {
+		return group.getBot().getId();
+	}
+
+	@Override
+	public Permission getPermission() {
+		return Permission.USER;
 	}
 
 	

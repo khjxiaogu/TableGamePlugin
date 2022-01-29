@@ -1,7 +1,9 @@
 package com.khjxiaogu.TableGames.platform.mirai;
 
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MessageListener;
+import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.utils.Game;
 
@@ -16,7 +18,7 @@ public class MiraiUserFriend implements AbstractUser {
 	@Override
 	public void sendPrivate(String str) {
 		try {
-			member.sendMessage(str);
+			SlowUtils.runSlowly(()->member.sendMessage(str));
 		}catch(Exception ex) {
 			while(true) {
 				try {
@@ -51,7 +53,7 @@ public class MiraiUserFriend implements AbstractUser {
 	public void sendPrivate(IMessage msg) {
 		net.mamoe.mirai.message.data.Message pmsg=MiraiAdapter.INSTANCE.toPlatform(msg,member);
 		try {
-			member.sendMessage(pmsg);
+			SlowUtils.runSlowly(()->member.sendMessage(pmsg));
 		}catch(Exception ex) {
 			while(true) {
 				try {
@@ -125,5 +127,17 @@ public class MiraiUserFriend implements AbstractUser {
 	public Object getRoleObject() {
 		return null;
 	}
+	@Override
+	public AbstractRoom getRoom() {
+		return null;
+	}
 
+	@Override
+	public long getHostId() {
+		return member.getBot().getId();
+	}
+	@Override
+	public Permission getPermission() {
+		return Permission.USER;
+	}
 }

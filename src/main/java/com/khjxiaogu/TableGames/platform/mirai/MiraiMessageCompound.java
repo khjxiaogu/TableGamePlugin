@@ -1,11 +1,13 @@
 package com.khjxiaogu.TableGames.platform.mirai;
 
 import java.util.AbstractList;
+
 import com.khjxiaogu.TableGames.platform.message.At;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.platform.message.Text;
+
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.message.data.MessageChain;
 

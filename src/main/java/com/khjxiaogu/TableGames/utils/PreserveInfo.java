@@ -11,8 +11,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 
 
 public abstract class PreserveInfo<T extends Game>{
@@ -99,7 +99,7 @@ public abstract class PreserveInfo<T extends Game>{
 		AliveCounter--;
 		if(AliveCounter==0) {
 			for(AbstractUser m:topreserve.keySet()) {
-				m.sendPrivate("由于超时未能开始，您的预定已被取消。");
+				m.sendPrivate("由于超时未能开始，"+m.getMemberString()+" 的预定已被取消。");
 			}
 			this.removeAll();
 		}
@@ -121,10 +121,10 @@ public abstract class PreserveInfo<T extends Game>{
 		 */
 		AliveCounter=PreserveInfo.KeepAlive;
 		if(topreserve.put(m,new Date().getTime()) == null) {
-			m.sendPrivate("预定成功");
+			m.sendPrivate(m.getMemberString()+" 预定"+this.getName()+"成功");
 			sendPersonInfo();
 		} else {
-			m.sendPrivate("您已经预定了。");
+			m.sendPrivate(m.getMemberString()+"您已经预定了。");
 		}
 		synchronized(PreserveInfo.prevSize) {
 			if(getActualCurrentNum()>=getSuitMembers()&&PreserveInfo.prevSize<getSuitMembers()) {

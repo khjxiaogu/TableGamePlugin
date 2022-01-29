@@ -3,6 +3,7 @@ package com.khjxiaogu.TableGames.game.spwarframe.skill;
 import java.util.List;
 
 import com.khjxiaogu.TableGames.game.spwarframe.GameManager;
+import com.khjxiaogu.TableGames.game.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.CantSaveException;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.CantSelfException;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.InvalidInterruptedTargetException;
@@ -11,7 +12,6 @@ import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.InvalidSkillTargetExc
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.RoleDiedException;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.RoleNotExistException;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.SkillException;
-import com.khjxiaogu.TableGames.game.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.game.spwarframe.events.Event;
 import com.khjxiaogu.TableGames.game.spwarframe.role.Role;
 

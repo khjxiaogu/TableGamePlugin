@@ -9,8 +9,11 @@ public interface AbstractRoom {
 	void sendMessage(IMessage msg);
 	void sendMessage(String msg);
 	Object getInstance();
+	void registerRoomListener(RoomMessageListener ml);
 	void registerListener(Long id, MessageListener ml);
 	void releaseListener(long id);
 	void setMuteAll(boolean isMute);
 	String getHostNameCard();
+	long getId();
+	void releaseRoomListener();
 }

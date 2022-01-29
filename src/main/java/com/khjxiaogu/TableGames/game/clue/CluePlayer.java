@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.UserFunction;
-import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 public class CluePlayer extends UserFunction {
@@ -115,7 +115,7 @@ public class CluePlayer extends UserFunction {
 							game.addKnow(c);
 						}
 						this.sendPublic(sb.toString());
-						game.getScheduler().submit(()->next.onTurn());
+						game.getScheduler().submit(next::onTurn);
 					}
 				}catch(Exception e) {
 					sendPrivate("格式错误，正确格式：“假设 [凶手角色ID] [凶器卡号码]”");
@@ -131,7 +131,7 @@ public class CluePlayer extends UserFunction {
 			return;
 		}
 		super.releaseListener();
-		game.getScheduler().submit(()->next.onTurn());
+		game.getScheduler().submit(next::onTurn);
 	}
 	public void checkAllCardPresnet(Card room,Card weapon,Card role) {
 		CluePlayer fst=this;
@@ -148,7 +148,7 @@ public class CluePlayer extends UserFunction {
 			sendPrivate(fst.getNameCard()+" 向你出示了\n"+rslt.getDisplayName());
 			game.sendPublicMessage(fst.getNameCard()+" 向 "+getNameCard()+" 出示了一张牌");
 		}
-		game.getScheduler().submit(()->next.onTurn());
+		game.getScheduler().submit(next::onTurn);
 	}
 	public Card checkCardPresent(Card room,Card weapon,Card role) {
 		List<Card> cl=new ArrayList<>(3);

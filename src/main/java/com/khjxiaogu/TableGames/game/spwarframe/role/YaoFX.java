@@ -3,9 +3,9 @@ package com.khjxiaogu.TableGames.game.spwarframe.role;
 import java.util.List;
 
 import com.khjxiaogu.TableGames.game.spwarframe.GameManager;
+import com.khjxiaogu.TableGames.game.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.InvalidSkillParamException;
 import com.khjxiaogu.TableGames.game.spwarframe.Exceptions.SkillException;
-import com.khjxiaogu.TableGames.game.spwarframe.GameManager.GameTurn;
 import com.khjxiaogu.TableGames.game.spwarframe.events.FractionRevalEvent;
 import com.khjxiaogu.TableGames.game.spwarframe.events.RoleRevalEvent;
 import com.khjxiaogu.TableGames.game.spwarframe.events.SkillEvent;

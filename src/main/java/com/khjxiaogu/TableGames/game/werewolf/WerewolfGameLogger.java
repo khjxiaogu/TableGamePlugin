@@ -2,9 +2,9 @@ package com.khjxiaogu.TableGames.game.werewolf;
 
 import java.io.Serializable;
 
-import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.utils.ImagePrintStream;
 

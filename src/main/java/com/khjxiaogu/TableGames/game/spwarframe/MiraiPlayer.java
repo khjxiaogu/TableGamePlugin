@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.khjxiaogu.TableGames.platform.AbstractUser;
-import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 public class MiraiPlayer implements Player {

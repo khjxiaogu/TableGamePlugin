@@ -14,8 +14,8 @@ import java.util.Set;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.WaitReason;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.UserFunction;
-import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.utils.Utils;
 
@@ -45,12 +45,17 @@ public class Villager extends UserFunction implements Serializable {
 	Set<DiedReason> diedReasonStack = Collections.synchronizedSet(new HashSet<>());
 	double voteAccuracy;
 	int voted;
+	@PlayerDefined
+	int index;
 	double skillAccuracy;
 	int skilled;
 	// DiedReason dr = null;
+	@PlayerDefined
 	transient Villager prev;
+	@PlayerDefined
 	transient Villager next;
-
+	@PlayerDefined
+	String origname;
 	public Villager(WerewolfGame game, AbstractUser p) {
 		super(p);
 		this.game = game;
@@ -315,6 +320,7 @@ public class Villager extends UserFunction implements Serializable {
 		game.startWait(30000,WaitReason.Generic);
 		super.releaseListener();
 		if(game.canTalk.isEmpty()) {
+			game.sendPublicMessage("当前发言顺序：顺序");
 			Villager.orders.get("顺序").select(game.canTalk, lastDeath,this,game.playerlist);
 		}
 		return true;
@@ -562,7 +568,9 @@ public class Villager extends UserFunction implements Serializable {
 	public double onSkilledAccuracy() {
 		return 0.5;
 	}
-
+	public double onWolfKilledAccuracy() {
+		return onSkilledAccuracy();
+	}
 	public boolean shouldReplace(DiedReason src, DiedReason dest) {
 		return src.canBeReplaced(dest);
 	}

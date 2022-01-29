@@ -6,9 +6,11 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MessageListener;
-import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.RoomMessageListener;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 
 import net.mamoe.mirai.Bot;
@@ -98,19 +100,26 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 
 	@Override
 	public void sendMessage(IMessage msg) {
-		group.sendMessage(MiraiAdapter.INSTANCE.toPlatform(msg,this));
+		SlowUtils.runSlowly(()->group.sendMessage(MiraiAdapter.INSTANCE.toPlatform(msg,this)));
 	}
 
 	@Override
 	public void sendMessage(String msg) {
-		group.sendMessage(msg);
+		SlowUtils.runSlowly(()->group.sendMessage(msg));
 	}
 
 	@Override
 	public Object getInstance() {
 		return group;
 	}
-
+	@Override
+	public void registerRoomListener(RoomMessageListener ml) {
+		MiraiListenerUtils.registerListener(group, ml);
+	}
+	@Override
+	public void releaseRoomListener() {
+		
+	}
 	@Override
 	public void registerListener(Long id, MessageListener ml) {
 		MiraiListenerUtils.registerListener(id, group, ml);
@@ -129,5 +138,9 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 	@Override
 	public String getHostNameCard() {
 		return group.getBotAsMember().getNameCard();
+	}
+	@Override
+	public long getId() {
+		return group.getId();
 	}
 }

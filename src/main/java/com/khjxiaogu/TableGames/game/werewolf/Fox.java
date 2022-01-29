@@ -1,7 +1,7 @@
 package com.khjxiaogu.TableGames.game.werewolf;
 
 import com.khjxiaogu.TableGames.platform.AbstractUser;
-import com.khjxiaogu.TableGames.platform.MessageListener.MsgType;
+import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 
@@ -112,7 +112,9 @@ public class Fox extends Villager {
 		}
 		return 0.4;
 	}
-
+	public double onWolfKilledAccuracy() {
+		return 0.2;
+	}
 	@Override
 	public int getTurn() {
 		return 2;
