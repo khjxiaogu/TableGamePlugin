@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.data;
 
 import java.io.File;
@@ -9,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.JsonParser;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
 public class PlayerCreditData {
 
@@ -17,7 +35,7 @@ public class PlayerCreditData {
 			"data TEXT       NOT NULL DEFAULT '{}' " + // 游戏数据json
 			");";// 创建请求记录表
 	Connection database;
-	public ConcurrentHashMap<Long,PlayerCredit> creditCache=new ConcurrentHashMap<>();
+	public ConcurrentHashMap<UserIdentifier,PlayerCredit> creditCache=new ConcurrentHashMap<>();
 	public PlayerCreditData(File datapath) {
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -52,7 +70,7 @@ public class PlayerCreditData {
 					}
 					ac.getValue().unusedsince=0;
 					try(PreparedStatement ps=database.prepareStatement("REPLACE INTO profile(qq,data) VALUES(?,?)")){
-						ps.setString(1,String.valueOf(ac.getKey()));
+						ps.setString(1,ac.getKey().getId());
 						ps.setString(2,ac.getValue().save().toString());
 						ps.executeUpdate();
 					} catch (Exception e) {
@@ -65,12 +83,12 @@ public class PlayerCreditData {
 			}
 		}).start();
 	}
-	public PlayerCredit get(Long qq) {
-		PlayerCredit pc=creditCache.get(qq);
+	public PlayerCredit get(UserIdentifier id) {
+		PlayerCredit pc=creditCache.get(id);
 		if(pc==null) {
 			pc=new PlayerCredit();
 			try(PreparedStatement ps=database.prepareStatement("SELECT data FROM profile WHERE qq = ?")){
-				ps.setString(1,String.valueOf(qq));
+				ps.setString(1,id.getId());
 				try(ResultSet rs=ps.executeQuery()){
 					if(rs.next()){
 						pc.load(JsonParser.parseString(rs.getString(1)).getAsJsonObject());
@@ -80,7 +98,7 @@ public class PlayerCreditData {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			creditCache.put(qq,pc);
+			creditCache.put(id,pc);
 		}
 		return pc;
 	}

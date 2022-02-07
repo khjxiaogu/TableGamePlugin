@@ -15,10 +15,41 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.message;
+package com.khjxiaogu.TableGames.platform.mirai;
 
-public interface IMessage {
-	public default MessageCompound asMessage() {
-		return new MessageCompound().append(this);
+import java.util.HashMap;
+import java.util.Map;
+
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
+
+public class QQId implements UserIdentifier {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	long id;
+	private static final Map<Long,QQId> cache=new HashMap<>();
+	private QQId(long id) {
+		this.id=id;
 	}
+
+	@Override
+	public String getId() {
+		return String.valueOf(id);
+	}
+
+	@Override
+	public String serialize() {
+		return String.valueOf(id);
+	}
+
+	@Override
+	public boolean isActual() {
+		return id>10000;
+	}
+
+	public static QQId of(long id) {
+		return cache.computeIfAbsent(id,QQId::new);
+	}
+
 }

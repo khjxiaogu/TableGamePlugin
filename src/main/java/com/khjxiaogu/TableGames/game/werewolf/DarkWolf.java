@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.game.werewolf;
 
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
@@ -36,9 +53,9 @@ public class DarkWolf extends Werewolf {
 		super.StartTurn();
 		// dr = dir;
 		sendPrivate(game.getAliveList());
-		super.sendPrivate("狼王，你死了，你可以选择打死另一个人，你有30秒的考虑时间\n格式：“杀死 qq号或者游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
+		super.sendPrivate("狼王，你死了，你可以选择打死另一个人，你有30秒的考虑时间\n格式：“杀死 游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
 		asked = true;
-		super.registerListener( (msg, type) -> {
+		super.registerListener((msg, type) -> {
 			if ((dir == DiedReason.Vote || game.isFirstNight()) && type == MsgType.AT) {
 				super.releaseListener();
 				game.skipWait(WaitReason.DieWord);
@@ -48,18 +65,18 @@ public class DarkWolf extends Werewolf {
 			String content = Utils.getPlainText(msg);
 			if (content.startsWith("杀死")) {
 				try {
-					Long qq = Long.parseLong(Utils.removeLeadings("杀死", content).replace('号', ' ').trim());
-					Villager p = game.getPlayerById(qq);
+					Long num = Long.parseLong(Utils.removeLeadings("杀死", content).replace('号', ' ').trim());
+					Villager p = game.getPlayerByNum(num);
 					if (p == null) {
-						super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
+						super.sendPrivate("选择的游戏号码非游戏玩家，请重新输入");
 						return;
 					}
 					if (p.isDead()) {
-						super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
+						super.sendPrivate("选择的游戏号码已死亡，请重新输入");
 						return;
 					}
 					if (p.equals(this)) {
-						super.sendPrivate("选择的qq号或者游戏号码是你自己，请重新输入");
+						super.sendPrivate("选择的游戏号码是你自己，请重新输入");
 						return;
 					}
 					EndTurn();
@@ -79,17 +96,19 @@ public class DarkWolf extends Werewolf {
 					p.isDead = true;
 					game.kill(p, DiedReason.DarkWolf);
 				} catch (Throwable t) {
-					super.sendPrivate("发生错误，正确格式为：“杀死 qq号或者游戏号码”！");
+					super.sendPrivate("发生错误，正确格式为：“杀死 游戏号码”！");
 				}
 			} else if (content.startsWith("放弃")) {
 				super.sendPrivate("你放弃了！");
 			}
 		});
 	}
+
 	@Override
 	public boolean shouldWaitDeathSkill() {
 		return true;
 	}
+
 	@Override
 	public double onVotedAccuracy() {
 		return 1;

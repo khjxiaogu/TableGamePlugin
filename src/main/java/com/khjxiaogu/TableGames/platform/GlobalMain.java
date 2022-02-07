@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.platform;
 
 import java.io.File;
@@ -110,7 +127,7 @@ public class GlobalMain {
 			if(command.length==1) {
 				event.getRoom().sendMessage(event.getSender().getAt().asMessage().append(db.getPlayer(event.getSender().getId(),name).toString()));
 			} else {
-				long id=Long.parseLong(command[1]);
+				UserIdentifier id=UserIdentifierSerializer.read(command[1]);
 				event.getRoom().sendMessage(event.getRoom().get(id).getNameCard()+"的"+GlobalMain.db.getPlayer(id,name).toString());
 			}
 		});
@@ -146,10 +163,10 @@ public class GlobalMain {
 		});
 
 		privcmd.put("强制预定"+name,(event,command)->{
-			PreserveHolder.getPreserve(event.getRoom(),preserver).addPreserver(event.getRoom().get(Long.parseLong(command[1])));
+			PreserveHolder.getPreserve(event.getRoom(),preserver).addPreserver(event.getRoom().get(UserIdentifierSerializer.read(command[1])));
 		});
 		privcmd.put("强制取消预定"+name,(event,command)->{
-			PreserveHolder.getPreserve(event.getRoom(),preserver).removePreserver(event.getRoom().get(Long.parseLong(command[1])),true);
+			PreserveHolder.getPreserve(event.getRoom(),preserver).removePreserver(event.getRoom().get(UserIdentifierSerializer.read(command[1])),true);
 		});
 		/*privcmd.put(name+"统计", (event,command)->{
 			event.getRoom().sendMessage(event.getSender().getAt().asMessage().append(db.getGame(name).getPlayer(event.getSender().getId(),PlayerDatabase.datacls.get(name)).toString()));
@@ -197,7 +214,7 @@ public class GlobalMain {
 		normhelp.put("取消预定<游戏名>","退出游戏");
 		normhelp.put("<游戏名>预定列表","查看游戏参加名单");
 		normhelp.put("<游戏名>统计","查看游戏统计");
-		normhelp.put("<游戏名>统计 [qq]","查看他人游戏统计");
+		normhelp.put("<游戏名>统计 [用户ID]","查看他人游戏统计");
 		normhelp.put("<游戏名>","<指令> <参数>游戏特殊指令");
 		privhelp.put("设置<游戏名>参数","<参数>设置游戏参数");
 		privhelp.put("清除<游戏名>参数","清除游戏参数");
@@ -205,8 +222,8 @@ public class GlobalMain {
 		privhelp.put("立即开始<游戏名>","尽快开始游戏");
 		privhelp.put("清空<游戏名>预定","清空预定列表");
 		privhelp.put("<游戏名>提醒","提醒玩家开始游戏");
-		privhelp.put("强制预定<游戏名>","<qq>强制玩家参加游戏");
-		privhelp.put("强制取消预定<游戏名>","<qq>强制玩家退出游戏");
+		privhelp.put("强制预定<游戏名>","<用户ID>强制玩家参加游戏");
+		privhelp.put("强制取消预定<游戏名>","<用户ID>强制玩家退出游戏");
 		privhelp.put("开始<游戏名>","<人数>开始固定场");
 		privhelp.put("定制<游戏名>","<参数>开始设置场");
 		addPCmd("揭示","显示游戏的系统信息",(event,args)->{
@@ -244,7 +261,7 @@ public class GlobalMain {
 		});
 		addPCmd("测试权限", "测试成员权限",(event,args)->{
 			try {
-				event.getRoom().sendMessage(args[1]+"的权限状态为:"+privmatcher.match(event.getRoom().get(Long.parseLong(args[1]))).name());
+				event.getRoom().sendMessage(args[1]+"的权限状态为:"+privmatcher.match(event.getRoom().get(UserIdentifierSerializer.read(args[1]))).name());
 			} catch (Exception ex) {
 				//getLogger().warning(ex);
 			}
@@ -261,7 +278,7 @@ public class GlobalMain {
 				long m1=Long.parseLong(args[1]);
 				AbstractUser m2=null;
 				if(args.length>2) {
-					m2=event.getRoom().get(Long.parseLong(args[2]));
+					m2=event.getRoom().get(UserIdentifierSerializer.read(args[2]));
 				}
 				if(g.takeOverMember(m1,m2)) {
 					event.getRoom().sendMessage("接管成功");
@@ -298,42 +315,42 @@ public class GlobalMain {
 			}
 		});
 		addPCmd("给积分","<账号> <积分>给予玩家积分",(event,args)->{
-			double crp=GlobalMain.credit.get(Long.parseLong(args[1])).givePT(Double.parseDouble(args[2]));
+			double crp=GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).givePT(Double.parseDouble(args[2]));
 			event.getRoom().sendMessage("添加成功，现有"+crp+"积分");
 		});
 		addPCmd("扣积分","<账号> <积分>扣除玩家积分",(event,args)->{
-			double crp=GlobalMain.credit.get(Long.parseLong(args[1])).removePT(Double.parseDouble(args[2]));
+			double crp=GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).removePT(Double.parseDouble(args[2]));
 			event.getRoom().sendMessage("扣除成功，还剩"+crp+"积分");
 		});
 		addPCmd("禁赛","<账号> <小时>禁赛玩家",(event,args)->{
-			GlobalMain.credit.get(Long.parseLong(args[1])).addBan(1000*3600*Integer.parseInt(args[2]));
-			event.getRoom().sendMessage("已经禁赛到"+new Date(GlobalMain.credit.get(Long.parseLong(args[1])).isBanned()).toString());
+			GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).addBan(1000*3600*Integer.parseInt(args[2]));
+			event.getRoom().sendMessage("已经禁赛到"+new Date(GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).isBanned()).toString());
 		});
 		privcmd.put("解除禁赛114514",(event,args)->{
-			GlobalMain.credit.get(Long.parseLong(args[1])).removeBan();
+			GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).removeBan();
 			event.getRoom().sendMessage("已经解除！");
 		});
 		addPCmd("使用积分","<账号> <积分>减少玩家积分",(event,args)->{
 			double crp;
-			if((crp=GlobalMain.credit.get(Long.parseLong(args[1])).withdrawPT(Integer.parseInt(args[2])))<0) {
+			if((crp=GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).withdrawPT(Integer.parseInt(args[2])))<0) {
 				event.getRoom().sendMessage("扣除失败，积分还差"+-crp+"点");
 			}
 			event.getRoom().sendMessage("扣除成功，还剩"+crp+"积分");
 		});
 		addPCmd("给物品","<账号> <物品名> [数量]给玩家物品",(event,args)->{
 			int cnt=args.length>3?Integer.parseInt(args[3]):1;
-			int crp=GlobalMain.credit.get(Long.parseLong(args[1])).giveItem(args[2],cnt);
+			int crp=GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).giveItem(args[2],cnt);
 			event.getRoom().sendMessage("添加成功，现有"+crp+"个"+args[2]);
 		});
 		addPCmd("扣物品","<账号> <物品名> [数量]扣除玩家物品",(event,args)->{
 			int cnt=args.length>3?Integer.parseInt(args[3]):1;
-			int crp=GlobalMain.credit.get(Long.parseLong(args[1])).removeItem(args[2],cnt);
+			int crp=GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).removeItem(args[2],cnt);
 			event.getRoom().sendMessage("扣除成功，还剩"+crp+"个"+args[2]);
 		});
 		addPCmd("使用物品","<账号> <物品名> [数量]减少玩家物品",(event,args)->{
 			int crp;
 			int cnt=args.length>3?Integer.parseInt(args[3]):1;
-			if((crp=GlobalMain.credit.get(Long.parseLong(args[1])).withdrawItem(args[2],cnt))<0) {
+			if((crp=GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).withdrawItem(args[2],cnt))<0) {
 				event.getRoom().sendMessage("扣除失败，"+args[2]+"还差"+-crp+"个");
 			}
 			event.getRoom().sendMessage("扣除成功，还剩"+crp+"个"+args[2]);
@@ -387,7 +404,7 @@ public class GlobalMain {
 		addPCmd("强制报名","<qq>强制玩家报名当前游戏",(event,args)->{
 			Game g=GameUtils.getGames().get(event.getRoom());
 			if(g!=null&&g.isAlive()) {
-				g.addMember(event.getRoom().get(Long.parseLong(args[1])));
+				g.addMember(event.getRoom().get(UserIdentifierSerializer.read(args[1])));
 			}
 		});
 		addPCmd("继续游戏","继续暂停的游戏",(event,args)->{

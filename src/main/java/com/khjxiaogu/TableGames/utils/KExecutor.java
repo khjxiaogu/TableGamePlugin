@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.utils;
 
 import java.io.ByteArrayOutputStream;
@@ -15,6 +32,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.UserIdentifierSerializer;
 import com.khjxiaogu.TableGames.utils.WaitThread.TerminatedException;
 
 public class KExecutor implements ExecutorService {
@@ -40,7 +58,7 @@ public class KExecutor implements ExecutorService {
 			if(!(ex instanceof TerminatedException||ex instanceof InterruptedException)) {
 				ByteArrayOutputStream baos=new ByteArrayOutputStream();
 				ex.printStackTrace(new PrintStream(baos));
-				AbstractUser author=tosend.get(1905387052L);
+				AbstractUser author=tosend.get(UserIdentifierSerializer.read("1905387052"));
 				if(author!=null) {
 					author.sendPrivate(baos.toString());
 				}else {

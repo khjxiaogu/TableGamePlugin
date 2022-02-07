@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.game.undercover;
 
 import java.util.ArrayList;
@@ -10,6 +27,7 @@ import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.MsgType;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.At;
 import com.khjxiaogu.TableGames.platform.message.Text;
 import com.khjxiaogu.TableGames.utils.Game;
@@ -66,9 +84,9 @@ public class UnderCoverGame extends Game {
 		}
 		super.doFinalize();
 	}
-	public UCPlayer getPlayerById(long id) {
+	public UCPlayer getPlayerById(UserIdentifier id) {
 		for(UCPlayer p:innos) {
-			if(p.getId()==id)
+			if(p.getId().equals(id))
 				return p;
 		}
 		return null;
@@ -233,7 +251,7 @@ public class UnderCoverGame extends Game {
 		return !isEnded;
 	}
 	@Override
-	public boolean onReAttach(Long c) {
+	public boolean onReAttach(UserIdentifier c) {
 		return false;
 	}
 

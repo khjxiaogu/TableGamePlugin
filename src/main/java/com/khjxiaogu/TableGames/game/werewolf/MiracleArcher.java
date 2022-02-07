@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.game.werewolf;
 
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
@@ -5,16 +22,12 @@ import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 
-
-
 public class MiracleArcher extends Villager {
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private int lastkillId;
-
-
 
 	public MiracleArcher(WerewolfGame game, AbstractUser p) {
 		super(game, p);
@@ -30,7 +43,7 @@ public class MiracleArcher extends Villager {
 	@Override
 	public void onTurn() {
 		super.StartTurn();
-		if(game.isFirstNight())
+		if (game.isFirstNight())
 			return;
 		if (!hasArrow) {
 			super.sendPrivate("奇迹弓手，你没有箭了。");
@@ -38,23 +51,23 @@ public class MiracleArcher extends Villager {
 		}
 		sendPrivate(game.getAliveList());
 		StringBuilder sb = new StringBuilder(
-				"奇迹弓手，你可以射一个人，格式：“射 qq号或者游戏号码”；你可以保护一个人，格式：“保护 qq号或者游戏号码”，如果不需要使用技能，无需发送任何内容，等待时间结束即可。\n");
+				"奇迹弓手，你可以射一个人，格式：“射 游戏号码”；你可以保护一个人，格式：“保护 游戏号码”，如果不需要使用技能，无需发送任何内容，等待时间结束即可。\n");
 		sb.append("你有一分钟的考虑时间。\n");
 		super.sendPrivate(sb.toString());
-		super.registerListener( (msg, type) -> {
+		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
 			if (content.startsWith("射")) {
 				try {
-					Long qq = Long.parseLong(Utils.removeLeadings("射", content).replace('号', ' ').trim());
-					Villager p = game.getPlayerById(qq);
+					Long num = Long.parseLong(Utils.removeLeadings("射", content).replace('号', ' ').trim());
+					Villager p = game.getPlayerByNum(num);
 					if (p == null) {
-						super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
+						super.sendPrivate("选择的游戏号码非游戏玩家，请重新输入");
 						return;
 					}
 					if (p.isDead()) {
-						super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
+						super.sendPrivate("选择的游戏号码已死亡，请重新输入");
 						return;
 					}
 					EndTurn();
@@ -81,18 +94,18 @@ public class MiracleArcher extends Villager {
 					super.releaseListener();
 					super.EndTurn();
 				} catch (Throwable t) {
-					super.sendPrivate("发生错误，正确格式为：“射 qq号或者游戏号码”！");
+					super.sendPrivate("发生错误，正确格式为：“射 游戏号码”！");
 				}
 			} else if (content.startsWith("保护")) {
 				try {
-					Long qq = Long.parseLong(Utils.removeLeadings("保护", content).replace('号', ' ').trim());
-					Villager p = game.getPlayerById(qq);
+					Long num = Long.parseLong(Utils.removeLeadings("保护", content).replace('号', ' ').trim());
+					Villager p = game.getPlayerByNum(num);
 					if (p == null) {
-						super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
+						super.sendPrivate("选择的游戏号码非游戏玩家，请重新输入");
 						return;
 					}
 					if (p.isDead()) {
-						super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
+						super.sendPrivate("选择的游戏号码已死亡，请重新输入");
 						return;
 					}
 					hasArrow = false;
@@ -101,7 +114,7 @@ public class MiracleArcher extends Villager {
 					game.logger.logSkill(this, p, "弓手保护");
 					super.sendPrivate("保护了" + p.getMemberString());
 				} catch (Throwable t) {
-					super.sendPrivate("发生错误，正确格式为：“保护 qq号或者游戏号码”！");
+					super.sendPrivate("发生错误，正确格式为：“保护 游戏号码”！");
 				}
 			}
 		});
@@ -111,20 +124,20 @@ public class MiracleArcher extends Villager {
 	@Override
 	public boolean shouldSurvive(DiedReason dir) {
 		if (dir == DiedReason.Shoot_s)
-			return game.getPlayerById(lastkillId).isGuarded;
+			return game.getPlayerByNum(lastkillId).isGuarded;
 		return super.shouldSurvive(dir);
 	}
 
 	@Override
 	public double onVotedAccuracy() {
-		if(hasArrow)
+		if (hasArrow)
 			return 0.25;
 		return 0.35;
 	}
 
 	@Override
 	public double onSkilledAccuracy() {
-		if(hasArrow)
+		if (hasArrow)
 			return 0;
 		return 0.3;
 	}

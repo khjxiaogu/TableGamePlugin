@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.data;
 
 import java.io.File;
@@ -17,6 +34,7 @@ import com.google.gson.JsonParser;
 import com.khjxiaogu.TableGames.game.undercover.UnderCoverPlayerData;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfPlayerData;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
 
 public class PlayerDatabase {
@@ -24,18 +42,18 @@ public class PlayerDatabase {
 	public static class GameData{
 		Gson gs=new GsonBuilder().create();
 		public static class PlayerData{
-			long qq;
+			UserIdentifier id;
 			GameData db;
-			private PlayerData(long qq, GameData db) {
+			private PlayerData(UserIdentifier id, GameData db) {
 				super();
-				this.qq = qq;
+				this.id = id;
 				this.db = db;
 			}
 			public JsonObject getData() {
-				return db.getData(qq);
+				return db.getData(id);
 			}
 			public boolean setData(JsonObject data) {
-				return db.setData(qq,data);
+				return db.setData(id,data);
 			}
 		}
 		String game;
@@ -44,23 +62,23 @@ public class PlayerDatabase {
 			this.game = game;
 			this.db = db;
 		}
-		public JsonObject getData(long qq) {
-			return db.getData(qq, game);
+		public JsonObject getData(UserIdentifier id) {
+			return db.getData(id, game);
 		}
-		public boolean setData(long qq,JsonObject data) {
-			return db.setData(qq, game, data);
+		public boolean setData(UserIdentifier id,JsonObject data) {
+			return db.setData(id, game, data);
 		}
-		public boolean setData(long qq,String data) {
-			return db.setData(qq, game, data);
+		public boolean setData(UserIdentifier id,String data) {
+			return db.setData(id, game, data);
 		}
-		public PlayerData getPlayer(long qq) {
-			return new PlayerData(qq,this);
+		public PlayerData getPlayer(UserIdentifier id) {
+			return new PlayerData(id,this);
 		}
-		public <T> T getPlayer(long qq,Class<T> datacls) {
-			return gs.fromJson(db.getData(qq, game),datacls);
+		public <T> T getPlayer(UserIdentifier id,Class<T> datacls) {
+			return gs.fromJson(db.getData(id, game),datacls);
 		}
-		public boolean setPlayer(long qq,Object datacls) {
-			return setData(qq,gs.toJson(datacls));
+		public boolean setPlayer(UserIdentifier id,Object datacls) {
+			return setData(id,gs.toJson(datacls));
 		}
 	}
 	static final String createPoM = "CREATE TABLE IF NOT EXISTS profile (" +
@@ -90,9 +108,9 @@ public class PlayerDatabase {
 			GlobalMain.getLogger().error("信息数据库初始化失败！");
 		}
 	}
-	public JsonObject getData(long qq,String game) {
+	public JsonObject getData(UserIdentifier id,String game) {
 		try(PreparedStatement ps=database.prepareStatement("SELECT data FROM profile WHERE qq = ? AND game = ?")){
-			ps.setString(1,String.valueOf(qq));
+			ps.setString(1,id.getId());
 			ps.setString(2,game);
 			try(ResultSet rs=ps.executeQuery()){
 				if(rs.next())
@@ -104,12 +122,12 @@ public class PlayerDatabase {
 		}
 		return new JsonObject();
 	}
-	public boolean setData(long qq,String game,JsonObject data) {
-		return setData(qq,game,data.toString());
+	public boolean setData(UserIdentifier id,String game,JsonObject data) {
+		return setData(id,game,data.toString());
 	}
-	public boolean setData(long qq,String game,String data) {
+	public boolean setData(UserIdentifier id,String game,String data) {
 		try(PreparedStatement ps=database.prepareStatement("REPLACE INTO profile(qq,game,data) VALUES(?,?,?)")){
-			ps.setString(1,String.valueOf(qq));
+			ps.setString(1,id.getId());
 			ps.setString(2,game);
 			ps.setString(3,data);
 			return ps.executeUpdate()>0;
@@ -119,8 +137,8 @@ public class PlayerDatabase {
 		}
 		return false;
 	}
-	public GenericPlayerData<?> getPlayer(long qq,String game) {
-		return gs.fromJson(getData(qq, game),PlayerDatabase.datacls.get(game));
+	public GenericPlayerData<?> getPlayer(UserIdentifier id,String game) {
+		return gs.fromJson(getData(id, game),PlayerDatabase.datacls.get(game));
 	}
 	public GenericPlayerData<?>[] getPlayers(String game) {
 		List<GenericPlayerData<?>> ll=new LinkedList<>();

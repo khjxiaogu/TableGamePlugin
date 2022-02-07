@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.game.werewolf;
 
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
@@ -5,9 +22,7 @@ import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.utils.Utils;
 
-
-
-public class Werewolf extends Villager{
+public class Werewolf extends Villager {
 
 	/**
 	 *
@@ -24,8 +39,6 @@ public class Werewolf extends Villager{
 		return 1;
 	}
 
-
-
 	@Override
 	public void onTurnStart() {
 		isSavedByWitch = false;
@@ -41,7 +54,7 @@ public class Werewolf extends Villager{
 	@Override
 	public void onTurn() {
 		super.StartTurn();
-		super.sendPrivate(getRole()+"，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
+		super.sendPrivate(getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
 	}
 
 	@Override
@@ -51,14 +64,14 @@ public class Werewolf extends Villager{
 		if (s.startsWith("自爆")) {
 			try {
 				super.sendPublic("是狼人，自爆了，进入黑夜。");
-				game.logger.logRaw(getNameCard()+"自爆了");
+				game.logger.logRaw(getNameCard() + "自爆了");
 				game.getScheduler().execute(() -> {
 					game.removeAllListeners();
 					game.preSkipDay();
 					this.onDied(DiedReason.Explode);
-					if(game.isSheriffSelection) {
-						game.isSheriffSelection=false;
-						game.isSkippedDay=true;
+					if (game.isSheriffSelection) {
+						game.isSheriffSelection = false;
+						game.isSkippedDay = true;
 						game.onDiePending();
 						return;
 					}
@@ -76,42 +89,44 @@ public class Werewolf extends Villager{
 
 	@Override
 	public void addDaySkillListener() {
-		super.registerListener( (msgx, typex) -> {
+		super.registerListener((msgx, typex) -> {
 			if (typex == MsgType.PRIVATE) {
 				String content = Utils.getPlainText(msgx);
 				doDaySkillPending(content);
 			}
 		});
 	}
+
 	@Override
 	public boolean canWolfTurn() {
 		return true;
 	}
+
 	@Override
 	public void onWolfTurn() {
 		StartTurn();
 		sendPrivate(game.getAliveList());
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
-		super.registerListener( (msg, type) -> {
+		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
 			if (content.startsWith("投票")) {
 				try {
-					Long qq = Long.parseLong(Utils.removeLeadings("投票", content).replace('号', ' ').trim());
-					Villager p = game.getPlayerById(qq);
+					Long num = Long.parseLong(Utils.removeLeadings("投票", content).replace('号', ' ').trim());
+					Villager p = game.getPlayerByNum(num);
 					if (p == null) {
-						super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
+						super.sendPrivate("选择的游戏号码非游戏玩家，请重新输入");
 						return;
 					}
 					if (p.isDead()) {
-						super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
+						super.sendPrivate("选择的游戏号码已死亡，请重新输入");
 						return;
 					}
 					EndTurn();
 					super.releaseListener();
-					super.registerListener( (msgx, typex) -> {
+					super.registerListener((msgx, typex) -> {
 						if (typex != MsgType.PRIVATE)
 							return;
 						String contentx = Utils.getPlainText(msgx);
@@ -128,7 +143,7 @@ public class Werewolf extends Villager{
 					game.WolfVote(this, p);
 					super.sendPrivate("已投票给 " + p.getMemberString());
 				} catch (Throwable t) {
-					super.sendPrivate("发生错误，正确格式为：“投票 qq号或者游戏号码”！");
+					super.sendPrivate("发生错误，正确格式为：“投票 游戏号码”！");
 				}
 			} else if (content.startsWith("#")) {
 				String tosend = getMemberString() + ":" + Utils.removeLeadings("#", content);

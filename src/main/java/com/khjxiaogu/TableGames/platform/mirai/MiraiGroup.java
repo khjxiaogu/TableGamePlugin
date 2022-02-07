@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.platform.mirai;
 
 import java.io.IOException;
@@ -11,6 +28,7 @@ import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MessageListener;
 import com.khjxiaogu.TableGames.platform.RoomMessageListener;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 
 import net.mamoe.mirai.Bot;
@@ -92,10 +110,10 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 	}
 
 	@Override
-	public AbstractUser get(long id) {
-		MiraiHumanUser m;
-		m=new MiraiHumanUser(group.get(id));
-		return m;
+	public AbstractUser get(UserIdentifier id) {
+		if(id instanceof QQId)
+			return new MiraiHumanUser(group.get(((QQId) id).id));
+		return null;
 	}
 
 	@Override
@@ -121,13 +139,15 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 		
 	}
 	@Override
-	public void registerListener(Long id, MessageListener ml) {
-		MiraiListenerUtils.registerListener(id, group, ml);
+	public void registerListener(UserIdentifier id, MessageListener ml) {
+		if(id instanceof QQId)
+			MiraiListenerUtils.registerListener(((QQId) id).id, group, ml);
 	}
 
 	@Override
-	public void releaseListener(long id) {
-		MiraiListenerUtils.releaseListener(id);
+	public void releaseListener(UserIdentifier id) {
+		if(id instanceof QQId)
+			MiraiListenerUtils.releaseListener(((QQId) id).id);
 	}
 
 	@Override
@@ -140,7 +160,7 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 		return group.getBotAsMember().getNameCard();
 	}
 	@Override
-	public long getId() {
-		return group.getId();
+	public QQId getId() {
+		return QQId.of(group.getId());
 	}
 }

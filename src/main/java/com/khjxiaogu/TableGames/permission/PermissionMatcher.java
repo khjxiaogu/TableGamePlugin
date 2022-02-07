@@ -1,11 +1,29 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.permission;
 
 import java.util.List;
 
 import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
 public interface PermissionMatcher {
-	PermissionResult match(long id,long group, long botid);
+	PermissionResult match(UserIdentifier id,UserIdentifier group,UserIdentifier botid);
 	default PermissionResult match(AbstractUser m) {
 		return match(m.getId(),m.getRoom().getId(),m.getHostId());
 	}
@@ -13,7 +31,7 @@ public interface PermissionMatcher {
 	 * @param temp  
 	 */
 	default PermissionResult match(AbstractUser u,boolean temp) {
-		return match(u.getId(),0,u.getHostId());
+		return match(u.getId(),null,u.getHostId());
 	}
 	List<String> getValue();
 }

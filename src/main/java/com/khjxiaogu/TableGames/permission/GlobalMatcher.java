@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.permission;
 
 import java.io.File;
@@ -13,11 +30,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
+import com.khjxiaogu.TableGames.platform.UserIdentifierSerializer;
 
 
 public class GlobalMatcher implements PermissionMatcher{
 	BotMatcher global;
-	Map<Long,BotMatcher> local=new ConcurrentHashMap<>();
+	Map<UserIdentifier,BotMatcher> local=new ConcurrentHashMap<>();
 	@Override
 	public PermissionResult match(AbstractUser m) {
 		BotMatcher bm=local.getOrDefault(m.getHostId(),global);
@@ -31,11 +50,11 @@ public class GlobalMatcher implements PermissionMatcher{
 	}
 
 	@Override
-	public PermissionResult match(long id, long group, long botid) {
+	public PermissionResult match(UserIdentifier id,UserIdentifier group,UserIdentifier botid) {
 		BotMatcher bm=local.getOrDefault(botid,global);
 		return bm.match(id,group,botid);
 	}
-	public void loadString(String s,long bid) {
+	public void loadString(String s,UserIdentifier bid) {
 		BotMatcher bm=local.get(bid);
 		if(bm==null) {
 			bm=new BotMatcher();
@@ -70,7 +89,7 @@ public class GlobalMatcher implements PermissionMatcher{
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		for(Entry<Long, BotMatcher> i:local.entrySet()){
+		for(Entry<UserIdentifier, BotMatcher> i:local.entrySet()){
 			try(FileOutputStream fis=new FileOutputStream(new File(loadfrom,i.getKey()+".permission"),false);PrintStream sc=new PrintStream(fis)){
 				boolean nfirst=false;
 				for(String s:global.getValue()) {
@@ -123,7 +142,7 @@ public class GlobalMatcher implements PermissionMatcher{
 			if(ff.getName().endsWith(".permission")) {
 				String fn=ff.getName().split("\\.")[0];
 				if(Character.isDigit(fn.charAt(0))) {
-					long gn=Long.parseLong(fn);
+					UserIdentifier gn=UserIdentifierSerializer.read(fn);
 					BotMatcher bm=new BotMatcher();
 					try(FileInputStream fis=new FileInputStream(ff);Scanner sc=new Scanner(fis)){
 						int i=0;

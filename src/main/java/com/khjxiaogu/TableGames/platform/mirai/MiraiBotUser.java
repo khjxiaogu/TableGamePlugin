@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.platform.mirai;
 
 import java.io.Serializable;
@@ -7,6 +24,7 @@ import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.Permission;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.MessageCompound;
@@ -76,11 +94,11 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 		logic.onPrivate(msg);
 	}
 	public void sendAsBot(IMessageCompound msg,MsgType type) {
-		MiraiListenerUtils.dispatch(getId(), type, msg);
+		MiraiListenerUtils.dispatch(getId().id, type, msg);
 	}
 	@Override
 	public void sendAsBot(String msg) {
-		MiraiListenerUtils.dispatch(getId(),MsgType.PRIVATE,new Text(msg).asMessage());
+		MiraiListenerUtils.dispatch(getId().id,MsgType.PRIVATE,new Text(msg).asMessage());
 	}
 	@Override
 	public void sendAtAsBot(String msg) {
@@ -91,7 +109,7 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		MiraiListenerUtils.dispatch(getId(),MsgType.AT,new Text(msg).asMessage());
+		MiraiListenerUtils.dispatch(getId().id,MsgType.AT,new Text(msg).asMessage());
 	}
 	@Override
 	public void sendBotMessage(String msg) {
@@ -126,8 +144,8 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	}
 
 	@Override
-	public long getId() {
-		return 100+rbid;
+	public QQId getId() {
+		return QQId.of(100+rbid);
 	}
 
 
@@ -154,8 +172,8 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	}
 
 	@Override
-	public long getHostId() {
-		return group.getBot().getId();
+	public QQId getHostId() {
+		return QQId.of(group.getBot().getId());
 	}
 
 	@Override

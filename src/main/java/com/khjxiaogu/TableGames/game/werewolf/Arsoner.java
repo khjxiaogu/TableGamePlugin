@@ -1,3 +1,20 @@
+/**
+ * Mirai Song Plugin
+ * Copyright (C) 2021  khjxiaogu
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.khjxiaogu.TableGames.game.werewolf;
 
 import com.khjxiaogu.TableGames.platform.AbstractUser;
@@ -17,21 +34,21 @@ public class Arsoner extends Villager {
 		if (isSkillUsed)
 			return;
 		sendPrivate(game.getAliveList());
-		super.sendPrivate("纵火者，你可以纵火烧一个人，你有一分钟考虑时间，\n格式：“烧 qq号或者游戏号码”\n如：“烧 1”\n如果放弃纵火，则无需发送任何内容，等待时间结束即可。");
+		super.sendPrivate("纵火者，你可以纵火烧一个人，你有一分钟考虑时间，\n格式：“烧 游戏号码”\n如：“烧 1”\n如果放弃纵火，则无需发送任何内容，等待时间结束即可。");
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
 			String content = Utils.getPlainText(msg);
 			if (content.startsWith("烧")) {
 				try {
-					Long qq = Long.parseLong(Utils.removeLeadings("烧", content).replace('号', ' ').trim());
-					Villager p = game.getPlayerById(qq);
+					Long num = Long.parseLong(Utils.removeLeadings("烧", content).replace('号', ' ').trim());
+					Villager p = game.getPlayerByNum(num);
 					if (p == null) {
-						super.sendPrivate("选择的qq号或者游戏号码非游戏玩家，请重新输入");
+						super.sendPrivate("选择的游戏号码非游戏玩家，请重新输入");
 						return;
 					}
 					if (p.isDead()) {
-						super.sendPrivate("选择的qq号或者游戏号码已死亡，请重新输入");
+						super.sendPrivate("选择的游戏号码已死亡，请重新输入");
 						return;
 					}
 					EndTurn();
@@ -41,7 +58,7 @@ public class Arsoner extends Villager {
 					p.isBurned = true;
 					super.sendPrivate(p.getMemberString() + "被纵火了！");
 				} catch (Throwable t) {
-					super.sendPrivate("发生错误，正确格式为：“烧 qq号或者游戏号码”！");
+					super.sendPrivate("发生错误，正确格式为：“烧 游戏号码”！");
 				}
 			}
 		});
@@ -64,14 +81,14 @@ public class Arsoner extends Villager {
 
 	@Override
 	public double onVotedAccuracy() {
-		if(isSkillUsed)
+		if (isSkillUsed)
 			return 0.25;
 		return 0;
 	}
 
 	@Override
 	public double onSkilledAccuracy() {
-		if(isSkillUsed)
+		if (isSkillUsed)
 			return 0.25;
 		return 0;
 	}
@@ -80,7 +97,6 @@ public class Arsoner extends Villager {
 	public int getTurn() {
 		return 2;
 	}
-
 
 	public Arsoner(WerewolfGame game, AbstractUser p) {
 		super(game, p);
