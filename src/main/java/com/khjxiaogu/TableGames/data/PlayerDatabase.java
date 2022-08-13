@@ -38,9 +38,9 @@ import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
 
 public class PlayerDatabase {
-	Gson gs=new GsonBuilder().create();
+	Gson gs=new GsonBuilder().enableComplexMapKeySerialization().create();
 	public static class GameData{
-		Gson gs=new GsonBuilder().create();
+		Gson gs=new GsonBuilder().enableComplexMapKeySerialization().create();
 		public static class PlayerData{
 			UserIdentifier id;
 			GameData db;
@@ -123,7 +123,7 @@ public class PlayerDatabase {
 		return new JsonObject();
 	}
 	public boolean setData(UserIdentifier id,String game,JsonObject data) {
-		return setData(id,game,data.toString());
+		return setData(id,game,gs.toJson(data));
 	}
 	public boolean setData(UserIdentifier id,String game,String data) {
 		try(PreparedStatement ps=database.prepareStatement("REPLACE INTO profile(qq,game,data) VALUES(?,?,?)")){

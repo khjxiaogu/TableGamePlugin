@@ -159,6 +159,6 @@ public abstract class Game implements Serializable{
 		return false;
 	}
 
-	public void userSettings(AbstractUser ar, String name, String set) {
+	public void userSettings(UserIdentifier user, String name, String set) {
 	}
 }

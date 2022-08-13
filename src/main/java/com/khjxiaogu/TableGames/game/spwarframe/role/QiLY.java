@@ -56,7 +56,7 @@ public class QiLY extends Role {
 				throw new InvalidSkillParamException(this);
 			Role target = game.getSkillPlayerByName(params.get(0));
 			return super.fireEvent(new RoleRevalEvent(owner, target, this))
-					|| super.fireEvent(new FractionRevalEvent(owner, target, this));
+					| super.fireEvent(new FractionRevalEvent(owner, target, this));
 		}
 
 		@Override

@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
 
 public class PreserveHolder {
@@ -55,11 +56,11 @@ public class PreserveHolder {
 		return (T) pi;
 	}
 	@SuppressWarnings("unchecked")
-	public static <T extends PreserveInfo<?>> List<T> getPreserves(AbstractUser u, Class<T> type) {
+	public static <T extends PreserveInfo<?>> List<T> getPreserves(UserIdentifier userIdentifier, Class<? extends PreserveInfo<?>> preserver) {
 		List<T> pivs=new ArrayList<>();
 		for(Map<Class<? extends PreserveInfo<?>>, PreserveInfo<?>> mc:PreserveHolder.ps.values()) {
-			PreserveInfo<?> pi = mc.get(type);
-			if(pi!=null&&pi.hasPreserver(u)) {
+			PreserveInfo<?> pi = mc.get(preserver);
+			if(pi!=null&&pi.hasPreserver(userIdentifier)) {
 				pivs.add((T) pi);
 			}
 		}

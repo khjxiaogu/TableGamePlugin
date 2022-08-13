@@ -144,10 +144,10 @@ public class BotMatcher implements PermissionMatcher {
 		for (PermissionMatcher sp : restricted.values())
 			pl.addAll(sp.getValue());
 		for (Entry<UserIdentifier, PermissionResult> i : friendpermissions.entrySet()) {
-			pl.add(i.getValue().getSymbol() + i.getKey().toString());
+			pl.add(i.getValue().getSymbol() + i.getKey().serialize());
 		}
 		for (Entry<UserIdentifier, GroupMatcher> i : groupmatchers.entrySet()) {
-			String gn = "@" + i.getKey();
+			String gn = "@" + i.getKey().serialize();
 			for (String s : i.getValue().getValue()) {
 				pl.add(s + gn);
 			}

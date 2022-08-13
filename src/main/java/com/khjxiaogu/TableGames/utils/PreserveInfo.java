@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
 
 public abstract class PreserveInfo<T extends Game>{
@@ -37,9 +38,9 @@ public abstract class PreserveInfo<T extends Game>{
 	AbstractRoom group;
 	Map<String, String> args=null;
 	static class UserItem{
-		AbstractUser user;
+		UserIdentifier user;
 		String item;
-		public UserItem(String item, AbstractUser user) {
+		public UserItem(String item, UserIdentifier user) {
 			this.item = item;
 			this.user = user;
 		}
@@ -91,14 +92,14 @@ public abstract class PreserveInfo<T extends Game>{
 	public abstract String getName();
 	public boolean enablefake=false;
 	public static Integer prevSize=0;
-	public final boolean addConfig(AbstractUser ar,String item,String set) {
+	public final boolean addConfig(UserIdentifier ar,String item,String set) {
 		if(isAvailableConfig(ar,item,set)) {
 			userset.put(new UserItem(item,ar),set);
 			return true;
 		}
 		return false;
 	}
-	protected boolean isAvailableConfig(AbstractUser ar,String item,String set) {
+	protected boolean isAvailableConfig(UserIdentifier ar,String item,String set) {
 		return false;
 	}
 	public int getCurrentNum() {
@@ -123,6 +124,12 @@ public abstract class PreserveInfo<T extends Game>{
 	}
 	public boolean hasPreserver(AbstractUser m) {
 		return topreserve.containsKey(m);
+	}
+	public boolean hasPreserver(UserIdentifier m) {
+		return topreserve.keySet().stream().map(AbstractUser::getId).anyMatch(m::equals);
+	}
+	public AbstractUser getPreserver(UserIdentifier m) {
+		return topreserve.keySet().stream().filter(t->t.getId().equals(m)).findFirst().orElse(null);
 	}
 	public void addPreserver(AbstractUser m) {
 		if(getCurrentNum()>=getMaxMembers()) {

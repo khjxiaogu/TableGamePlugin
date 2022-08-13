@@ -157,7 +157,7 @@ public abstract class Role {
 	Fraction fraction;
 	Fraction fakefraction;
 	public final GameManager room;
-	public List<KillEvent> lastkill;
+	public List<KillEvent> lastkill=new ArrayList<>();
 	public boolean alive = true;
 	public boolean exposed = false;
 	public boolean fexposed = false;
@@ -446,6 +446,7 @@ public abstract class Role {
 				room.fireEvent(dae);
 			}
 		}
+		owner.sendMessage("你死了");
 		if(isBoss&&br!=null) {
 			owner.sendMessage("你是境主，你死了，请选择是否现身。如果要，发送“是”，否则发送“否”");
 			owner.listenMessage(s -> {
@@ -456,7 +457,11 @@ public abstract class Role {
 				}
 				room.skipSkillWait();
 			});
-			room.waitForSkill(6000);
+			
+			room.waitForSkill(30000);
+			if(br.isAlive()&&!room.isBossShowup) {
+				br.kill();
+			}
 			owner.removeListener();
 		}
 	}

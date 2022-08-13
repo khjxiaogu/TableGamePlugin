@@ -181,6 +181,28 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 		return Permission.USER;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + rbid;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MiraiBotUser other = (MiraiBotUser) obj;
+		if (rbid != other.rbid)
+			return false;
+		return true;
+	}
+
 	
 
 }

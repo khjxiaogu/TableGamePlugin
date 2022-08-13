@@ -20,6 +20,7 @@ package com.khjxiaogu.TableGames.game.werewolf;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.utils.DefaultGameCreater;
 import com.khjxiaogu.TableGames.utils.GameCreater;
 import com.khjxiaogu.TableGames.utils.PreserveInfo;
@@ -53,15 +54,17 @@ public class WerewolfPreserve extends PreserveInfo<WerewolfGame> {
 	}
 
 	@Override
-	protected boolean isAvailableConfig(AbstractUser ar, String item, String set) {
+	protected boolean isAvailableConfig(UserIdentifier ar, String item, String set) {
 		if (item.equals("vip")) {
-			if (GlobalMain.credit.get(ar.getId()).hasItem("狼人杀vip券")) {
+			AbstractUser ut=super.getPreserver(ar);
+			if(ut==null)return false;
+			if (GlobalMain.credit.get(ar).hasItem("狼人杀vip券")) {
 				if (set.equals("神") || set.equals("狼") || set.equals("民")) {
 					return true;
 				}
-				ar.sendPrivate("阵营错误，必须为“神”、“狼”、“民”之一");
+				ut.sendPrivate("阵营错误，必须为“神”、“狼”、“民”之一");
 			}
-			ar.sendPrivate("狼人杀vip券不足！");
+			ut.sendPrivate("狼人杀vip券不足！");
 		}
 		return false;
 	}

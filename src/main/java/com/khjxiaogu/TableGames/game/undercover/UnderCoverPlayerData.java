@@ -100,4 +100,8 @@ public class UnderCoverPlayerData implements GenericPlayerData<UnderCoverPlayerD
 		out+=another.out;
 		total=Math.max(another.total,total);
 	}
+	@Override
+	public String getStatistic(String v) {
+		return "暂无数据";
+	}
 }

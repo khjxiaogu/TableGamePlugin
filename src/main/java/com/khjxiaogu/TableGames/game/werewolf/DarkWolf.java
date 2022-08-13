@@ -121,7 +121,7 @@ public class DarkWolf extends Werewolf {
 
 	@Override
 	public boolean canDeathSkill(DiedReason dir) {
-		if (hasGun && !asked && dir.canUseSkill)
+		if (hasGun && !asked && (dir==DiedReason.Hunter||dir==DiedReason.DarkWolf||dir.canUseSkill))
 			return true;
 		return super.canDeathSkill(dir);
 	}

@@ -101,9 +101,6 @@ public class WolfKiller extends Villager {
 		return 0.1;
 	}
 
-	public double onWolfKilledAccuracy() {
-		return onSkilledAccuracy();
-	}
 
 	@Override
 	public boolean shouldReplace(DiedReason src, DiedReason dest) {

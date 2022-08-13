@@ -18,8 +18,10 @@
 package com.khjxiaogu.TableGames.game.werewolf;
 
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
+import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.WaitReason;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MsgType;
+import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 public class Werewolf extends Villager {
@@ -40,29 +42,54 @@ public class Werewolf extends Villager {
 	}
 
 	@Override
-	public void onTurnStart() {
-		isSavedByWitch = false;
-		lastIsGuarded = false;
-		isArcherProtected = false;
-		if (isGuarded) {
-			lastIsGuarded = true;
-			isGuarded = false;
-		}
-		addDaySkillListener();
-	}
-
-	@Override
 	public void onTurn() {
 		super.StartTurn();
 		super.sendPrivate(getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
 	}
 
+	public void SheriffDeselect(IMessageCompound msg, MsgType type) {
+		if (type == MsgType.PRIVATE) {
+			if (Utils.getPlainText(msg).startsWith("退选")) {
+				game.logger.logRaw(getNameCard() + "已退选");
+				this.sendPublic("已退选");
+				game.sherifflist.remove(this);
+				this.releaseListener();
+				this.addDaySkillListener();
+			} else {
+				doDaySkillPending(Utils.getPlainText(msg));
+			}
+		}
+	}
+	public void onSheriffState() {
+		onBeforeTalk();
+		sendPublic("你有五分钟时间进行竞选发言。\n可以随时@我结束你的讲话。");
+		super.registerListener((msg, type) -> {
+			if (type == MsgType.AT) {
+				super.releaseListener();
+				super.registerListener((msgx, typex) -> SheriffDeselect(msgx, typex));
+				game.skipWait(WaitReason.State);
+			} else if (type == MsgType.PRIVATE) {
+				if(Utils.getPlainText(msg).startsWith("退选")) {
+					game.logger.logRaw(getNameCard() + "已退选");
+					this.sendPublic("已退选");
+					game.sherifflist.remove(this);
+					this.releaseListener();
+					addDaySkillListener();
+					game.skipWait(WaitReason.State);
+				}else doDaySkillPending(Utils.getPlainText(msg));
+			}
+		});
+		game.startWait(300000, WaitReason.State);
+		onFinishTalk();
+		super.registerListener((msgx, typex) -> SheriffDeselect(msgx, typex));
+	}
 	@Override
 	public void doDaySkillPending(String s) {
 		if (isDead())
 			return;
 		if (s.startsWith("自爆")) {
 			try {
+				this.canContinueState = true;
 				super.sendPublic("是狼人，自爆了，进入黑夜。");
 				game.logger.logRaw(getNameCard() + "自爆了");
 				game.getScheduler().execute(() -> {
@@ -75,9 +102,11 @@ public class Werewolf extends Villager {
 						game.onDiePending();
 						return;
 					}
+					this.canContinueState = false;
 					game.skipDay();
 				});
 			} catch (Throwable t) {
+				this.canContinueState = false;
 				super.sendPrivate("发生错误！");
 			}
 		}
@@ -131,7 +160,7 @@ public class Werewolf extends Villager {
 							return;
 						String contentx = Utils.getPlainText(msgx);
 						if (contentx.startsWith("#")) {
-							String tosend = getMemberString() + ":" + Utils.removeLeadings("#", contentx);
+							String tosend = index + "号 |" + origname + ":" + Utils.removeLeadings("#", contentx);
 							for (Villager w : game.playerlist) {
 								if (w instanceof Werewolf && !w.isDead() && !w.equals(this)) {
 									w.sendPrivate(tosend);
@@ -170,10 +199,10 @@ public class Werewolf extends Villager {
 		for (Villager w : game.playerlist) {
 			if (w instanceof Werewolf)
 				if (!w.equals(this)) {
-					sb.append(w.getMemberString() + "\n");
+					sb.append(w.index + "号 |" + w.origname + "\n");
 				}
 		}
-		sb.append("你可以直接和他们联系，也可以通过狼人频道联系。");
+		sb.append("你可以直接和他们联系，也可以通过狼人频道联系，狼人频道仅当狼人回合时有效！");
 		super.sendPrivate(sb.toString());
 
 	}
@@ -196,5 +225,12 @@ public class Werewolf extends Villager {
 	@Override
 	public String getRole() {
 		return "狼人";
+	}
+
+	@Override
+	public void onPreSheriffSkill() {
+		super.onPreSheriffSkill();
+		sendPrivate(getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
+		addDaySkillListener();
 	}
 }

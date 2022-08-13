@@ -55,7 +55,7 @@ public class HiddenWolf extends Villager {
 		for (Villager w : game.playerlist) {
 			if (w instanceof Werewolf)
 				if (!w.equals(this)) {
-					sb.append(w.getMemberString() + "\n");
+					sb.append(w.index+"号 |"+w.origname + "\n");
 				}
 		}
 		super.sendPrivate(sb.toString());

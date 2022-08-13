@@ -25,4 +25,5 @@ public interface GenericPlayerData<T extends GenericPlayerData<T>>{
 			plus((T) another);
 		}
 	}
+	String getStatistic(String v);
 }

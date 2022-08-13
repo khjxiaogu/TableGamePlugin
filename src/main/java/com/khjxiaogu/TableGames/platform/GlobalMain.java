@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -28,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,7 +54,9 @@ import com.khjxiaogu.TableGames.game.undercover.UnderCoverPreserve;
 import com.khjxiaogu.TableGames.game.werewolf.MiniWerewolfPreserve;
 import com.khjxiaogu.TableGames.game.werewolf.StandardWerewolfCreater;
 import com.khjxiaogu.TableGames.game.werewolf.StandardWerewolfPreserve;
+import com.khjxiaogu.TableGames.game.werewolf.Villager;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame;
+import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.Role;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfPreserve;
 import com.khjxiaogu.TableGames.permission.GlobalMatcher;
 import com.khjxiaogu.TableGames.platform.message.Image;
@@ -131,7 +135,14 @@ public class GlobalMain {
 				event.getRoom().sendMessage(event.getRoom().get(id).getNameCard()+"的"+GlobalMain.db.getPlayer(id,name).toString());
 			}
 		});
-
+		normcmd.put(name+"分析", (event,command)->{
+			if(command.length==2) {
+				event.getRoom().sendMessage(event.getSender().getAt().asMessage().append(db.getPlayer(event.getSender().getId(),name).getStatistic(command[1])));
+			} else if(command.length==3){
+				UserIdentifier id=UserIdentifierSerializer.read(command[2]);
+				event.getRoom().sendMessage(event.getRoom().get(id).getNameCard()+"的"+GlobalMain.db.getPlayer(id,name).getStatistic(command[1]));
+			}
+		});
 		normcmd.put("取消预定"+name, (event,command)->{
 			PreserveHolder.getPreserve(event.getRoom(),preserver).removePreserver(event.getSender());
 		});
@@ -197,8 +208,8 @@ public class GlobalMain {
 				boolean success=false;
 			}
 			Ptr t=new Ptr();
-			PreserveHolder.getPreserves(event.getSender(),preserver).forEach(p->{
-				t.success |=p.addConfig(event.getSender(),command[1],command[2]);
+			PreserveHolder.getPreserves(event.getSender().getId(),preserver).forEach(p->{
+				t.success |=p.addConfig(event.getSender().getId(),command[1],command[2]);
 				getLogger().debug("setting");
 			});
 			if(t.success)
@@ -280,6 +291,7 @@ public class GlobalMain {
 				if(args.length>2) {
 					m2=event.getRoom().get(UserIdentifierSerializer.read(args[2]));
 				}
+				
 				if(g.takeOverMember(m1,m2)) {
 					event.getRoom().sendMessage("接管成功");
 				} else {
@@ -420,6 +432,51 @@ public class GlobalMain {
 				event.getRoom().sendMessage("继续游戏失败！");
 				e.printStackTrace();
 			}
+		});
+		Random ckr=new SecureRandom();
+		List<String> cards=new ArrayList<>();
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("平民");
+		cards.add("长老");
+		cards.add("老流氓");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("狼人");
+		cards.add("石像鬼");
+		cards.add("白狼王");
+		cards.add("白痴");
+		cards.add("预言家");
+		cards.add("猎人");
+		cards.add("女巫");
+		cards.add("守卫");
+		cards.add("乌鸦");
+		cards.add("骑士");
+		cards.add("守墓人");
+		cards.add("守卫");
+		cards.add("猎魔人");
+		addPCmd("狼人杀摇号","模拟狼人杀摇号",(event,args)->{
+			List<Role> larr=WerewolfGame.fairRollRole(Integer.parseInt(args[1]));
+			double pts=WerewolfGame.calculateRolePoint(larr);
+			StringBuilder sb=new StringBuilder();
+			for(Role cls:larr) {
+				sb.append(cls.getName()).append(" ");
+			}
+			sb.append("得分：").append(pts);
+			event.getRoom().sendMessage(sb.toString());
+		});
+		addCmd("狼人杀抽卡","进行一次虚拟抽卡",(event,args)->{
+			event.getSender().sendPublic(cards.get(ckr.nextInt(cards.size())));
 		});
 		addCmd("成语接龙","开始成语接龙",(event,args)->{
 			IdiomSolitare is=GameUtils.createGame(IdiomSolitare::new,event.getRoom(),1);

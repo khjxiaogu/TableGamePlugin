@@ -17,10 +17,55 @@
  */
 package com.khjxiaogu.TableGames.game.werewolf;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import com.khjxiaogu.TableGames.data.GenericPlayerData;
+import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.Role;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData> {
+	public static class RoleWinInfo {
+		public int wins;
+		public int loses;
+		public int total;
+		public int alive;
+		public int death;
+		public double saccuracy;
+		public long saccuracydemon;
+		public double vaccuracy;
+		public long vaccuracydemon;
+
+		public RoleWinInfo() {
+		}
+
+		public RoleWinInfo(Role r) {
+		}
+
+		public void winAsRole(boolean alive, double sacc, long sad, double vacc, long vad) {
+			if (alive)
+				this.alive++;
+			else
+				this.death++;
+			wins++;
+			total++;
+			saccuracy += sacc;
+			saccuracydemon += sad;
+			vaccuracy += vacc;
+			vaccuracydemon += vad;
+		}
+
+		public void loseAsRole(double sacc, long sad, double vacc, long vad) {
+			death++;
+			loses++;
+			total++;
+			saccuracy += sacc;
+			saccuracydemon += sad;
+			vaccuracy += vacc;
+			vaccuracydemon += vad;
+		}
+	}
+
 	public int wins;
 	public int loses;
 	public int winaswolf;
@@ -42,8 +87,22 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 	public long vaccuracydemon;
 	public double saccuracy;
 	public long saccuracydemon;
+	public Map<Role, RoleWinInfo> winsrole = new EnumMap<>(Role.class);
 
 	public WerewolfPlayerData() {
+
+	}
+
+	public void winAsRole(Role r, boolean alive, double acc, long ad, double sacc, long sad) {
+		if (r == null)
+			return;
+		winsrole.computeIfAbsent(r, RoleWinInfo::new).winAsRole(alive, acc, ad, sacc, sad);
+	}
+
+	public void loseAsRole(Role r, double acc, long ad, double sacc, long sad) {
+		if (r == null)
+			return;
+		winsrole.computeIfAbsent(r, RoleWinInfo::new).loseAsRole(acc, ad, sacc, sad);
 	}
 
 	public void winAsWolf(boolean isAlive) {
@@ -109,7 +168,8 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 		dieasgod++;
 	}
 
-	public void win(Fraction frac, boolean isAlive) {
+	public void win(Villager p, Fraction frac, boolean isAlive, double acc, long cd, double vacc, long vcd) {
+		this.winAsRole(Role.getRole(p), isAlive, acc, cd, vacc, vcd);
 		switch (frac) {
 		case Innocent:
 			winAsVill(isAlive);
@@ -123,7 +183,8 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 		}
 	}
 
-	public void lose(Fraction frac) {
+	public void lose(Villager p, Fraction frac, double acc, long cd, double vacc, long vcd) {
+		this.loseAsRole(Role.getRole(p), acc, cd, vacc, vcd);
 		switch (frac) {
 		case Innocent:
 			loseAsVill();
@@ -140,14 +201,16 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 	public boolean log(Villager player, Fraction win, boolean isAlive) {
 		Fraction frac = player.getRealFraction();
 		if (win == Fraction.Innocent && (frac == Fraction.God || frac == Fraction.Innocent)) {
-			win(frac, isAlive);
+
 			saccuracydemon += player.skilled;
 			vaccuracydemon += player.voted;
 			saccuracy += player.skillAccuracy + 0.25 * player.skilled;
 			vaccuracy += player.voteAccuracy + 0.25 * player.voted;
+			win(player, frac, isAlive, player.skillAccuracy + 0.25 * player.skilled, player.skilled,
+					player.voteAccuracy + 0.25 * player.voted, player.voted);
 			return true;
 		} else if (win == Fraction.Wolf && frac == Fraction.Wolf) {
-			win(frac, isAlive);
+			win(player, frac, isAlive, 0, 0, 0, 0);
 			return true;
 		} else {
 			if (frac != Fraction.Wolf) {
@@ -155,8 +218,10 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 				vaccuracydemon += player.voted;
 				saccuracy += player.skillAccuracy - (player.skilled > 0 ? 0.1 : 0);
 				vaccuracy += player.voteAccuracy - (player.voted > 0 ? 0.1 : 0);
-			}
-			lose(frac);
+				lose(player, frac, player.skillAccuracy + 0.25 * player.skilled, player.skilled,
+						player.voteAccuracy + 0.25 * player.voted, player.voted);
+			} else
+				lose(player, frac, 0, 0, 0, 0);
 		}
 		return false;
 	}
@@ -174,7 +239,24 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 		apd.append("神存活率 ").append(Utils.percent(aliveasgod, aliveasgod + dieasgod)).append("\n");
 		apd.append("民存活率 ").append(Utils.percent(aliveasvill, aliveasvill + dieasvill)).append("\n");
 		apd.append("狼存活率 ").append(Utils.percent(aliveaswolf, aliveaswolf + dieaswolf)).append("\n");
-		apd.append("综合准确率：").append(Utils.percent(saccuracy * 2 + vaccuracy, saccuracydemon * 2 + vaccuracydemon));
+		apd.append("综合准确率：").append(Utils.percent(saccuracy * 2 + vaccuracy, saccuracydemon * 2 + vaccuracydemon)).append("\n");
+		apd.append("输入##狼人杀分析 <角色> 查看角色统计");
+		return apd.toString();
+	}
+
+	@Override
+	public String getStatistic(String v) {
+		Role r = Role.getByName(v);
+		if (r == null)
+			return " 角色不存在";
+		RoleWinInfo rwi = winsrole.get(r);
+		if (rwi == null)
+			return " 暂无数据";
+		StringBuilder apd = new StringBuilder();
+		apd.append(" "+r.getName() + "统计").append("\n");
+		apd.append("胜率：" + Utils.percent(rwi.wins, rwi.total)).append("\n");
+		apd.append("存活率：" + Utils.percent(rwi.alive, rwi.total)).append("\n");
+		apd.append("准确率：" +Utils.percent(rwi.saccuracy * 2 + rwi.vaccuracy, rwi.saccuracydemon * 2 + rwi.vaccuracydemon));
 		return apd.toString();
 	}
 
@@ -198,4 +280,5 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 		death += another.death;
 		total = Math.max(another.total, total);
 	}
+
 }

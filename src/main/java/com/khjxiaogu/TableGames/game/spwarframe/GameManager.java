@@ -98,6 +98,11 @@ public class GameManager implements EventBus{
 		private Fraction(String name) {
 			this.name = name;
 		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
 	}
 	class EventConsumer<T extends Event> implements Consumer<Event>{
 		Consumer<T> inner;
@@ -232,7 +237,7 @@ public class GameManager implements EventBus{
 	}
 	public List<Role> roles=new ArrayList<>();
 	Role boss;
-	boolean isBossShowup=false;
+	public boolean isBossShowup=false;
 	public final static long skillwait=60000;
 	int turns=0;
 	//register event listeners
@@ -542,6 +547,7 @@ public class GameManager implements EventBus{
 
 				((DiedEvent) f).getTarget().lastkill=((DiedEvent) f).getKillBy();
 				if(((DiedEvent) f).getKillBy().size()==1&&((DiedEvent) f).getKillBy().get(0).getSource()==((DiedEvent) f).getTarget()) {
+				
 				}else {
 					DeadAnnounceEvent dae=new DeadAnnounceEvent(((DiedEvent) f).getTarget());
 					dae.setCounter(((DiedEvent) f).getKillBy().size());
@@ -577,24 +583,15 @@ public class GameManager implements EventBus{
 			}
 			return false;
 		});
-		firing.removeIf(f->{
-			if(f.isCanceled())return true;
-			if(f.isRejected()) {
-				if(f instanceof SkillEvent&&((SkillEvent) f).isMainEvent()) {
-					((SkillEvent) f).getSkill().retainRemain();
-				}
-				return true;
+		prep.values().forEach(f->{
+			if(f.isCanceled())return;
+			
+			deadann.append(f.getTarget().getName());
+			if(f.getCounter()>1) {
+				deadann.append("  属于").append(f.getTarget().getFraction().getName()).append("境");
+				f.getTarget().exposeFraction();
 			}
-			if(f instanceof DeadAnnounceEvent) {
-				deadann.append(((DeadAnnounceEvent) f).getTarget().getName());
-				if(((DeadAnnounceEvent) f).getCounter()>1) {
-					deadann.append("  属于").append(((DeadAnnounceEvent) f).getTarget().getFraction().getName()).append("境");
-					((DeadAnnounceEvent) f).getTarget().exposeFraction();
-				}
-				deadann.append("\n");
-				return true;
-			}
-			return false;
+			deadann.append("\n");
 		});
 		if(numd>0) {
 			sendAllLong(deadann.toString());
@@ -602,6 +599,19 @@ public class GameManager implements EventBus{
 		if(VictoryPending())return;
 		turns++;
 		onDayTurn();
+	}
+	public void announceVictory(Fraction f) {
+		StringBuilder sb=new StringBuilder(f.getName());
+		sb.append("阵营胜利！");
+		for(Role r:roles) {
+			sb.append("\n").append(r.getPlayer()).append(" ").append(r.getName()).append(" 属于").append(r.getFraction().getName()).append("境").append(" ").append(r.isAlive()?"存活":"死亡");
+			if(r.isBoss()) {
+				sb.append(" 是境主");
+			}
+		}
+		sb.append("\n游戏种子：").append(seed);
+		p.sendAllLong(sb.toString());
+		started=false;
 	}
 	public boolean VictoryPending() {
 		int mc=0;
@@ -664,19 +674,6 @@ public class GameManager implements EventBus{
 			}
 		}
 		return false;
-	}
-	public void announceVictory(Fraction f) {
-		StringBuilder sb=new StringBuilder(f.getName());
-		sb.append("阵营胜利！");
-		for(Role r:roles) {
-			sb.append("\n").append(r.getPlayer()).append(" ").append(r.getName()).append(" 属于").append(r.getFraction().getName()).append("境").append(" ").append(r.isAlive()?"存活":"死亡");
-			if(r.isBoss()) {
-				sb.append(" 是境主");
-			}
-		}
-		sb.append("\n游戏种子：").append(seed);
-		p.sendAllLong(sb.toString());
-		started=false;
 	}
 	public void fireSystemEventFor(GameTurn turn) {
 		firing.removeIf(f->{

@@ -1,2 +1,7 @@
 /target/
 /test.jpg
+hs_err_*
+replay_*
+.classpath
+.projcet
+.settings

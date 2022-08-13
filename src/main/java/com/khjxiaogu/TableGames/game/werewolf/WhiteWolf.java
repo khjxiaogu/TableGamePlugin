@@ -53,7 +53,12 @@ public class WhiteWolf extends Werewolf {
 		super.sendPrivate("白狼王，你可以在投票前随时翻牌自爆带走一个玩家并且立即进入黑夜，格式：“自爆 游戏号码”");
 		super.sendPrivate(game.getAliveList());
 	}
-
+	@Override
+	public void onPreSheriffSkill() {
+		super.onPreSheriffSkill();
+		sendPrivate("白狼王，你可以在投票前随时翻牌自爆带走一个玩家并且立即进入黑夜，格式：“自爆 游戏号码”");
+		addDaySkillListener();
+	}
 	@Override
 	public void doDaySkillPending(String content) {
 		if (isDead())
@@ -76,10 +81,18 @@ public class WhiteWolf extends Werewolf {
 				p.isDead = true;
 				game.getScheduler().execute(() -> {
 					game.removeAllListeners();
+					game.preSkipDay();
 					p.onDied(DiedReason.Explode);
 					game.logger.logDeath(p, DiedReason.Explode);
 					this.onDied(DiedReason.Explode);
 					game.logger.logDeath(this, DiedReason.Explode);
+					
+					if (game.isSheriffSelection) {
+						game.isSheriffSelection = false;
+						game.isSkippedDay = true;
+						game.onDiePending();
+						return;
+					}
 					game.skipDay();
 				});
 			} catch (Throwable t) {

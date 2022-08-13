@@ -65,7 +65,7 @@ public class GroupMatcher implements PermissionMatcher {
 		for(PermissionMatcher sp:restricted.values())
 			pl.addAll(sp.getValue());
 		for(Entry<UserIdentifier, PermissionResult> i:memberpermissions.entrySet()) {
-			pl.add(i.getValue().getSymbol()+i.getKey().toString());
+			pl.add(i.getValue().getSymbol()+i.getKey().serialize());
 		}
 		return pl;
 	}

@@ -64,6 +64,7 @@ public class Villager extends UserFunction implements Serializable {
 	@PlayerDefined
 	int index;
 	double skillAccuracy;
+	boolean canContinueState;
 	int skilled;
 	// DiedReason dr = null;
 	@PlayerDefined
@@ -109,6 +110,10 @@ public class Villager extends UserFunction implements Serializable {
 	}
 
 	public void onTurnStart() {
+		onDayStart();
+		addDaySkillListener();
+	}
+	public void onDayStart() {
 		isSavedByWitch = false;
 		lastIsGuarded = false;
 		isArcherProtected = false;
@@ -116,9 +121,7 @@ public class Villager extends UserFunction implements Serializable {
 			lastIsGuarded = true;
 			isGuarded = false;
 		}
-		addDaySkillListener();
 	}
-
 	public void addDaySkillListener() {
 	}
 
@@ -160,7 +163,10 @@ public class Villager extends UserFunction implements Serializable {
 			});
 			game.startWait(300000, WaitReason.State);
 		} finally {
-			onFinishTalk();
+			if(this.canContinueState)
+				this.canContinueState=false;
+			else
+				onFinishTalk();
 		}
 	}
 
@@ -447,6 +453,7 @@ public class Villager extends UserFunction implements Serializable {
 				game.logger.logRaw(getNameCard() + "已退选");
 				this.sendPublic("已退选");
 				game.sherifflist.remove(this);
+				this.releaseListener();
 				game.skipWait(WaitReason.State);
 			}
 		});
@@ -459,6 +466,7 @@ public class Villager extends UserFunction implements Serializable {
 			game.logger.logRaw(getNameCard() + "已退选");
 			this.sendPublic("已退选");
 			game.sherifflist.remove(this);
+			this.releaseListener();
 		}
 	}
 
@@ -533,6 +541,9 @@ public class Villager extends UserFunction implements Serializable {
 		} else {
 			isDead = true;
 			sendPublic("死了，没有遗言。");
+			if (shouldCheckSkill)
+				if(onDiePending(dir))
+				game.startWait(30000, WaitReason.DieWord);
 			tryMute();
 		}
 	}
@@ -667,5 +678,8 @@ public class Villager extends UserFunction implements Serializable {
 
 	public boolean isDead() {
 		return isDead;
+	}
+
+	public void onPreSheriffSkill() {
 	}
 }

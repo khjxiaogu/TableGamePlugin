@@ -63,7 +63,8 @@ public class NightmareKnight extends Werewolf {
 	@Override
 	public void addDaySkillListener() {
 	}
-
+	@Override
+	public void onPreSheriffSkill() {}
 	@Override
 	public String getRole() {
 		return "恶灵骑士";

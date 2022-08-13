@@ -23,6 +23,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import com.khjxiaogu.TableGames.PluginData;
@@ -34,6 +38,7 @@ import com.khjxiaogu.TableGames.platform.RoomMessageEvent;
 import com.khjxiaogu.TableGames.platform.UserIdentifierSerializer;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Text;
+import com.khjxiaogu.TableGames.platform.mirai.Markov.StateContainer;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
@@ -54,8 +59,9 @@ public class MiraiMain extends JavaPlugin {
 		super(new JvmPluginDescriptionBuilder(PluginData.id,PluginData.version).name(PluginData.name).author(PluginData.author).info(PluginData.info).build());
 	}
 	public static MiraiMain plugin;
-
-
+	Map<Long,StateContainer> states=new HashMap<>();
+	Set<Long> ergroup=new HashSet<>();
+	private static Markov mc=new Markov();
 	public static void transfer(InputStream i,OutputStream o) throws IOException {
 		int nRead;
 		byte[] data = new byte[4096];
@@ -75,8 +81,9 @@ public class MiraiMain extends JavaPlugin {
 		//BotConfiguration.getDefault().setProtocol(MiraiProtocol.ANDROID_PHONE);
 		MiraiMain.plugin=this;
 		GlobalMain.init(super.getDataFolder());
-		GlobalMain.privmatcher.load(this.getDataFolder());
 		UserIdentifierSerializer.addRawSerializer(e->QQId.of(Long.parseLong(e)));
+		GlobalMain.privmatcher.load(this.getDataFolder());
+		
 		try {
 			File f=new File(super.getDataFolder(),"undtext.txt");
 			File f2=new File(super.getDataFolder(),"cyyy.csv");
@@ -102,13 +109,44 @@ public class MiraiMain extends JavaPlugin {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		ergroup.add(981524397L);
 		GlobalEventChannel.INSTANCE.registerListenerHost(new SimpleListenerHost(getCoroutineContext()) {
 			@EventHandler
 			public void onGroup(GroupMessageEvent event) {
 				//if(event.getGroup().getBotAsMember().getPermission()==MemberPermission.MEMBER)return;
-				
-				At at = MiraiUtils.getAt(event.getMessage());
 				String command=MiraiUtils.getPlainText(event.getMessage());
+				long gid=event.getGroup().getId();
+				if(ergroup.contains(gid)&&event.getSender().getId()!=2462884343L) {
+					String r=null;
+					if(!command.startsWith("!!")&&!command.startsWith("Mk$")) {
+						if(!command.startsWith("#rb")) {
+							if(command.startsWith("#?")) {
+								
+								r="#rb<header>3> 要求改写对应信息\r\n"
+								+ "#srb<seed> <header>3>以固定种子生成信息\r\n"
+								+ "#gnr[seed]以固定种子或者随机种子直接生成一段文本\r\n"
+								+ "#? 显示此消息";
+							}else if(command.startsWith("#srb")) {
+								String cmd=Utils.removeLeadings("#srb",command);
+								int cid=cmd.indexOf(" ");
+								String seed=cmd.substring(0,cid);
+								String text=cmd.substring(cid+1);
+								r=mc.sfret(text,seed);
+							}else if(command.startsWith("#gnr")) {
+								String cmd=Utils.removeLeadings("#gnr",command);
+								r=mc.gar(cmd);
+							}
+							else if(!command.startsWith("#")) r=mc.ret(command,states.computeIfAbsent(gid,a->new StateContainer()));
+						}else
+							r=mc.fret(Utils.removeLeadings("#rb",command));
+						if(r!=null) {
+							event.getGroup().sendMessage(r);
+							return;
+						}
+					}
+				}else if(gid!=176234430&&gid!=793311898) mc.train(command,states.computeIfAbsent(gid,a->new StateContainer()));
+				At at = MiraiUtils.getAt(event.getMessage());
+				
 				boolean hasCmd=false;
 				if((at!=null&&at.getTarget() == event.getBot().getId())) {
 					hasCmd=true;
@@ -128,6 +166,13 @@ public class MiraiMain extends JavaPlugin {
 							MiraiRoomMessageEvent uev=new MiraiRoomMessageEvent(event);
 							bae.accept(uev,args);
 						}else if(GlobalMain.privmatcher.match(new MiraiHumanUser((NormalMember) event.getSender())).isAllowed()) {
+							if(args[0].equals("enrb")) {
+								event.getGroup().sendMessage("马氏回声已开启");
+								ergroup.add(event.getGroup().getId());
+							}else if(args[0].equals("derb")) {
+								event.getGroup().sendMessage("已缄默");
+								ergroup.remove(event.getGroup().getId());
+							}
 							BiConsumer<RoomMessageEvent, String[]> bce=GlobalMain.privcmd.get(args[0]);
 							if(bce!=null) {
 								MiraiRoomMessageEvent uev=new MiraiRoomMessageEvent(event);
@@ -156,6 +201,10 @@ public class MiraiMain extends JavaPlugin {
 						MiraiPrivateMessageEvent uev=new MiraiPrivateMessageEvent(event);
 						bae.accept(uev,args);
 					}
+				}else if(command.startsWith("mrb")) {
+					command=Utils.removeLeadings("mrb",command);
+					event.getFriend().sendMessage(mc.fret(command));
+					return;
 				}
 				GlobalMain.dispatchexec.execute(()->MiraiListenerUtils.dispatch(event.getSender().getId(),MsgType.PRIVATE,(IMessageCompound) MiraiAdapter.INSTANCE.toUnified(event.getMessage(),event.getBot())));
 			}

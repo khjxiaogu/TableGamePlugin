@@ -128,7 +128,7 @@ public class GlobalMatcher implements PermissionMatcher{
 				try {
 					global.loadMatcher(sc.nextLine());
 				}catch(Exception ex) {
-					//GlobalMain.getLogger().warning(ex);
+					GlobalMain.getLogger().error(ex);;
 					GlobalMain.getLogger().warning("权限配置文件"+gc.getName()+"的第"+i+"行有语法错误！");
 				}
 			}

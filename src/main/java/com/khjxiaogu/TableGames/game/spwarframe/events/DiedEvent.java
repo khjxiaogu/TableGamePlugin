@@ -25,12 +25,16 @@ import com.khjxiaogu.TableGames.game.spwarframe.role.Role;
 public class DiedEvent extends Event {
 	private List<KillEvent> killBy=new LinkedList<>();
 	private Role target;
-	public DiedEvent(Role target) { super();this.target=target; }
-	public DiedEvent(Role target,KillEvent by) { super();this.target=target;killBy.add(by); }
+	public DiedEvent() {
+	}
+	public DiedEvent(Role target) { this();this.target=target; }
+	public DiedEvent(Role target,KillEvent by) { this();this.target=target;killBy.add(by); }
 	public DiedEvent(Role target, List<KillEvent> by) {
+		this();
 		this.target=target;
 		killBy.addAll(by);
 	}
+	
 	public Role getTarget() {
 		return target;
 	}

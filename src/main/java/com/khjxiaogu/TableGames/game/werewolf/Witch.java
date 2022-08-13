@@ -156,10 +156,6 @@ public class Witch extends Villager {
 		return 0;
 	}
 
-	public double onWolfKilledAccuracy() {
-		return 0.5;
-	}
-
 	@Override
 	public double onSkilledAccuracy() {
 		if (!hasHeal && !hasPoison)

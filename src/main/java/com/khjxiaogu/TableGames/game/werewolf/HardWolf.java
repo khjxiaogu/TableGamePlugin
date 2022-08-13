@@ -17,6 +17,7 @@
  */
 package com.khjxiaogu.TableGames.game.werewolf;
 
+import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 
 public class HardWolf extends Werewolf {
@@ -28,7 +29,8 @@ public class HardWolf extends Werewolf {
 
 	@Override
 	public boolean shouldSurvive() {
-		return true;
+		super.diedReasonStack.removeIf(dr->dr!=DiedReason.Burn||dr!=DiedReason.Shoot_r);
+		return super.diedReasonStack.isEmpty();
 	}
 
 	@Override
@@ -44,5 +46,13 @@ public class HardWolf extends Werewolf {
 	public HardWolf(WerewolfGame game, AbstractUser p) {
 		super(game, p);
 	}
+	@Override
+	public String getRole() {
+		return "巨狼";
+	}
 
+	@Override
+	public String getJobDescription() {
+		return "你属于狼人阵营，你晚上可以与其他狼人联络共同使用杀人权，但是你免疫夜晚的技能伤害。";
+	}
 }

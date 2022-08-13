@@ -66,7 +66,7 @@ public class Hunter extends Villager {
 		asked = true;
 		super.registerListener((msg, type) -> {
 			if (type == MsgType.AT) {
-				if (dir == DiedReason.Vote || dir == DiedReason.Explode) {
+				if (dir == DiedReason.Vote || dir == DiedReason.Explode||dir==DiedReason.DarkWolf) {
 					if (hasGun) {
 						super.sendPrivate("你还没选择发动技能，如果不需要发动，请手动输入“放弃”，否则不能结束遗言！");
 						return;
@@ -143,7 +143,7 @@ public class Hunter extends Villager {
 
 	@Override
 	public boolean canDeathSkill(DiedReason dir) {
-		if (hasGun && !asked && dir.canUseSkill)
+		if (hasGun && !asked && (dir==DiedReason.Hunter||dir==DiedReason.DarkWolf||dir.canUseSkill))
 			return true;
 		return super.canDeathSkill(dir);
 	}

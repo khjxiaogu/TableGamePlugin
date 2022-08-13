@@ -94,7 +94,7 @@ public class VoteHelper<T extends UserFunction> {
 	}
 	public boolean vote(T src,T id,double ticket) {
 		synchronized(voted){
-			if(!tovote.remove(src))return false;
+			if(!tovote.remove(src))return tovote.size()==0;
 			double vnum=voted.getOrDefault(id,0D);
 			voted.put(id,vnum+ticket);
 			if(tovote.size()==0)

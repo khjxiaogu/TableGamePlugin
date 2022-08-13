@@ -105,10 +105,6 @@ public class WolfBeauty extends Werewolf {
 		}
 	}
 
-	@Override
-	public boolean shouldWaitDeathSkill() {
-		return super.shouldWaitDeathSkill();
-	}
 
 	@Override
 	public boolean canDeathSkill(DiedReason dir) {
@@ -139,7 +135,8 @@ public class WolfBeauty extends Werewolf {
 	@Override
 	public void addDaySkillListener() {
 	}
-
+	@Override
+	public void onPreSheriffSkill() {}
 	@Override
 	public int getTurn() {
 		return 2;

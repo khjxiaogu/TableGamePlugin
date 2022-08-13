@@ -50,7 +50,6 @@
 					<artifactSet>
 						<includes>
 							<include>com.google.code.gson:gson</include>
-							<include>org.xerial:sqlite-jdbc</include>
 						</includes>
 					</artifactSet>
 					<relocations>

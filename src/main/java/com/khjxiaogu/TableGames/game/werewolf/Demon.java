@@ -49,10 +49,6 @@ public class Demon extends Werewolf {
 	}
 
 	@Override
-	public void onTurnStart() {
-	}
-
-	@Override
 	public void onTurn() {
 		super.StartTurn();
 		sendPrivate(game.getAliveList());
@@ -93,10 +89,6 @@ public class Demon extends Werewolf {
 	public void onDieSkill(DiedReason dir) {
 	}
 
-	@Override
-	public boolean shouldWaitDeathSkill() {
-		return super.shouldWaitDeathSkill();
-	}
 
 	@Override
 	public boolean canDeathSkill(DiedReason dir) {
@@ -120,5 +112,8 @@ public class Demon extends Werewolf {
 	public String getRole() {
 		return "恶魔";
 	}
+
+	@Override
+	public void onPreSheriffSkill() {}
 
 }
