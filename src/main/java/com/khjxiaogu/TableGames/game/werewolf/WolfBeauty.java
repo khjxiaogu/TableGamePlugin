@@ -53,7 +53,7 @@ public class WolfBeauty extends Werewolf {
 	public void onTurn() {
 		pid = -1;
 		super.StartTurn();
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("狼美人，你可以魅惑一个好人。\n格式：“魅惑 游戏号码”\n如：“魅惑 1”\n如果放弃魅惑，则无需发送任何内容，等待时间结束即可。");
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
@@ -81,7 +81,7 @@ public class WolfBeauty extends Werewolf {
 					if (!(p instanceof Tramp)) {
 						pid = game.getIdByPlayer(p);
 					}
-					super.sendPrivate(p.getMemberString() + "获得了魅惑！");
+					super.sendPrivate(p.getMemberString(this) + "获得了魅惑！");
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“魅惑 游戏号码”！");
 				}

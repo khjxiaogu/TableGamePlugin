@@ -46,7 +46,7 @@ public class Tramp extends Villager {
 		}
 		isDead = true;
 		onBeforeTalk();
-		game.logger.logRaw(getNameCard() + " 老流氓出局");
+		game.logger.logRaw(this.getMemberString(this)  + " 老流氓出局");
 		sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时@我结束你的讲话。");
 		super.registerListener((msg, type) -> {
 			if (type == MsgType.AT) {
@@ -55,7 +55,7 @@ public class Tramp extends Villager {
 			}
 		});
 		game.startWait(300000, WaitReason.DieWord);
-		sendPublic("说完了。");
+		super.releaseListener();
 		tryMute();
 	}
 

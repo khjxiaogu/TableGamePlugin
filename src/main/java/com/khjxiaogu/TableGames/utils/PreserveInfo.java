@@ -131,21 +131,20 @@ public abstract class PreserveInfo<T extends Game>{
 	public AbstractUser getPreserver(UserIdentifier m) {
 		return topreserve.keySet().stream().filter(t->t.getId().equals(m)).findFirst().orElse(null);
 	}
+
 	public void addPreserver(AbstractUser m) {
 		if(getCurrentNum()>=getMaxMembers()) {
 			group.sendMessage(getName()+"当前已经满人！");
 			return;
 		}
-		/*
-		try {
-			m.getBot().getFriend(m.getId());
-		}catch(Exception e) {
-			m.sendPrivate("为了保证游戏流畅进行，请加我好友。");
-		}
-		 */
+		
+		
+		m.tryAvailable();
+	
+		 
 		AliveCounter=PreserveInfo.KeepAlive;
 		if(topreserve.put(m,new Date().getTime()) == null) {
-			m.sendPrivate(m.getMemberString()+" 预定"+this.getName()+"成功");
+			m.sendPrivate(m.getMemberString()+" 预定"+this.getName()+"成功"+getWelcomeMessage(m));
 			sendPersonInfo();
 		} else {
 			m.sendPrivate(m.getMemberString()+"您已经预定了。");
@@ -154,6 +153,8 @@ public abstract class PreserveInfo<T extends Game>{
 			if(getActualCurrentNum()>=getSuitMembers()&&PreserveInfo.prevSize<getSuitMembers()) {
 				group.sendMessage("已达到最佳预定人数，游戏将会在1分钟后开始，还想参加的请抓紧时间预定，格式为“##预定"+getName()+"”");
 				if(!acceled) {
+					if(td==null)
+						onStartPending();
 					td.interrupt();
 				}
 				acceled=true;
@@ -184,7 +185,7 @@ public abstract class PreserveInfo<T extends Game>{
 	}
 	public void notifyPreserver() {
 		for(AbstractUser m:topreserve.keySet()) {
-			m.sendPrivate(this.getName()+"游戏即将开始，请注意！");
+			m.sendPrivate(this.getName()+"游戏即将开始，请"+m.getNameCard()+"注意！");
 		}
 	}
 	public String getPreserveList() {
@@ -218,14 +219,14 @@ public abstract class PreserveInfo<T extends Game>{
 		if(crn != null)
 		{
 			if(force||new Date().getTime()-crn>180000) {
-				m.sendPrivate("取消预定成功");
+				m.sendPrivate(m.getNameCard()+"取消预定成功");
 				topreserve.remove(m);
 				sendPersonInfo();
 			} else {
-				m.sendPrivate("预定后的三分钟内不能取消预定！");
+				m.sendPrivate(m.getNameCard()+"预定后的三分钟内不能取消预定！");
 			}
 		} else {
-			m.sendPrivate("你还没预定。");
+			m.sendPrivate(m.getNameCard()+"你还没预定。");
 		}
 		if(getActualCurrentNum()<getMinMembers()&&td!=null) {
 			group.sendMessage("预定人数不足，已取消。");
@@ -328,5 +329,8 @@ public abstract class PreserveInfo<T extends Game>{
 		mems.removeIf(m->gm.addMember(m));
 		this.group.sendMessage("游戏已经开始...");
 		return true;
+	}
+	public String getWelcomeMessage(AbstractUser ar) {
+		return "";
 	}
 }

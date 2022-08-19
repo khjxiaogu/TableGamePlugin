@@ -44,14 +44,17 @@ public class Werewolf extends Villager {
 	@Override
 	public void onTurn() {
 		super.StartTurn();
-		super.sendPrivate(getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
+		super.sendPrivate(getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
 	}
-
+	public void onTurnStart() {
+		super.onTurnStart();
+		super.sendPrivate(getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
+	}
 	public void SheriffDeselect(IMessageCompound msg, MsgType type) {
 		if (type == MsgType.PRIVATE) {
 			if (Utils.getPlainText(msg).startsWith("退选")) {
-				game.logger.logRaw(getNameCard() + "已退选");
-				this.sendPublic("已退选");
+				game.logger.logRaw(this.getMemberString(this) + "已退选");
+				this.sendForName("已退选");
 				game.sherifflist.remove(this);
 				this.releaseListener();
 				this.addDaySkillListener();
@@ -70,8 +73,8 @@ public class Werewolf extends Villager {
 				game.skipWait(WaitReason.State);
 			} else if (type == MsgType.PRIVATE) {
 				if(Utils.getPlainText(msg).startsWith("退选")) {
-					game.logger.logRaw(getNameCard() + "已退选");
-					this.sendPublic("已退选");
+					game.logger.logRaw(this.getMemberString(this) + "已退选");
+					this.sendForName("已退选");
 					game.sherifflist.remove(this);
 					this.releaseListener();
 					addDaySkillListener();
@@ -90,8 +93,8 @@ public class Werewolf extends Villager {
 		if (s.startsWith("自爆")) {
 			try {
 				this.canContinueState = true;
-				super.sendPublic("是狼人，自爆了，进入黑夜。");
-				game.logger.logRaw(getNameCard() + "自爆了");
+				sendForName("是狼人，自爆了，进入黑夜。");
+				game.logger.logRaw(this.getMemberString(this) + "自爆了");
 				game.getScheduler().execute(() -> {
 					game.removeAllListeners();
 					game.preSkipDay();
@@ -134,7 +137,7 @@ public class Werewolf extends Villager {
 	@Override
 	public void onWolfTurn() {
 		StartTurn();
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
 		super.registerListener((msg, type) -> {
@@ -160,30 +163,46 @@ public class Werewolf extends Villager {
 							return;
 						String contentx = Utils.getPlainText(msgx);
 						if (contentx.startsWith("#")) {
-							String tosend = index + "号 |" + origname + ":" + Utils.removeLeadings("#", contentx);
+							String tosendHead = this.getMemberString(this);
+							String tosendEnd=":" + Utils.removeLeadings("#", contentx);
 							for (Villager w : game.playerlist) {
 								if (w instanceof Werewolf && !w.isDead() && !w.equals(this)) {
-									w.sendPrivate(tosend);
+									w.sendPrivate(tosendHead+"->"+w.getMemberString()+tosendEnd);
 								}
 							}
 						}
 					});
 					game.logger.logSkill(this, p, "狼人投票");
 					game.WolfVote(this, p);
-					super.sendPrivate("已投票给 " + p.getMemberString());
+					super.sendPrivate("已投票给 " + p.getMemberString(this));
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“投票 游戏号码”！");
 				}
 			} else if (content.startsWith("#")) {
-				String tosend = getMemberString() + ":" + Utils.removeLeadings("#", content);
+				String tosendHead = this.getMemberString(this);
+				String tosendEnd=":" + Utils.removeLeadings("#", content);
 				for (Villager w : game.playerlist) {
 					if (w instanceof Werewolf && !w.isDead() && !w.equals(this)) {
-						w.sendPrivate(tosend);
+						w.sendPrivate(tosendHead+"->"+w.getMemberString()+tosendEnd);
 					}
 				}
 			} else if (content.startsWith("放弃")) {
 				EndTurn();
 				super.releaseListener();
+				super.registerListener((msgx, typex) -> {
+					if (typex != MsgType.PRIVATE)
+						return;
+					String contentx = Utils.getPlainText(msgx);
+					if (contentx.startsWith("#")) {
+						String tosendHead = this.getMemberString(this);
+						String tosendEnd=":" + Utils.removeLeadings("#", contentx);
+						for (Villager w : game.playerlist) {
+							if (w instanceof Werewolf && !w.isDead() && !w.equals(this)) {
+								w.sendPrivate(tosendHead+"->"+w.getMemberString()+tosendEnd);
+							}
+						}
+					}
+				});
 				game.NoVote(this);
 				super.sendPrivate("已放弃");
 			}
@@ -230,7 +249,12 @@ public class Werewolf extends Villager {
 	@Override
 	public void onPreSheriffSkill() {
 		super.onPreSheriffSkill();
-		sendPrivate(getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
+		sendPrivate(getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
 		addDaySkillListener();
+	}
+	public String getMemberString(Villager to) {
+		if(game.isNameProtected&&!(to instanceof Werewolf))
+			return index+"号 |"+index+"号玩家";
+		return index+"号 |"+origname;
 	}
 }

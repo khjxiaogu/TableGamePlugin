@@ -40,19 +40,19 @@ public class WerewolfGameLogger implements Serializable {
 	}
 
 	public void logSkill(Villager from, Villager to, String name) {
-		logSkill(from.getNameCard(), to, name);
+		logSkill(from.getMemberString(from), to, name);
 	}
 
 	public void logSkill(String from, Villager to, String name) {
-		gamelog.append(from).append(" ").append(name).append("了 ").append(to.getNameCard()).println();
+		gamelog.append(from).append(" ").append(name).append("了 ").append(to.getMemberString(to)).println();
 	}
 
 	public void logVote(Villager from, Villager to) {
-		gamelog.append(from.getNameCard()).append(" 投票给").append(to.getNameCard()).println();
+		gamelog.append(from.getMemberString(from)).append(" 投票给").append(to.getMemberString(to)).println();
 	}
 
 	public void logDeath(Villager to, DiedReason dr) {
-		gamelog.append(to.getNameCard()).append(" ").append(dr.desc).println();
+		gamelog.append(to.getMemberString(to)).append(" ").append(dr.desc).println();
 	}
 
 	public void title(String name) {

@@ -57,7 +57,7 @@ public class Hunter extends Villager {
 		super.StartTurn();
 		// dr = dir;
 
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		if (!game.isDayTime) {
 			super.sendPrivate("猎人，你死了，你可以选择翻牌并开枪打死另一个人，你有30秒的考虑时间\n格式：“杀死 游戏号码”\n如：“杀死 1”\n如果不需要，则等待时间结束即可。");
 		} else {
@@ -107,7 +107,7 @@ public class Hunter extends Villager {
 					}
 					hasGun = false;
 					game.logger.logSkill(this, p, "猎人杀死");
-					super.sendPrivate("你杀死了" + p.getMemberString());
+					super.sendPrivate("你杀死了" + p.getMemberString(this));
 					if (game.isDayTime) {
 						super.sendPrivate("你的遗言回合还未结束，请在说完后在群里@机器人结束。");
 					}

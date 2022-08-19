@@ -81,8 +81,7 @@ public class Villager extends UserFunction implements Serializable {
 	}
 
 	public void onGameStart() {
-		sendPrivate("您的身份是：" + getRole() + "。");
-		sendPrivate(getJobDescription());
+		sendPrivate(getMemberString()+"，您的身份是：" + getRole() + "\n"+getJobDescription());
 	}
 
 	private void readObject(ObjectInputStream aInputStream) throws ClassNotFoundException, IOException {
@@ -98,6 +97,7 @@ public class Villager extends UserFunction implements Serializable {
 	}
 
 	public void doTakeOver(AbstractUser ap) {
+		transferListener(ap);
 		member = ap;
 		super.bind(this);
 		onGameStart();
@@ -163,6 +163,8 @@ public class Villager extends UserFunction implements Serializable {
 			});
 			game.startWait(300000, WaitReason.State);
 		} finally {
+			super.releaseListener();
+			addDaySkillListener();
 			if(this.canContinueState)
 				this.canContinueState=false;
 			else
@@ -186,7 +188,7 @@ public class Villager extends UserFunction implements Serializable {
 
 	public void vote() {
 		isVoteTurn = true;
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("请私聊投票要驱逐的人，你有2分钟的考虑时间\n格式：“投票 游戏号码”\n如：“投票 1”\n弃票请输入“弃权”");
 		game.vu.addToVote(this);
 		super.registerListener((msg, type) -> {
@@ -195,8 +197,8 @@ public class Villager extends UserFunction implements Serializable {
 				if (content.startsWith("弃权")) {
 					isVoteTurn = false;
 					super.releaseListener();
-					this.sendPublic("已弃权。");
-					sendPrivate("你已弃权");
+					this.sendForName("已弃权。");
+					sendPrivate(getMemberString()+"，你已弃权");
 					game.NoVote(this);
 				} else if (content.startsWith("投票")) {
 					try {
@@ -218,8 +220,8 @@ public class Villager extends UserFunction implements Serializable {
 						super.releaseListener();
 						increaseVoteAccuracy(p.onVotedAccuracy());
 						game.logger.logSkill(this, p, "投票");
-						super.sendPrivate("已投票给 " + p.getMemberString());
-						super.sendPublic("已投票给 " + p.getMemberString());
+						sendPrivate("已投票给 " + p.getMemberString(this));
+						sendForName("已投票给 " + p.getMemberString());
 						game.DayVote(this, p);
 
 					} catch (Throwable t) {
@@ -393,17 +395,17 @@ public class Villager extends UserFunction implements Serializable {
 					isSheriff = false;
 					increaseVoteAccuracy(-p.onVotedAccuracy());
 					game.logger.logSkill(this, p, "警徽给");
-					super.sendPrivate("已传 " + p.getMemberString());
-					super.sendPublic("已把警徽给 " + p.getMemberString());
+					super.sendPrivate("已传 " + p.getMemberString(this));
+					super.sendForName("已把警徽给 " + p.getMemberString());
 					p.isSheriff = true;
 					game.skipWait(WaitReason.Generic);
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“传给 游戏号码”！");
 				}
 			} else if (content.startsWith("撕毁")) {
-				game.logger.logRaw(getNameCard() + "撕毁了警徽");
+				game.logger.logRaw(this.getMemberString(this)  + "撕毁了警徽");
 				super.sendPrivate("你撕毁了警徽。");
-				super.sendPublic("撕毁了警徽");
+				super.sendForName("撕毁了警徽");
 				isSheriff = false;
 				game.skipWait(WaitReason.Generic);
 			}
@@ -425,11 +427,11 @@ public class Villager extends UserFunction implements Serializable {
 				return;
 			String content = Utils.getPlainText(msg);
 			if (content.startsWith("竞选")) {
-				super.sendPrivate("你参加了竞选。");
+				super.sendPrivate(getMemberString()+"，你参加了竞选。");
 				super.releaseListener();
 				game.sherifflist.add(this);
 			} else if (content.startsWith("放弃")) {
-				super.sendPrivate("你放弃了竞选。");
+				super.sendPrivate(getMemberString()+"，你放弃了竞选。");
 				super.releaseListener();
 			}
 		});
@@ -437,7 +439,7 @@ public class Villager extends UserFunction implements Serializable {
 	}
 
 	public void onBeforeSheriffState() {
-		sendPrivate("在竞选投票开始前，你随时都可以私聊发送“退选”进行退选。");
+		sendPrivate(getMemberString()+"，在竞选投票开始前，你随时都可以私聊发送“退选”进行退选。");
 		super.registerListener((msgx, typex) -> SheriffDeselect(msgx, typex));
 	}
 
@@ -450,8 +452,8 @@ public class Villager extends UserFunction implements Serializable {
 				super.registerListener((msgx, typex) -> SheriffDeselect(msgx, typex));
 				game.skipWait(WaitReason.State);
 			} else if (type == MsgType.PRIVATE && Utils.getPlainText(msg).startsWith("退选")) {
-				game.logger.logRaw(getNameCard() + "已退选");
-				this.sendPublic("已退选");
+				game.logger.logRaw(this.getMemberString(this) + "已退选");
+				this.sendForName("已退选");
 				game.sherifflist.remove(this);
 				this.releaseListener();
 				game.skipWait(WaitReason.State);
@@ -463,8 +465,8 @@ public class Villager extends UserFunction implements Serializable {
 
 	public void SheriffDeselect(IMessageCompound msg, MsgType type) {
 		if (type == MsgType.PRIVATE && Utils.getPlainText(msg).startsWith("退选")) {
-			game.logger.logRaw(getNameCard() + "已退选");
-			this.sendPublic("已退选");
+			game.logger.logRaw(this.getMemberString(this) + "已退选");
+			this.sendForName("已退选");
 			game.sherifflist.remove(this);
 			this.releaseListener();
 		}
@@ -473,7 +475,7 @@ public class Villager extends UserFunction implements Serializable {
 	public void onSheriffVote() {
 		StringBuilder sb = new StringBuilder("警长竞选列表：\n");
 		for (Villager p : game.sherifflist) {
-			sb.append(p.getMemberString());
+			sb.append(p.getMemberString(this));
 			sb.append("\n");
 		}
 		sendPrivate(sb.toString());
@@ -484,8 +486,8 @@ public class Villager extends UserFunction implements Serializable {
 				String content = Utils.getPlainText(msg);
 				if (content.startsWith("弃权")) {
 					super.releaseListener();
-					this.sendPublic("已弃权。");
-					sendPrivate("你已弃权");
+					this.sendForName("已弃权。");
+					sendPrivate(getMemberString()+"，你已弃权");
 					game.NoVote(this);
 				} else if (content.startsWith("投票")) {
 					try {
@@ -502,8 +504,8 @@ public class Villager extends UserFunction implements Serializable {
 						super.releaseListener();
 						increaseVoteAccuracy(-p.onVotedAccuracy());
 						game.logger.logSkill(this, p, "投票");
-						super.sendPrivate("已投票给 " + p.getMemberString());
-						super.sendPublic("已投票给 " + p.getMemberString());
+						sendPrivate("已投票给 " + p.getMemberString(this));
+						sendForName("已投票给 " + p.getMemberString());
 						game.SheriffVote(this, p);
 					} catch (Throwable t) {
 						super.sendPrivate("发生错误，正确格式为：“投票 游戏号码”！");
@@ -536,7 +538,7 @@ public class Villager extends UserFunction implements Serializable {
 				});
 			}
 			game.startWait(300000, WaitReason.DieWord);
-			sendPublic("说完了。");
+			super.releaseListener();
 			tryMute();
 		} else {
 			isDead = true;
@@ -681,5 +683,17 @@ public class Villager extends UserFunction implements Serializable {
 	}
 
 	public void onPreSheriffSkill() {
+	}
+
+	@Override
+	public String getMemberString() {
+		if(game.isNameProtected)
+			return index+"号 |"+index+"号玩家";
+		return index+"号 |"+origname;
+	}
+	public String getMemberString(Villager to) {
+		if(game.isNameProtected&&to!=this)
+			return index+"号 |"+index+"号玩家";
+		return index+"号 |"+origname;
 	}
 }

@@ -74,4 +74,11 @@ public class WerewolfPreserve extends PreserveInfo<WerewolfGame> {
 		return "狼人杀";
 	}
 
+	@Override
+	public String getWelcomeMessage(AbstractUser ar) {
+		if (GlobalMain.credit.get(ar.getId()).hasItem("狼人杀vip券"))
+			return "\n您可以使用##狼人杀 vip <阵营> 来提高进入某个阵营的概率";
+		return "";
+	}
+
 }

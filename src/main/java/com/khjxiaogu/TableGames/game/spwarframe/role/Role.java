@@ -176,6 +176,9 @@ public abstract class Role {
 	}
 
 	public Role bind(Player p) {
+		if(owner!=null)
+			owner.transferListener(p);
+		
 		owner = p;
 		return this;
 	}

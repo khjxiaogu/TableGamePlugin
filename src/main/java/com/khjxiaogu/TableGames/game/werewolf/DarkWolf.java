@@ -52,7 +52,7 @@ public class DarkWolf extends Werewolf {
 	public void onDieSkill(DiedReason dir) {
 		super.StartTurn();
 		// dr = dir;
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("狼王，你死了，你可以选择打死另一个人，你有30秒的考虑时间\n格式：“杀死 游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
 		asked = true;
 		super.registerListener((msg, type) -> {
@@ -90,7 +90,7 @@ public class DarkWolf extends Werewolf {
 						});
 					}
 					hasGun = false;
-					super.sendPrivate("你杀死了" + p.getMemberString());
+					super.sendPrivate("你杀死了" + p.getMemberString(this));
 					game.logger.logSkill(this, p, "狼王杀死");
 					super.sendPublic(new Text("死亡，同时带走了").asMessage().append(p.getAt()));
 					p.isDead = true;

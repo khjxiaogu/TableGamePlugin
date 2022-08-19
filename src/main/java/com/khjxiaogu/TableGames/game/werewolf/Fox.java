@@ -44,7 +44,7 @@ public class Fox extends Villager {
 		super.StartTurn();
 		if (!canSkill)
 			return;
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("狐狸，你可以选择查验一个人，请私聊选择查验的人，你有一分钟的考虑时间\n格式：“查验 游戏号码”\n如：“查验 1”");
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)

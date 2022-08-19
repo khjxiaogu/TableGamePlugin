@@ -49,7 +49,7 @@ public class MiracleArcher extends Villager {
 			super.sendPrivate("奇迹弓手，你没有箭了。");
 			return;
 		}
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		StringBuilder sb = new StringBuilder(
 				"奇迹弓手，你可以射一个人，格式：“射 游戏号码”；你可以保护一个人，格式：“保护 游戏号码”，如果不需要使用技能，无需发送任何内容，等待时间结束即可。\n");
 		sb.append("你有一分钟的考虑时间。\n");
@@ -112,7 +112,7 @@ public class MiracleArcher extends Villager {
 					p.isArcherProtected = true;
 					increaseSkilledAccuracy(-p.onSkilledAccuracy());
 					game.logger.logSkill(this, p, "弓手保护");
-					super.sendPrivate("保护了" + p.getMemberString());
+					super.sendPrivate("保护了" + p.getMemberString(this));
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“保护 游戏号码”！");
 				}

@@ -92,7 +92,11 @@ public class MiraiListenerUtils {
 	public static void releaseListener(Long id) {
 		mls.remove(id);
 	}
-
+	public static void transferListener(Long id,AbstractUser id2) {
+		MessageListenerWrapper ml = mls.remove(id);
+		if(ml!=null)
+			id2.registerListener(ml);
+	}
 	public static boolean dispatch(Long id, MsgType type, IMessageCompound messageCompound) {
 		
 		MessageListenerWrapper ml = mls.get(id);

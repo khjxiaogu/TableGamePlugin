@@ -27,6 +27,7 @@ import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.message.data.PlainText;
 
 public abstract class MiraiUser implements AbstractUser,Serializable {
 	/**
@@ -89,6 +90,10 @@ public abstract class MiraiUser implements AbstractUser,Serializable {
 		MiraiListenerUtils.releaseListener(getId().id);
 	}
 	@Override
+	public void transferListener(AbstractUser another) {
+		MiraiListenerUtils.transferListener(getId().id,another);
+	}
+	@Override
 	public abstract QQId getId();
 	@Override
 	public Object getRoleObject() {
@@ -101,5 +106,49 @@ public abstract class MiraiUser implements AbstractUser,Serializable {
 	@Override
 	public AbstractRoom getRoom() {
 		return MiraiGroup.createInstance(group);
+	}
+
+	@Override
+	public void sendForName(String str) {
+		try {
+			
+			SlowUtils.runSlowly(()->group.sendMessage(this.getMemberString()+" "+str));
+		}catch(Exception ex) {
+			while(true) {
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {}
+				try {
+					this.sendPrivate(str);
+					return;
+				}catch(Exception ex2) {}
+			}
+		}
+	}
+
+	@Override
+	public void sendForName(IMessage msg) {
+		try {
+			SlowUtils.runSlowly(()->group.sendMessage(new PlainText(this.getMemberString()).plus(MiraiAdapter.INSTANCE.toPlatform(msg,group))));
+		}catch(Exception ex) {
+			while(true) {
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {}
+				try {
+					this.sendPrivate(msg);
+					return;
+				}catch(Exception ex2) {}
+			}
+		}
+	}
+	@Override
+	public void tryAvailable() {
+		try {
+			if(group.getBot().getFriend(this.getId().id)!=null)return;
+		}catch(Exception ex) {
+			
+		}
+		this.sendPublic(" 为了游戏顺利进行，请加我。");
 	}
 }

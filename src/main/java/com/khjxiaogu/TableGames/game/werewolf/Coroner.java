@@ -42,7 +42,7 @@ public class Coroner extends Villager {
 		if (!game.getTokill().isEmpty()) {
 			for (Villager me : game.getTokill()) {
 				game.logger.logSkill(this, me, "验尸官查验");
-				sb.append("\n").append(me.getMemberString()).append(" 是")
+				sb.append("\n").append(me.getMemberString(this)).append(" 是")
 						.append(me.getPredictorFraction() == Fraction.Wolf ? "狼人" : "好人").append("，死于")
 						.append(me.getEffectiveDiedReason().desc);
 				hasKnown = true;

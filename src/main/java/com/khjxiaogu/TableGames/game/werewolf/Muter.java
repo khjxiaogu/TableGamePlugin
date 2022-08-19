@@ -42,7 +42,7 @@ public class Muter extends Villager {
 		if (game.isFirstNight())
 			return;
 		super.StartTurn();
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate(
 				"你可以禁言一个人，让他在明天的发言回合不能发言。\n请私聊选择禁言的人，你有60秒的考虑时间。\n格式：“禁言 游戏号码”\n如果无需禁言，则无需发送任何内容，等待时间结束即可。");
 		super.registerListener((msg, type) -> {
@@ -70,7 +70,7 @@ public class Muter extends Villager {
 					// increaseSkilledAccuracy(p.onVotedAccuracy());
 					game.logger.logSkill(this, p, "禁言");
 					p.isMuted = true;
-					super.sendPrivate(p.getMemberString() + "获得了禁言！");
+					super.sendPrivate(p.getMemberString(this) + "获得了禁言！");
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“禁言 游戏号码”！");
 				}

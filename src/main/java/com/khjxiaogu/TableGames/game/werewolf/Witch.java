@@ -59,7 +59,7 @@ public class Witch extends Villager {
 			super.sendPrivate("女巫，你没有药了。");
 			return;
 		}
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		StringBuilder sb = new StringBuilder("女巫，你有");
 		if (hasPoison) {
 			sb.append("一瓶毒药，格式：“毒 游戏号码”\n");
@@ -71,7 +71,7 @@ public class Witch extends Villager {
 				sb.append("今晚没有人死亡");
 			} else {
 				for (Villager p : game.getTokill()) {
-					sb.append(p.getMemberString());
+					sb.append(p.getMemberString(this));
 					sb.append("\n");
 				}
 			}
@@ -108,7 +108,7 @@ public class Witch extends Villager {
 					increaseSkilledAccuracy(p.onSkilledAccuracy());
 					game.logger.logSkill(this, p, "女巫毒");
 					hasPoison = false;
-					super.sendPrivate("毒死了" + p.getMemberString());
+					super.sendPrivate("毒死了" + p.getMemberString(this));
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“毒 游戏号码”！");
 				}

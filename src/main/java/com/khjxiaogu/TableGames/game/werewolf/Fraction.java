@@ -17,12 +17,23 @@
  */
 package com.khjxiaogu.TableGames.game.werewolf;
 
+import java.util.HashMap;
+
 public enum Fraction {
+	
 	God("神"), Innocent("民"), Wolf("狼"), Other("三");
 
 	String name;
-
+	private static final HashMap<String,Fraction> names=new HashMap<>();
 	private Fraction(String name) {
 		this.name = name;
+		
+	}
+	static {
+		for(Fraction f:values())
+		names.put(f.name, f);
+	}
+	public static Fraction getByName(String name) {
+		return names.get(name);
 	}
 }

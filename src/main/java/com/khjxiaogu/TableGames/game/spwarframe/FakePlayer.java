@@ -63,4 +63,8 @@ public class FakePlayer implements Player {
 	public void removeNumber() {
 	}
 
+	@Override
+	public void transferListener(Player p) {
+	}
+
 }

@@ -54,10 +54,10 @@ public class Idiot extends Villager {
 		if (dir != DiedReason.Vote) {
 			super.onDied(dir, shouldSkill);
 		} else {
-			game.logger.logRaw(getNameCard() + " 白痴出局");
+			game.logger.logRaw(this.getMemberString(this) + " 白痴出局");
 			isDead = false;
 			canVote = false;
-			sendPublic("被驱逐了，身份是白痴。");
+			sendForName("被驱逐了，身份是白痴。");
 		}
 	}
 

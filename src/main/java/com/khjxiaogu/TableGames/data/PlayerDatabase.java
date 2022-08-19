@@ -35,6 +35,7 @@ import com.khjxiaogu.TableGames.game.undercover.UnderCoverPlayerData;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfPlayerData;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
+import com.khjxiaogu.TableGames.platform.UserIdentifierSerializer;
 
 
 public class PlayerDatabase {
@@ -155,6 +156,21 @@ public class PlayerDatabase {
 			e.printStackTrace();
 		}
 		return ll.toArray(new GenericPlayerData<?>[0]);
+	}
+	public <T extends GenericPlayerData<?>> Map<UserIdentifier,T> getDatas(String game,Class<T> dcls) {
+		Map<UserIdentifier,T> ll=new HashMap<>();
+		try(PreparedStatement ps=database.prepareStatement("SELECT qq,data FROM profile WHERE game = ?")){
+			ps.setString(1,game);
+			try(ResultSet rs=ps.executeQuery()){
+				while(rs.next()) {
+					ll.put(UserIdentifierSerializer.read(rs.getString(1)),gs.fromJson(rs.getString(2),dcls));
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return ll;
 	}
 	public GameData getGame(String game) {
 		return new GameData(game,this);

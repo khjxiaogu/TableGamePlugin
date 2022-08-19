@@ -51,7 +51,7 @@ public class WhiteWolf extends Werewolf {
 	public void onTurn() {
 		super.StartTurn();
 		super.sendPrivate("白狼王，你可以在投票前随时翻牌自爆带走一个玩家并且立即进入黑夜，格式：“自爆 游戏号码”");
-		super.sendPrivate(game.getAliveList());
+		super.sendPrivate(game.getAliveList(this));
 	}
 	@Override
 	public void onPreSheriffSkill() {
@@ -76,7 +76,7 @@ public class WhiteWolf extends Werewolf {
 					return;
 				}
 				game.logger.logSkill(this, p, "白狼自爆");
-				super.sendPublic("是白狼王，带走了" + p.getMemberString() + "进入黑夜！");
+				super.sendForName("是白狼王，带走了" + p.getMemberString() + "进入黑夜！");
 				isDead = true;
 				p.isDead = true;
 				game.getScheduler().execute(() -> {

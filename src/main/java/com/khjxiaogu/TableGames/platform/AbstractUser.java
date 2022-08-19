@@ -26,6 +26,9 @@ public interface AbstractUser {
 	void sendPrivate(IMessage msg);
 	void sendPublic(String str);
 	void sendPublic(IMessage msg);
+	void sendForName(String str);
+	void sendForName(IMessage msg);
+	void tryAvailable();
 	IMessage getAt();
 	String getMemberString();
 	void setNameCard(String s);
@@ -38,6 +41,7 @@ public interface AbstractUser {
 	void bind(Object obj);
 	void setGame(Game g);
 	void registerListener(MessageListener msgc);
+	void transferListener(AbstractUser another);
 	void releaseListener();
 	Object getRoleObject();
 	Permission getPermission();

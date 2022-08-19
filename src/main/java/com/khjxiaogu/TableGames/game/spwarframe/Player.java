@@ -35,4 +35,5 @@ public interface Player {
 	void makeMute();
 	void setNumber(int num);
 	void removeNumber();
+	void transferListener(Player p);
 }

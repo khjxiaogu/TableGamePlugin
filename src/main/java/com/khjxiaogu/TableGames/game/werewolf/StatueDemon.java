@@ -55,7 +55,7 @@ public class StatueDemon extends Villager {
 	@Override
 	public void onTurn() {
 		super.StartTurn();
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("石像鬼，你可以查验一个人的身份，请私聊选择查验的人，你有30秒的考虑时间\n格式：“查验 游戏号码”\n如：“查验 1”");
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
@@ -85,7 +85,7 @@ public class StatueDemon extends Villager {
 					super.releaseListener();
 					game.logger.logSkill(this, p, "石像鬼查验");
 					p.isDemonChecked = true;
-					super.sendPrivate(p.getMemberString() + "是" + p.getPredictorRole());
+					super.sendPrivate(p.getMemberString(this) + "是" + p.getPredictorRole());
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“查验 游戏号码”！");
 				}
@@ -117,7 +117,7 @@ public class StatueDemon extends Villager {
 				return;
 		}
 		StartTurn();
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
 		super.registerListener((msg, type) -> {
@@ -140,7 +140,7 @@ public class StatueDemon extends Villager {
 					super.releaseListener();
 					game.WolfVote(this, p);
 					game.logger.logSkill(this, p, "狼人投票");
-					super.sendPrivate("已投票给 " + p.getMemberString());
+					super.sendPrivate("已投票给 " + p.getMemberString(this));
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“投票 游戏号码”！");
 				}

@@ -51,7 +51,7 @@ public class Demon extends Werewolf {
 	@Override
 	public void onTurn() {
 		super.StartTurn();
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("恶魔，你可以查验一个人是否神职。\n格式：“查验 游戏号码”\n如：“查验 1”");
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
@@ -76,7 +76,7 @@ public class Demon extends Werewolf {
 					game.logger.logSkill(this, p, "恶魔查验");
 					EndTurn();
 					super.releaseListener();
-					super.sendPrivate(p.getMemberString() + "是" + (p.getRealFraction() == Fraction.God ? "神职"
+					super.sendPrivate(p.getMemberString(this) + "是" + (p.getRealFraction() == Fraction.God ? "神职"
 							: (p.getRealFraction() == Fraction.Wolf) ? "狼人" : "平民"));
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“查验 游戏号码”！");

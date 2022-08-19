@@ -91,7 +91,7 @@ public class HiddenWolf extends Villager {
 				return;
 		}
 		StartTurn();
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
 		super.registerListener((msg, type) -> {
@@ -114,7 +114,7 @@ public class HiddenWolf extends Villager {
 					super.releaseListener();
 					game.WolfVote(this, p);
 					game.logger.logSkill(this, p, "狼人投票");
-					super.sendPrivate("已投票给 " + p.getMemberString());
+					super.sendPrivate("已投票给 " + p.getMemberString(this));
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“投票 游戏号码”！");
 				}

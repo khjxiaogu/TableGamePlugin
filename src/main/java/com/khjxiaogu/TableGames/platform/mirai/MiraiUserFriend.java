@@ -168,4 +168,20 @@ public class MiraiUserFriend implements AbstractUser {
 			return false;
 		return true;
 	}
+
+	@Override
+	public void transferListener(AbstractUser another) {
+	}
+
+	@Override
+	public void sendForName(String str) {
+	}
+
+	@Override
+	public void sendForName(IMessage msg) {
+	}
+
+	@Override
+	public void tryAvailable() {
+	}
 }

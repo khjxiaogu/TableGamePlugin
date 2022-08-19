@@ -60,7 +60,7 @@ public class Utils {
 		return ba.toByteArray();
 	}
 	public static String percent(double v1, double v2) {
-		long val=Math.round(v1 / v2 * 10000) / 100;
+		double val=Math.round(v1 / v2 * 1000) / 10d;
 		if(val>100) {
 			val=100;
 		}
@@ -71,7 +71,18 @@ public class Utils {
 			return String.valueOf(val) + "%";
 		return "N/A%";
 	}
-
+	public static String percentDot2(double v1, double v2) {
+		double val=Math.round(v1 / v2 * 10000) / 100d;
+		if(val>100) {
+			val=100;
+		}
+		if(val<0) {
+			val=0;
+		}
+		if (v2 != 0)
+			return String.valueOf(val) + "%";
+		return "N/A%";
+	}
 
 	/**
 	 * @param contact  

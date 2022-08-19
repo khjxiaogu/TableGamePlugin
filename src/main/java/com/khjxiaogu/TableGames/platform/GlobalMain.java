@@ -24,12 +24,16 @@ import java.io.ObjectInputStream;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,6 +61,7 @@ import com.khjxiaogu.TableGames.game.werewolf.StandardWerewolfPreserve;
 import com.khjxiaogu.TableGames.game.werewolf.Villager;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.Role;
+import com.khjxiaogu.TableGames.game.werewolf.WerewolfPlayerData;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfPreserve;
 import com.khjxiaogu.TableGames.permission.GlobalMatcher;
 import com.khjxiaogu.TableGames.platform.message.Image;
@@ -193,6 +198,16 @@ public class GlobalMain {
 			}
 			event.getRoom().sendMessage("全局"+ds[0].toString());
 		});
+		privcmd.put(name+"全局分析", (event,command)->{
+			GenericPlayerData<? extends GenericPlayerData<?>>[] ds=GlobalMain.db.getPlayers(name);
+			for(int i=1;i<ds.length;i++) {
+				ds[0].plusa(ds[i]);
+			}
+			if(command.length>1)
+				event.getRoom().sendMessage("全局"+ds[0].getStatistic(command[1]));
+			else
+				event.getRoom().sendMessage("全局"+ds[0].getStatistic("全部"));
+		});
 		privcmd.put("开始"+name, (event,command)->{
 			GameUtils.createGame(gameClass,event.getRoom(),Integer.parseInt(command[1]));
 			event.getRoom().sendMessage(name+"游戏已经创建，请发送“##报名” 来报名。");
@@ -240,8 +255,48 @@ public class GlobalMain {
 		addPCmd("揭示","显示游戏的系统信息",(event,args)->{
 			Game g=GameUtils.getGames().get(event.getRoom());
 			if(g!=null&&g.isAlive()) {
-				g.forceShow( event.getSender());
+				g.forceShow(event.getSender());
 			}
+		});
+		addCmd("狼人杀胜率排名","查看狼人杀胜率排名", (event,command)->{
+			LinkedList<Map.Entry<UserIdentifier,WerewolfPlayerData>> ds=new LinkedList<>(GlobalMain.db.getDatas("狼人杀",WerewolfPlayerData.class).entrySet());
+			ds.removeIf(v->v.getValue().total<10);
+			
+			ds.sort(Comparator.comparingDouble(v->v.getValue().wins*1d/v.getValue().total));
+			StringBuilder sb=new StringBuilder("胜率前十：");
+			for(int i=0;i<10;i++) {
+				Map.Entry<UserIdentifier,WerewolfPlayerData> ent=ds.pollLast();
+				if(ent!=null) {
+					AbstractUser au=event.getRoom().get(ent.getKey());
+					if(au==null) {
+						i--;
+						continue;
+					}
+					sb.append("\n").append(au.getNameCard()+" "+Utils.percent(ent.getValue().wins, ent.getValue().total));
+				}else break;
+					
+			}
+			event.getRoom().sendMessage(sb.toString());
+		});
+		addCmd("狼人杀胜率倒数","查看狼人杀胜率倒数", (event,command)->{
+			LinkedList<Map.Entry<UserIdentifier,WerewolfPlayerData>> ds=new LinkedList<>(GlobalMain.db.getDatas("狼人杀",WerewolfPlayerData.class).entrySet());
+			ds.removeIf(v->v.getValue().total<10);
+			
+			ds.sort(Comparator.comparingDouble(v->v.getValue().wins*1d/v.getValue().total));
+			StringBuilder sb=new StringBuilder("胜率倒十：");
+			for(int i=0;i<10;i++) {
+				Map.Entry<UserIdentifier,WerewolfPlayerData> ent=ds.poll();
+				if(ent!=null) {
+					AbstractUser au=event.getRoom().get(ent.getKey());
+					if(au==null) {
+						i--;
+						continue;
+					}
+					sb.append("\n").append(au.getNameCard()+" "+Utils.percent(ent.getValue().wins, ent.getValue().total));
+				}else break;
+					
+			}
+			event.getRoom().sendMessage(sb.toString());
 		});
 		addPCmd("权限","设置权限", (event,args)->{
 			try {
@@ -335,7 +390,7 @@ public class GlobalMain {
 			event.getRoom().sendMessage("扣除成功，还剩"+crp+"积分");
 		});
 		addPCmd("禁赛","<账号> <小时>禁赛玩家",(event,args)->{
-			GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).addBan(1000*3600*Integer.parseInt(args[2]));
+			GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).addBan(1000L*3600L*Long.parseLong(args[2]));
 			event.getRoom().sendMessage("已经禁赛到"+new Date(GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).isBanned()).toString());
 		});
 		privcmd.put("解除禁赛114514",(event,args)->{

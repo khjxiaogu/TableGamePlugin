@@ -51,6 +51,10 @@ public class MiraiPlayer implements Player {
 		intern.releaseListener();
 	}
 	@Override
+	public void transferListener(Player p) {
+		intern.transferListener(((MiraiPlayer)p).intern);
+	}
+	@Override
 	public void makeSpeak() {
 		intern.tryUnmute();
 	}

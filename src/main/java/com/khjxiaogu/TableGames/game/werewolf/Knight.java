@@ -60,13 +60,13 @@ public class Knight extends Villager {
 		super.StartTurn();
 		if (hasSkill) {
 			super.sendPrivate("骑士，你可以翻牌挑战一个人。\n你可以在投票前随时使用本技能。\n格式：“挑战 游戏号码”\n");
-			super.sendPrivate(game.getAliveList());
+			super.sendPrivate(game.getAliveList(this));
 		}
 	}
 
 	@Override
 	public void doDaySkillPending(String content) {
-		if (!hasSkill)
+		if (!hasSkill||isDead)
 			return;
 		if (content.startsWith("挑战")) {
 			try {
@@ -82,7 +82,7 @@ public class Knight extends Villager {
 				}
 				hasSkill = false;
 				game.logger.logSkill(this, p, "骑士挑战");
-				super.sendPublic("是骑士，挑战了" + p.getMemberString());
+				super.sendForName("是骑士，挑战了" + p.getMemberString());
 				if (p instanceof NightmareKnight) {
 					NightmareKnight nk = (NightmareKnight) p;
 					if (!nk.isSkillUsed) {
@@ -127,7 +127,7 @@ public class Knight extends Villager {
 
 	@Override
 	public void addDaySkillListener() {
-		if (hasSkill) {
+		if (hasSkill&&!isDead) {
 			super.registerListener((msgx, typex) -> {
 				if (typex == MsgType.PRIVATE) {
 					String content = Utils.getPlainText(msgx);

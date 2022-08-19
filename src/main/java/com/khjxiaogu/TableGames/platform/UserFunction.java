@@ -57,6 +57,13 @@ public class UserFunction implements Serializable{
 	public void sendPublic(MessageCompound msg) {
 		member.sendPublic(msg);
 	}
+	public void sendForName(String str) {
+		member.sendForName(str);
+	};
+	public void sendForName(IMessage msg) {
+		member.sendForName(msg);
+		
+	};
 	public IMessage getAt() {
 		return member.getAt();
 	}
@@ -71,6 +78,9 @@ public class UserFunction implements Serializable{
 	}
 	public void releaseListener() {
 		member.releaseListener();
+	}
+	public void transferListener(AbstractUser as) {
+		member.transferListener(as);
 	}
 	public String getNameCard() {
 		return member.getNameCard();

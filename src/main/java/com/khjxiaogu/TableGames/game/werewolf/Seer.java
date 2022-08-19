@@ -41,7 +41,7 @@ public class Seer extends Villager {
 	@Override
 	public void onTurn() {
 		super.StartTurn();
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("预言家，你可以查验一个人，请私聊选择查验的人，你有一分钟的考虑时间\n格式：“查验 游戏号码”\n如：“查验 1”");
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
@@ -62,7 +62,7 @@ public class Seer extends Villager {
 					EndTurn();
 					super.releaseListener();
 					game.logger.logSkill(this, p, "查验");
-					super.sendPrivate(p.getMemberString() + "是" + p.getPredictorRole());
+					super.sendPrivate(p.getMemberString(this) + "是" + p.getPredictorRole());
 					if (p instanceof NightmareKnight) {
 						NightmareKnight nk = (NightmareKnight) p;
 						if (!nk.isSkillUsed) {

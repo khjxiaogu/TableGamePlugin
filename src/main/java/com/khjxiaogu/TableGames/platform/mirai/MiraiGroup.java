@@ -33,6 +33,7 @@ import com.khjxiaogu.TableGames.platform.message.IMessage;
 
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.Member;
 
 public class MiraiGroup implements AbstractRoom,Serializable {
 	/**
@@ -84,7 +85,7 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 		// perform the default de-serialization first
 		aInputStream.defaultReadObject();
 
-		group=Bot.getInstance(RobotId).getGroup(groupId);
+		group=Bot.getInstances().get(0).getGroup(groupId);
 		// make defensive copy of the mutable Date field
 		// ensure that object state has not been corrupted or tampered with malicious code
 		//validateUserInfo();
@@ -111,8 +112,11 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 
 	@Override
 	public AbstractUser get(UserIdentifier id) {
-		if(id instanceof QQId)
-			return new MiraiHumanUser(group.get(((QQId) id).id));
+		if(id instanceof QQId) {
+			long qq=((QQId) id).id;
+			if(group.contains(qq))
+				return new MiraiHumanUser(group.get(qq));
+		}
 		return null;
 	}
 

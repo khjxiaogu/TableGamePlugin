@@ -27,12 +27,13 @@ public class SlowUtils {
 	private static final SecureRandom r=new SecureRandom();
 	public static void runSlowly(Runnable obj) {
 		synchronized(slowLock) {
-			obj.run();
 			try {
-				Thread.sleep(r.nextInt(300));
+				Thread.sleep(r.nextInt(1500)+500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			obj.run();
+			
 		}
 	}
 }

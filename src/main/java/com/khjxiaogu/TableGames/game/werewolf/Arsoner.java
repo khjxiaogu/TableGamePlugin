@@ -33,7 +33,7 @@ public class Arsoner extends Villager {
 		super.StartTurn();
 		if (isSkillUsed)
 			return;
-		sendPrivate(game.getAliveList());
+		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("纵火者，你可以纵火烧一个人，你有一分钟考虑时间，\n格式：“烧 游戏号码”\n如：“烧 1”\n如果放弃纵火，则无需发送任何内容，等待时间结束即可。");
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
@@ -56,7 +56,7 @@ public class Arsoner extends Villager {
 					game.logger.logSkill(this, p, "纵火烧");
 					isSkillUsed = true;
 					p.isBurned = true;
-					super.sendPrivate(p.getMemberString() + "被纵火了！");
+					super.sendPrivate(p.getMemberString(this) + "被纵火了！");
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“烧 游戏号码”！");
 				}

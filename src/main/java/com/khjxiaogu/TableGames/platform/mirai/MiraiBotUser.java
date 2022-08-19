@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.Permission;
@@ -202,6 +203,12 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 			return false;
 		return true;
 	}
+
+	@Override
+	public void tryAvailable() {
+	}
+
+
 
 	
 
