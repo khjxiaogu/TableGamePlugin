@@ -40,6 +40,9 @@ public class UserIdentifierSerializer {
 			}
 		});
 	}
+	public static Optional<UserIdentifier> readOptional(String s) {
+		return serializers.stream().map(f->f.apply(s)).filter(Optional::isPresent).findFirst().orElseGet(Optional::empty);
+	}
 	public static UserIdentifier read(String s) {
 		return serializers.stream().map(f->f.apply(s)).filter(Optional::isPresent).findFirst().orElseGet(Optional::empty).orElseThrow(NoSuchElementException::new);
 	}

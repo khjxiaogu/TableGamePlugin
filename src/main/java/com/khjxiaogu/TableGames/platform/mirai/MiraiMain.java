@@ -34,11 +34,13 @@ import com.khjxiaogu.TableGames.game.idiomsolitare.IdiomLibrary;
 import com.khjxiaogu.TableGames.game.undercover.UnderCoverTextLibrary;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.MsgType;
+import com.khjxiaogu.TableGames.platform.QQId;
 import com.khjxiaogu.TableGames.platform.RoomMessageEvent;
 import com.khjxiaogu.TableGames.platform.UserIdentifierSerializer;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Text;
 import com.khjxiaogu.TableGames.platform.mirai.Markov.StateContainer;
+import com.khjxiaogu.TableGames.platform.simplerobot.KookMain;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
@@ -59,6 +61,7 @@ public class MiraiMain extends JavaPlugin {
 		super(new JvmPluginDescriptionBuilder(PluginData.id,PluginData.version).name(PluginData.name).author(PluginData.author).info(PluginData.info).build());
 	}
 	public static MiraiMain plugin;
+	
 	Map<Long,StateContainer> states=new HashMap<>();
 	Set<Long> ergroup=new HashSet<>();
 	private static Markov mc=new Markov();
@@ -81,7 +84,7 @@ public class MiraiMain extends JavaPlugin {
 		//BotConfiguration.getDefault().setProtocol(MiraiProtocol.ANDROID_PHONE);
 		MiraiMain.plugin=this;
 		GlobalMain.init(super.getDataFolder());
-		UserIdentifierSerializer.addRawSerializer(e->QQId.of(Long.parseLong(e)));
+		
 		GlobalMain.privmatcher.load(this.getDataFolder());
 		
 		try {
@@ -110,6 +113,7 @@ public class MiraiMain extends JavaPlugin {
 			e.printStackTrace();
 		}
 		ergroup.add(981524397L);
+		
 		GlobalEventChannel.INSTANCE.registerListenerHost(new SimpleListenerHost(getCoroutineContext()) {
 			@EventHandler
 			public void onGroup(GroupMessageEvent event) {
@@ -224,6 +228,7 @@ public class MiraiMain extends JavaPlugin {
 				GlobalMain.dispatchexec.execute(()->MiraiListenerUtils.dispatch(event.getSender().getId(),MsgType.PRIVATE,(IMessageCompound) MiraiAdapter.INSTANCE.toUnified(event.getMessage(),event.getBot())));
 			}
 		});
+
 	}
 
 }

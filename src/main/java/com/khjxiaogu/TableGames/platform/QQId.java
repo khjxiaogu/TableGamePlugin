@@ -15,12 +15,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.mirai;
+package com.khjxiaogu.TableGames.platform;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
 public class QQId implements UserIdentifier {
 	/**
@@ -35,17 +33,17 @@ public class QQId implements UserIdentifier {
 
 	@Override
 	public String getId() {
-		return String.valueOf(id);
+		return String.valueOf(getQQId());
 	}
 
 	@Override
 	public String serialize() {
-		return String.valueOf(id);
+		return String.valueOf(getQQId());
 	}
 
 	@Override
 	public boolean isActual() {
-		return id>10000;
+		return getQQId()>10000;
 	}
 
 	public static QQId of(long id) {
@@ -56,7 +54,7 @@ public class QQId implements UserIdentifier {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (id ^ (id >>> 32));
+		result = prime * result + (int) (getQQId() ^ (getQQId() >>> 32));
 		return result;
 	}
 
@@ -69,9 +67,13 @@ public class QQId implements UserIdentifier {
 		if (getClass() != obj.getClass())
 			return false;
 		QQId other = (QQId) obj;
-		if (id != other.id)
+		if (getQQId() != other.getQQId())
 			return false;
 		return true;
+	}
+
+	public long getQQId() {
+		return id;
 	}
 
 }

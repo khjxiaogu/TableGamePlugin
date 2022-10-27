@@ -53,7 +53,7 @@ public class MiraiUtils {
 	}
 	public static Image getImage(MessageChain msg) {
 		for(Message m:msg) {
-			if(m instanceof At)
+			if(m instanceof Image)
 				return (Image) m;
 		}
 		return null;

@@ -21,10 +21,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -33,12 +33,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 
+import javax.imageio.ImageIO;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.khjxiaogu.TableGames.data.BindingDatabase;
 import com.khjxiaogu.TableGames.data.CreditTrade;
 import com.khjxiaogu.TableGames.data.GenericPlayerData;
 import com.khjxiaogu.TableGames.data.PlayerCreditData;
@@ -58,7 +65,6 @@ import com.khjxiaogu.TableGames.game.undercover.UnderCoverPreserve;
 import com.khjxiaogu.TableGames.game.werewolf.MiniWerewolfPreserve;
 import com.khjxiaogu.TableGames.game.werewolf.StandardWerewolfCreater;
 import com.khjxiaogu.TableGames.game.werewolf.StandardWerewolfPreserve;
-import com.khjxiaogu.TableGames.game.werewolf.Villager;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.Role;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfPlayerData;
@@ -66,43 +72,44 @@ import com.khjxiaogu.TableGames.game.werewolf.WerewolfPreserve;
 import com.khjxiaogu.TableGames.permission.GlobalMatcher;
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.utils.DefaultGameCreater;
+import com.khjxiaogu.TableGames.utils.FileUtil;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameCreater;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 import com.khjxiaogu.TableGames.utils.PreserveHolder;
 import com.khjxiaogu.TableGames.utils.PreserveInfo;
+import com.khjxiaogu.TableGames.utils.TimeUtil;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 
 public class GlobalMain {
 	public static PlayerDatabase db;
 	public static PlayerCreditData credit;
+	public static BindingDatabase bindings;
 	private static UnifiedLogger logger;
 	public static GlobalMatcher privmatcher=new GlobalMatcher();
 	public static File dataFolder;
-	@FunctionalInterface
-	interface BotCreater{
-		AbstractBotUser createBot(int id,Class<? extends BotUserLogic> logicCls,Game in);
-	}
-	private static BotCreater defaultBotCreater;
+	private static boolean hasInited;
+
 	public static UnifiedLogger getLogger() {
 		return logger;
 	}
 	public static void init(File dataFolder) {
+		if(hasInited)return;
+		hasInited=true;
 		GlobalMain.dataFolder=dataFolder;
+		GlobalMain.bindings=new BindingDatabase(dataFolder);
 		GlobalMain.db=new PlayerDatabase(dataFolder);
 		GlobalMain.credit=new PlayerCreditData(dataFolder);
+		UserIdentifierSerializer.addRawSerializer(e->QQId.of(Long.parseLong(e)));
+		UserIdentifierSerializer.addRawSerializer(e->SBId.load(e));
+		
 	}
 	public static void setLogger(UnifiedLogger logger) {
 		GlobalMain.logger=logger;
 	}
-	public static AbstractBotUser createBot(int id,Class<? extends BotUserLogic> logicCls,Game in) {
-		return defaultBotCreater.createBot(id, logicCls, in);
-	}
+
 	
-	public static void setDefaultBotCreater(BotCreater defaultBotCreater) {
-		GlobalMain.defaultBotCreater = defaultBotCreater;
-	}
 	public static Map<String,BiConsumer<RoomMessageEvent,String[]>> normcmd=new ConcurrentHashMap<>();
 	public static Map<String,String> normhelp=new LinkedHashMap<>();
 	public static Map<String,String> privhelp=new LinkedHashMap<>();
@@ -234,7 +241,15 @@ public class GlobalMain {
 		});
 
 	}
-
+	public static class BindingTicket{
+		public UserIdentifier nid;
+		public String token;
+		public BindingTicket(UserIdentifier nid, String token) {
+			super();
+			this.nid = nid;
+			this.token = token;
+		}
+	}
 	static {
 		normhelp.put("预定<游戏名>","参加游戏");
 		normhelp.put("取消预定<游戏名>","退出游戏");
@@ -252,6 +267,71 @@ public class GlobalMain {
 		privhelp.put("强制取消预定<游戏名>","<用户ID>强制玩家退出游戏");
 		privhelp.put("开始<游戏名>","<人数>开始固定场");
 		privhelp.put("定制<游戏名>","<参数>开始设置场");
+		addCmd("组字","使用KAGE生成字符",(event,args)->{
+			try {
+				JsonObject jo = JsonParser.parseString(FileUtil.readString(FileUtil.fetch("https://zi.tools/api/ids/lookupids/"+URLEncoder.encode(args[1],"UTF-8")))).getAsJsonObject();
+			
+			JsonElement je=jo.get(args[1]);
+			if(je.isJsonNull())
+				event.getSender().sendPublic("Invalid!");
+			else {
+				JsonObject ch=je.getAsJsonObject();
+				String ret=null;
+				if(ch.has("kage")) {
+					ret=ch.get("kage").getAsString();
+				}
+				else if(ch.has("lv1")) {
+					String rch=ch.get("lv1").getAsJsonObject().get("match_u_list").getAsJsonArray().get(0).getAsString();
+					if(jo.has("font")) {
+						JsonObject font=jo.get("font").getAsJsonObject();
+						if(font.has(rch)) {
+							File temp=new File(dataFolder,"temp");
+							temp.mkdirs();
+							String id=String.valueOf(TimeUtil.getTime());
+							File out=new File(temp,id+".svg");
+							File in=new File(temp,id+".jpg");
+							String svg="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n"
+									+ "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">";
+									
+							
+							svg+="<svg width=\"200\" height=\"200\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><path d=\""+font.get(rch).getAsString()+"\"></path></svg>";
+							FileUtil.transfer(svg, out);
+							Process p=Runtime.getRuntime().exec("magick -density 200 \""+out.getAbsolutePath()+"\" -fill white -opaque none -colorspace RGB -resize 200x200 \""+in.getAbsolutePath()+"\"");
+							FileUtil.transfer(p.getInputStream(),System.out);
+							FileUtil.transfer(p.getErrorStream(),System.err);
+							try {
+								p.waitFor();
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+							out.delete();
+							event.getSender().sendPublic(new Image(ImageIO.read(in)).asMessage().append("\nUnicode: "+rch).append("\nCode:"+Integer.toHexString(rch.codePointAt(0)).toUpperCase()));
+							in.delete();
+							return;
+							
+						}
+						
+						
+					}
+					event.getSender().sendPublic(Utils.sendTextAsImageUnicode(rch, event.getRoom()).asMessage().append("\nUnicode: "+rch).append("\nCode:"+Integer.toHexString(rch.codePointAt(0)).toUpperCase()));
+					
+					return;
+				}
+				if(ret!=null)
+					event.getSender().sendPublic(new Image(FileUtil.readAll(FileUtil.fetch("https://glyphwiki.org/get_preview_glyph.cgi?data="+URLEncoder.encode(ret,"UTF-8")))));
+				else
+					event.getSender().sendPublic("Invalid!");
+			}
+			} catch (JsonSyntaxException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				event.getRoom().sendMessage("Internal Error");
+			}
+			
+			
+		});
 		addPCmd("揭示","显示游戏的系统信息",(event,args)->{
 			Game g=GameUtils.getGames().get(event.getRoom());
 			if(g!=null&&g.isAlive()) {
@@ -362,6 +442,24 @@ public class GlobalMain {
 		});
 		privcmd.put("TTI",(event,args)->{
 			event.getRoom().sendMessage(new Image(Utils.textAsImage(String.join(" ",args))));
+		});
+		
+		addCmd("绑定","绑定其它平台账号",(event,args)->{
+			String id=UUID.randomUUID().toString();
+			bindings.putTicket(UserIdentifierSerializer.read(args[1]),new BindingTicket(event.getSender().getId(),id));
+			
+			event.getRoom().sendMessage(event.getSender().getAt().asMessage().append("请用您需要绑定的账号在机器人所在群聊发送\n##确认绑定 "+id));
+			
+		});
+		addCmd("确认绑定","绑定其它平台账号",(event,args)->{
+			UserIdentifier id=event.getSender().getId();
+			BindingTicket bt=bindings.getTicket(id);
+			if(bt.token.equals(args[1])) {
+				bindings.putBinding(bt.nid, id);
+				event.getRoom().sendMessage("绑定成功！");
+				bindings.delTicket(id);
+			}else event.getRoom().sendMessage("绑定失败，请重新请求绑定！");
+			
 		});
 		addCmd("查询积分","查询积分和物品",(event,args)->{
 			event.getRoom().sendMessage(event.getSender().getAt().asMessage().append(credit.get(event.getSender().getId()).toString()));
@@ -534,6 +632,11 @@ public class GlobalMain {
 			event.getSender().sendPublic(cards.get(ckr.nextInt(cards.size())));
 		});
 		addCmd("成语接龙","开始成语接龙",(event,args)->{
+			Game g=GameUtils.getGames().get(event.getRoom());
+			if(g!=null&&g.isAlive()) {
+				event.getRoom().sendMessage("因为有其他的游戏正在运行，无法开始。");
+				return;
+			}
 			IdiomSolitare is=GameUtils.createGame(IdiomSolitare::new,event.getRoom(),1);
 			is.startEmpty();
 		});

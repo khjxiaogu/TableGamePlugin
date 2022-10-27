@@ -35,7 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
-import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.WaitReason;
 import com.khjxiaogu.TableGames.game.werewolf.bots.BearBot;
 import com.khjxiaogu.TableGames.game.werewolf.bots.DarkWolfBot;
 import com.khjxiaogu.TableGames.game.werewolf.bots.DeadBot;
@@ -53,9 +52,7 @@ import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.BotUser;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
-import com.khjxiaogu.TableGames.platform.UserIdentifierSerializer;
 import com.khjxiaogu.TableGames.platform.message.MessageCompound;
-import com.khjxiaogu.TableGames.platform.mirai.MiraiMain;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
 import com.khjxiaogu.TableGames.utils.ParamUtils;
@@ -509,7 +506,7 @@ public class WerewolfGame extends Game implements Serializable {
 							bot = DeadBot.class;
 						}
 						playerlist.add(cp = role.getRoleClass().getConstructor(WerewolfGame.class, AbstractUser.class)
-								.newInstance(this, GlobalMain.createBot(min, bot, this)));
+								.newInstance(this,this.getGroup().createBot(min, bot, this)));
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						// TODO Auto-generated catch block
@@ -1154,7 +1151,7 @@ public class WerewolfGame extends Game implements Serializable {
 			}
 			p.origname=nc;
 			if (o == null) {
-				p.doTakeOver(GlobalMain.createBot(n, Role.getRole(p).getBotClass(), this));
+				p.doTakeOver(this.getGroup().createBot(n, Role.getRole(p).getBotClass(), this));
 			} else {
 				p.doTakeOver(o);
 			}
@@ -1296,7 +1293,7 @@ public class WerewolfGame extends Game implements Serializable {
 
 	public void onDawn() {
 		try (FileOutputStream fileOut = new FileOutputStream(
-				new File(MiraiMain.plugin.getDataFolder(), "" + getGroup() + ".game"));
+				new File(GlobalMain.dataFolder, "" + getGroup() + ".game"));
 				ObjectOutputStream out = new ObjectOutputStream(fileOut);) {
 
 			out.writeObject(this);

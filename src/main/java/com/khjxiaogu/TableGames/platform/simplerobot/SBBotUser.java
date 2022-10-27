@@ -15,18 +15,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.mirai;
+package com.khjxiaogu.TableGames.platform.simplerobot;
 
 import java.io.Serializable;
 
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
-import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.Permission;
-import com.khjxiaogu.TableGames.platform.QQId;
-import com.khjxiaogu.TableGames.platform.UserIdentifier;
+import com.khjxiaogu.TableGames.platform.SBId;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.MessageCompound;
@@ -34,10 +32,11 @@ import com.khjxiaogu.TableGames.platform.message.Text;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.Utils;
 
-import net.mamoe.mirai.contact.Group;
+import love.forte.simbot.definition.Channel;
 
 
-public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotUser {
+
+public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 	/**
 	 * 
 	 */
@@ -47,15 +46,15 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	protected String nameCard;
 	private BotUserLogic logic;
 	
-	public MiraiBotUser(int botId,Group in,Game g) {
+	public SBBotUser(int botId,Channel in,Game g) {
 		super(in);
 		rbid=botId;
 		nameCard="机器人"+rbid;
 		sg=g;
 	}
 
-	public MiraiBotUser(int botId,AbstractRoom group,Class<? extends BotUserLogic> logicType, Game in) {
-		this(botId,(Group) group.getInstance(),in);
+	public SBBotUser(int botId,AbstractRoom group,Class<? extends BotUserLogic> logicType, Game in) {
+		this(botId,(Channel) group.getInstance(),in);
 		logic=Utils.createLogic(logicType,this,in);
 	}
 
@@ -96,26 +95,20 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 		logic.onPrivate(msg);
 	}
 	public void sendAsBot(IMessageCompound msg,MsgType type) {
-		MiraiListenerUtils.dispatch(getId().getQQId(), type, msg);
+		SBListenerUtils.dispatch(getId().getIdX(), type, msg);
 	}
 	@Override
 	public void sendAsBot(String msg) {
-		MiraiListenerUtils.dispatch(getId().getQQId(),MsgType.PRIVATE,new Text(msg).asMessage());
+		SBListenerUtils.dispatch(getId().getIdX(),MsgType.PRIVATE,new Text(msg).asMessage());
 	}
 	@Override
 	public void sendAtAsBot(String msg) {
 		sendBotMessage(msg);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		MiraiListenerUtils.dispatch(getId().getQQId(),MsgType.AT,new Text(msg).asMessage());
+		SBListenerUtils.dispatch(getId().getIdX(),MsgType.AT,new Text(msg).asMessage());
 	}
 	@Override
 	public void sendBotMessage(String msg) {
-		SlowUtils.runSlowly(()->super.group.sendMessage(nameCard+"：\n"+msg));
+		SBAdapter.INSTANCE.sendMessage(group,nameCard+"：\n"+msg);
 	}
 	@Override
 	public IMessage getAt() {
@@ -146,15 +139,15 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	}
 
 	@Override
-	public QQId getId() {
-		return QQId.of(100+rbid);
+	public SBId getId() {
+		return SBId.of("robot"+String.valueOf(100+rbid));
 	}
 
 
 	@Override
 	public void setGame(Game g) {
 		sg=g;
-		super.group=(Group) g.getGroup().getInstance();
+		super.group=(Channel) g.getGroup().getInstance();
 	}
 
 	@Override
@@ -170,12 +163,12 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 
 	@Override
 	public AbstractRoom getRoom() {
-		return MiraiGroup.createInstance(group);
+		return SBGroup.createInstance(group);
 	}
 
 	@Override
-	public QQId getHostId() {
-		return QQId.of(group.getBot().getId());
+	public SBId getHostId() {
+		return SBId.of(group.getBot().getId());
 	}
 
 	@Override
@@ -199,7 +192,7 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MiraiBotUser other = (MiraiBotUser) obj;
+		SBBotUser other = (SBBotUser) obj;
 		if (rbid != other.rbid)
 			return false;
 		return true;

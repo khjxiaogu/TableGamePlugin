@@ -91,6 +91,7 @@ public class IdiomSolitare extends Game implements PreserveLess {
 	}
 
 	public void gameMain() {
+		isAlive=true;
 		if (isPL)
 			this.sendPublicMessage("成语接龙的玩家都可以在群里使用“我接 成语”的形式进行接龙，接龙次数最多的人获胜！\n接龙词语不能重复！若两分钟以内无人接上，则游戏结束！");
 		else
@@ -98,7 +99,7 @@ public class IdiomSolitare extends Game implements PreserveLess {
 					+ "分钟！\n若两分钟以内无人接上，则游戏结束！");
 		// int pointspool=cplayer/2;
 		if (isPL) {
-			this.getGroup().registerRoomListener((u, msg, type) -> {
+			this.getGroup().registerRoomListener(this,(u, msg, type) -> {
 				if (type == MsgType.PUBLIC) {
 					String cont = msg.getText();
 					if (cont.startsWith("我接")) {
@@ -153,6 +154,9 @@ public class IdiomSolitare extends Game implements PreserveLess {
 					break;
 			}
 		}
+		isAlive=false;
+		if(isPL)
+			this.getGroup().releaseRoomListener(this);
 		this.sendPublicMessage("游戏结束！");
 		StringBuilder sb = new StringBuilder("游戏结果：\n");
 		double maxpt = 0;
@@ -250,5 +254,13 @@ public class IdiomSolitare extends Game implements PreserveLess {
 		isPL = true;
 		started = true;
 		new Thread(this::gameMain).start();
+	}
+
+	@Override
+	public void forceStop() {
+		super.forceStop();
+		isAlive=false;
+		if(isPL)
+			this.getGroup().releaseRoomListener(this);
 	}
 }

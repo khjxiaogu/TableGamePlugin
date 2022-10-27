@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.mirai;
+package com.khjxiaogu.TableGames.platform.simplerobot;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -29,37 +29,42 @@ import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
 import com.khjxiaogu.TableGames.platform.MessageListener;
-import com.khjxiaogu.TableGames.platform.QQId;
 import com.khjxiaogu.TableGames.platform.RoomMessageListener;
+import com.khjxiaogu.TableGames.platform.SBId;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.utils.Game;
 
-import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.contact.Member;
+import love.forte.simbot.ID;
+import love.forte.simbot.bot.OriginBotManager;
+import love.forte.simbot.definition.Channel;
+import love.forte.simbot.definition.GuildMember;
+import love.forte.simbot.message.Text;
 
-public class MiraiGroup implements AbstractRoom,Serializable {
+
+
+public class SBGroup implements AbstractRoom,Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final Map<Long,MiraiGroup> cache=new HashMap<>();
-	private long RobotId;
-	private long groupId;
-	transient private Group group;
-	private MiraiGroup(Group group) {
+	private static final Map<ID,SBGroup> cache=new HashMap<>();
+	private String RobotId;
+	private String guildId;
+	private String groupId;
+	transient private Channel group;
+	private SBGroup(Channel group) {
 		this.group=group;
 	}
 	@Override
 	public String toString() {
-		return "MiraiGroup(" + group.getBot().getId() + "@" + group.getId() + ")";
+		return "SimbotGroup(" + group.getBot().getId() + "@" + group.getGuildId()+"." + group.getId() + ")";
 		
 	}
-	public static MiraiGroup createInstance(Group g) {
-		MiraiGroup mg=cache.get(g.getId());
+	public static SBGroup createInstance(Channel g) {
+		SBGroup mg=cache.get(g.getId());
 		if(mg!=null)return mg;
-		mg=new MiraiGroup(g);
+		mg=new SBGroup(g);
 		
 		cache.put(g.getId(),mg);
 		return mg;
@@ -77,7 +82,7 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MiraiGroup other = (MiraiGroup) obj;
+		SBGroup other = (SBGroup) obj;
 		if (group == null) {
 			if (other.group != null)
 				return false;
@@ -91,7 +96,7 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 		// perform the default de-serialization first
 		aInputStream.defaultReadObject();
 
-		group=Bot.getInstances().get(0).getGroup(groupId);
+		group=OriginBotManager.INSTANCE.getBot(ID.$(RobotId)).getGuild(ID.$(guildId)).getChannel(ID.$(groupId));
 		// make defensive copy of the mutable Date field
 		// ensure that object state has not been corrupted or tampered with malicious code
 		//validateUserInfo();
@@ -104,8 +109,9 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 
 		//ensure that object is in desired state. Possibly run any business rules if applicable.
 		//checkUserInfo();
-		groupId=group.getId();
-		RobotId=group.getBot().getId();
+		groupId=group.getId().toString();
+		guildId=group.getGuildId().toString();
+		RobotId=group.getBot().getId().toString();
 		// perform the default serialization for all non-transient, non-static fields
 		aOutputStream.defaultWriteObject();
 
@@ -113,27 +119,28 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 
 	@Override
 	public AbstractUser getOwner() {
-		return new MiraiHumanUser(group.getOwner());
+		return new SBHumanUser(group.getOwner(),group);
 	}
 
 	@Override
 	public AbstractUser get(UserIdentifier id) {
-		if(id instanceof QQId) {
-			long qq=((QQId) id).getQQId();
-			if(group.contains(qq))
-				return new MiraiHumanUser(group.get(qq));
+		if(id instanceof SBId) {
+			ID id2=((SBId) id).getIdX();
+			GuildMember member=group.getMember(id2);
+			if(member!=null)
+				return new SBHumanUser(member,group);
 		}
 		return null;
 	}
 
 	@Override
 	public void sendMessage(IMessage msg) {
-		SlowUtils.runSlowly(()->group.sendMessage(MiraiAdapter.INSTANCE.toPlatform(msg,this)));
+		SBAdapter.INSTANCE.sendMessage(group,msg,group.getBot());
 	}
 
 	@Override
 	public void sendMessage(String msg) {
-		SlowUtils.runSlowly(()->group.sendMessage(msg));
+		SBAdapter.INSTANCE.sendMessage(group,msg);
 	}
 
 	@Override
@@ -142,39 +149,42 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 	}
 	@Override
 	public void registerRoomListener(Object game,RoomMessageListener ml) {
-		MiraiListenerUtils.registerListener(game,group, ml);
+		SBListenerUtils.registerListener(game,group, ml);
 	}
 	@Override
 	public void releaseRoomListener(Object game) {
-		MiraiListenerUtils.releaseListener(game);
+		SBListenerUtils.releaseListener(game);
 	}
 	@Override
 	public void registerListener(UserIdentifier id, MessageListener ml) {
-		if(id instanceof QQId)
-			MiraiListenerUtils.registerListener(((QQId) id).getQQId(), group, ml);
+		if(id instanceof SBId)
+			SBListenerUtils.registerListener(((SBId) id).getIdX(), group, ml);
 	}
 
 	@Override
 	public void releaseListener(UserIdentifier id) {
-		if(id instanceof QQId)
-			MiraiListenerUtils.releaseListener(((QQId) id).getQQId());
+		if(id instanceof SBId)
+			SBListenerUtils.releaseListener(((SBId) id).getIdX());
 	}
 
 	@Override
 	public void setMuteAll(boolean isMute) {
-		group.getSettings().setMuteAll(isMute);
+		if(isMute)
+			group.muteBlocking();
+		else
+			group.unmuteBlocking();
 	}
 
 	@Override
 	public String getHostNameCard() {
-		return group.getBotAsMember().getNameCard();
+		return group.getBot().getUsername();
 	}
 	@Override
-	public QQId getId() {
-		return QQId.of(group.getId());
+	public SBId getId() {
+		return SBId.of(group.getId());
 	}
 	@Override
 	public AbstractBotUser createBot(int id, Class<? extends BotUserLogic> logicCls, Game in) {
-		return new MiraiBotUser(id,this,logicCls,in);
+		return new SBBotUser(id,this,logicCls,in);
 	}
 }

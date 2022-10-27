@@ -15,24 +15,51 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform;
-
-import com.khjxiaogu.TableGames.platform.message.IMessage;
-import com.khjxiaogu.TableGames.utils.Game;
+package com.khjxiaogu.TableGames.platform.simplerobot;
 
 
-public interface AbstractRoom {
-	AbstractUser getOwner();
-	AbstractUser get(UserIdentifier id);
-	void sendMessage(IMessage msg);
-	void sendMessage(String msg);
-	Object getInstance();
-	void registerRoomListener(Object game,RoomMessageListener ml);
-	void registerListener(UserIdentifier id, MessageListener ml);
-	void releaseListener(UserIdentifier id);
-	void setMuteAll(boolean isMute);
-	String getHostNameCard();
-	UserIdentifier getId();
-	void releaseRoomListener(Object game);
-	AbstractBotUser createBot(int id,Class<? extends BotUserLogic> logicCls,Game in);
+
+
+import org.slf4j.Logger;
+
+import com.khjxiaogu.TableGames.platform.UnifiedLogger;
+
+
+
+public class SBGameLogger implements UnifiedLogger {
+	Logger logger;
+	@Override
+	public void debug(String msg) {
+		logger.debug(msg);
+	}
+
+	@Override
+	public void info(String msg) {
+		logger.info(msg);
+	}
+
+	public SBGameLogger(Logger logger2) {
+		this.logger = logger2;
+	}
+
+	@Override
+	public void warning(String msg) {
+		logger.warn(msg);
+	}
+
+	@Override
+	public void error(String msg) {
+		logger.error(msg);
+	}
+
+	@Override
+	public void severe(String msg) {
+		logger.error(msg);
+	}
+
+	@Override
+	public void error(Exception e) {
+		logger.error("An exception has raised", e);;
+	}
+
 }

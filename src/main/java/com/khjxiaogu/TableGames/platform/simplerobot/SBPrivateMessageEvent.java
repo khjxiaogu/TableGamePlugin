@@ -15,24 +15,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform;
+package com.khjxiaogu.TableGames.platform.simplerobot;
 
-import com.khjxiaogu.TableGames.platform.message.IMessage;
-import com.khjxiaogu.TableGames.utils.Game;
+import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.RoomMessageEvent;
+
+import love.forte.simbot.event.ContactMessageEvent;
 
 
-public interface AbstractRoom {
-	AbstractUser getOwner();
-	AbstractUser get(UserIdentifier id);
-	void sendMessage(IMessage msg);
-	void sendMessage(String msg);
-	Object getInstance();
-	void registerRoomListener(Object game,RoomMessageListener ml);
-	void registerListener(UserIdentifier id, MessageListener ml);
-	void releaseListener(UserIdentifier id);
-	void setMuteAll(boolean isMute);
-	String getHostNameCard();
-	UserIdentifier getId();
-	void releaseRoomListener(Object game);
-	AbstractBotUser createBot(int id,Class<? extends BotUserLogic> logicCls,Game in);
+public class SBPrivateMessageEvent implements RoomMessageEvent {
+	ContactMessageEvent me;
+	public SBPrivateMessageEvent(ContactMessageEvent event) {
+		me=event;
+	}
+
+	@Override
+	public AbstractUser getSender() {
+		return new SBUserFriend(me.getUser());
+	}
+
+	@Override
+	public AbstractRoom getRoom() {
+		return null;
+	}
+
 }

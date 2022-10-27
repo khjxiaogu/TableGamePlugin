@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.mirai;
+package com.khjxiaogu.TableGames.platform.simplerobot;
 
 import java.io.Serializable;
 import java.security.SecureRandom;
@@ -23,20 +23,23 @@ import java.security.SecureRandom;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MessageListener;
-import com.khjxiaogu.TableGames.platform.QQId;
+import com.khjxiaogu.TableGames.platform.SBId;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
+import com.khjxiaogu.TableGames.platform.message.MessageCompound;
+import com.khjxiaogu.TableGames.platform.message.Text;
 
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.message.data.PlainText;
+import love.forte.simbot.definition.Channel;
+import love.forte.simbot.definition.Group;
 
-public abstract class MiraiUser implements AbstractUser,Serializable {
+
+public abstract class SBUser implements AbstractUser,Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 5656814787243115641L;
 
-	transient Group group;
+	transient Channel group;
 	transient protected Object roleObject;
 	
 	@Override
@@ -44,7 +47,7 @@ public abstract class MiraiUser implements AbstractUser,Serializable {
 		roleObject=obj;
 	}
 
-	public MiraiUser(Group group) {
+	public SBUser(Channel group) {
 		this.group = group;
 	}
 
@@ -52,104 +55,67 @@ public abstract class MiraiUser implements AbstractUser,Serializable {
 	public void sendPublic(String str) {
 		try {
 			
-			SlowUtils.runSlowly(()->group.sendMessage(MiraiAdapter.INSTANCE.toPlatform(getAt(),group).plus(str)));
+			SBAdapter.INSTANCE.sendMessage(group,str);
 		}catch(Exception ex) {
-			while(true) {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {}
-				try {
-					this.sendPrivate(str);
-					return;
-				}catch(Exception ex2) {}
-			}
 		}
 	}
 
 	@Override
 	public void sendPublic(IMessage msg) {
 		try {
-			SlowUtils.runSlowly(()->group.sendMessage(MiraiAdapter.INSTANCE.toPlatform(getAt(),group).plus(MiraiAdapter.INSTANCE.toPlatform(msg,group))));
+			SBAdapter.INSTANCE.sendMessage(group,msg,group.getBot());
 		}catch(Exception ex) {
-			while(true) {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {}
-				try {
-					this.sendPrivate(msg);
-					return;
-				}catch(Exception ex2) {}
-			}
+			
 		}
 	}
 	@Override
 	public void registerListener(MessageListener msgc) {
-		MiraiListenerUtils.registerListener(getId().getQQId(),group,msgc);
+		SBListenerUtils.registerListener(getId().getIdX(),group,msgc);
 	}
 	@Override
 	public void releaseListener() {
-		MiraiListenerUtils.releaseListener(getId().getQQId());
+		SBListenerUtils.releaseListener(getId().getIdX());
 	}
 	@Override
 	public void transferListener(AbstractUser another) {
-		MiraiListenerUtils.transferListener(getId().getQQId(),another);
+		SBListenerUtils.transferListener(getId().getIdX(),another);
 	}
 	@Override
-	public abstract QQId getId();
+	public abstract SBId getId();
 	@Override
 	public Object getRoleObject() {
 		return roleObject;
 	}
 	@Override
 	public UserIdentifier getHostId() {
-		return QQId.of(group.getBot().getId());
+		return SBId.of(group.getBot().getId());
 	}
 	@Override
 	public AbstractRoom getRoom() {
-		return MiraiGroup.createInstance(group);
+		return SBGroup.createInstance(group);
 	}
 
 	@Override
 	public void sendForName(String str) {
 		try {
-			
-			SlowUtils.runSlowly(()->group.sendMessage(this.getMemberString()+" "+str));
+			SBAdapter.INSTANCE.sendMessage(group,this.getMemberString()+" "+str);
 		}catch(Exception ex) {
-			while(true) {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {}
-				try {
-					this.sendPrivate(str);
-					return;
-				}catch(Exception ex2) {}
-			}
+
 		}
 	}
 
 	@Override
 	public void sendForName(IMessage msg) {
 		try {
-			SlowUtils.runSlowly(()->group.sendMessage(new PlainText(this.getMemberString()).plus(MiraiAdapter.INSTANCE.toPlatform(msg,group))));
+			MessageCompound msgx=msg.asMessage();
+			msgx.add(0,new Text(getMemberString()));
+			SBAdapter.INSTANCE.sendMessage(group,msgx,group.getBot());
+			
 		}catch(Exception ex) {
-			while(true) {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {}
-				try {
-					this.sendPrivate(msg);
-					return;
-				}catch(Exception ex2) {}
-			}
 		}
 	}
 	@Override
 	public void tryAvailable() {
-		try {
-			if(group.getBot().getFriend(this.getId().getQQId())!=null)return;
-		}catch(Exception ex) {
-			
-		}
-		this.sendPublic(" 为了游戏顺利进行，请加我。");
+
 	}
 }

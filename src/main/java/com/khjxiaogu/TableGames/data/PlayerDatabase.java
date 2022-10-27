@@ -111,7 +111,7 @@ public class PlayerDatabase {
 	}
 	public JsonObject getData(UserIdentifier id,String game) {
 		try(PreparedStatement ps=database.prepareStatement("SELECT data FROM profile WHERE qq = ? AND game = ?")){
-			ps.setString(1,id.getId());
+			ps.setString(1,GlobalMain.bindings.getBinding(id).serialize());
 			ps.setString(2,game);
 			try(ResultSet rs=ps.executeQuery()){
 				if(rs.next())
@@ -128,7 +128,7 @@ public class PlayerDatabase {
 	}
 	public boolean setData(UserIdentifier id,String game,String data) {
 		try(PreparedStatement ps=database.prepareStatement("REPLACE INTO profile(qq,game,data) VALUES(?,?,?)")){
-			ps.setString(1,id.getId());
+			ps.setString(1,GlobalMain.bindings.getBinding(id).serialize());
 			ps.setString(2,game);
 			ps.setString(3,data);
 			return ps.executeUpdate()>0;

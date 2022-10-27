@@ -18,6 +18,7 @@
 package com.khjxiaogu.TableGames.platform.mirai;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.platform.QQId;
 import com.khjxiaogu.TableGames.platform.message.At;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
@@ -65,7 +66,7 @@ public class MiraiAdapter {
 		}else if(msg instanceof Text)
 			return new PlainText(((Text)msg).getText());
 		else if(msg instanceof At&&((At) msg).getId()instanceof QQId)
-			return new net.mamoe.mirai.message.data.At(((QQId)((At)msg).getId()).id);
+			return new net.mamoe.mirai.message.data.At(((QQId)((At)msg).getId()).getQQId());
 		else if(msg instanceof Image)
 			return g.uploadImage(ExternalResource.create(((Image) msg).getData()));
 		else if(msg instanceof MiraiPlatformMessage)

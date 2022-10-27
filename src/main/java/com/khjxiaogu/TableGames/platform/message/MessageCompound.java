@@ -67,4 +67,16 @@ public class MessageCompound extends ArrayList<IMessage> implements IMessageComp
 		}
 		return null;
 	}
+	public void flatern() {
+		for(int i=0;i<this.size();i++) {
+			if(this.get(i) instanceof IMessageCompound) {
+				IMessageCompound m=(IMessageCompound) this.remove(i);
+				m.flatern();
+				for(IMessage im:m) {
+					this.add(i,im);
+					i++;
+				}
+			}
+		}
+	}
 }

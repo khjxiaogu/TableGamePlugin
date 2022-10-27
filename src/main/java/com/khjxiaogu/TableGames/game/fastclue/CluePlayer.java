@@ -45,7 +45,7 @@ public class CluePlayer extends UserFunction{
 		this.game=game;
 	}
 	public CluePlayer(FastClueGame game,int id) {
-		super(GlobalMain.createBot(id,BotCluePlayer.class,game));
+		super(game.getGroup().createBot(id,BotCluePlayer.class,game));
 		this.game = game;
 	}
 	public void addCard(Card cd) {

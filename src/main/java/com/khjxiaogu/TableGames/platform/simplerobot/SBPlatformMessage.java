@@ -15,24 +15,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform;
+package com.khjxiaogu.TableGames.platform.simplerobot;
 
-import com.khjxiaogu.TableGames.platform.message.IMessage;
-import com.khjxiaogu.TableGames.utils.Game;
+import com.khjxiaogu.TableGames.platform.message.PlatformMessage;
+
+import love.forte.simbot.message.Message;
 
 
-public interface AbstractRoom {
-	AbstractUser getOwner();
-	AbstractUser get(UserIdentifier id);
-	void sendMessage(IMessage msg);
-	void sendMessage(String msg);
-	Object getInstance();
-	void registerRoomListener(Object game,RoomMessageListener ml);
-	void registerListener(UserIdentifier id, MessageListener ml);
-	void releaseListener(UserIdentifier id);
-	void setMuteAll(boolean isMute);
-	String getHostNameCard();
-	UserIdentifier getId();
-	void releaseRoomListener(Object game);
-	AbstractBotUser createBot(int id,Class<? extends BotUserLogic> logicCls,Game in);
+
+public class SBPlatformMessage implements PlatformMessage {
+	Message msg;
+
+	public SBPlatformMessage(Message msg) {
+		this.msg = msg;
+	}
+
+	public Message getMsg() {
+		return msg;
+	}
+
+	public void setMsg(Message msg) {
+		this.msg = msg;
+	}
+
 }

@@ -70,7 +70,7 @@ public class PlayerCreditData {
 					}
 					ac.getValue().unusedsince=0;
 					try(PreparedStatement ps=database.prepareStatement("REPLACE INTO profile(qq,data) VALUES(?,?)")){
-						ps.setString(1,ac.getKey().getId());
+						ps.setString(1,GlobalMain.bindings.getBinding(ac.getKey()).serialize());
 						ps.setString(2,ac.getValue().save().toString());
 						ps.executeUpdate();
 					} catch (Exception e) {
@@ -88,7 +88,7 @@ public class PlayerCreditData {
 		if(pc==null) {
 			pc=new PlayerCredit();
 			try(PreparedStatement ps=database.prepareStatement("SELECT data FROM profile WHERE qq = ?")){
-				ps.setString(1,id.getId());
+				ps.setString(1,GlobalMain.bindings.getBinding(id).serialize());
 				try(ResultSet rs=ps.executeQuery()){
 					if(rs.next()){
 						pc.load(JsonParser.parseString(rs.getString(1)).getAsJsonObject());

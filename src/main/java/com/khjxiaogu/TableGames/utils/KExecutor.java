@@ -32,6 +32,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.UserIdentifierSerializer;
 import com.khjxiaogu.TableGames.utils.WaitThread.TerminatedException;
 
@@ -58,13 +59,19 @@ public class KExecutor implements ExecutorService {
 			if(!(ex instanceof TerminatedException||ex instanceof InterruptedException)) {
 				ByteArrayOutputStream baos=new ByteArrayOutputStream();
 				ex.printStackTrace(new PrintStream(baos));
-				AbstractUser author=tosend.get(UserIdentifierSerializer.read("1905387052"));
-				if(author!=null) {
-					author.sendPrivate(baos.toString());
-				}else {
-					tosend.getOwner().sendPrivate("哎呀，机器人出错了！请把以下信息报告给作者以便于修复。");
-					tosend.getOwner().sendPrivate(baos.toString());
+				UserIdentifier uid=UserIdentifierSerializer.readOptional("1905387052").or(()->
+				UserIdentifierSerializer.readOptional("sb:841570688")).orElse(null);
+				if(uid!=null) {
+					AbstractUser author=tosend.get(uid);
+					if(author!=null) {
+						author.sendPrivate(baos.toString());
+						return;
+					}
 				}
+				tosend.getOwner().sendPrivate("哎呀，机器人出错了！请把以下信息报告给作者以便于修复。");
+				tosend.getOwner().sendPrivate(baos.toString());
+				
+				
 			}
 			throw ex;
 		}});

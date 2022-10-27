@@ -15,49 +15,54 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.mirai;
+package com.khjxiaogu.TableGames.platform.simplerobot;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
-import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.Permission;
-import com.khjxiaogu.TableGames.platform.QQId;
-import com.khjxiaogu.TableGames.platform.UserIdentifier;
+import com.khjxiaogu.TableGames.platform.SBId;
 import com.khjxiaogu.TableGames.platform.message.At;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.utils.Game;
 
-import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.contact.MemberPermission;
-import net.mamoe.mirai.contact.NormalMember;
+import love.forte.simbot.ID;
+import love.forte.simbot.bot.Bot;
+import love.forte.simbot.bot.OriginBotManager;
+import love.forte.simbot.definition.Channel;
+import love.forte.simbot.definition.Guild;
+import love.forte.simbot.definition.GuildMember;
+import love.forte.simbot.message.Message;
 
 
-public class MiraiHumanUser extends MiraiUser implements Serializable {
+public class SBHumanUser extends SBUser implements Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1931093082691482532L;
-	private transient NormalMember member;
-	private long bid;
-	private long gid;
-	private long mid;
-	private QQId id;
+	private transient GuildMember member;
+	private String bid;
+	private String gid;
+	private String cid;
+	private String mid;
+	private SBId id;
 	private void readObject(ObjectInputStream aInputStream) throws ClassNotFoundException, IOException
 	{
 		aInputStream.defaultReadObject();
-		Bot bot=Bot.getInstances().get(0);
-		group=bot.getGroup(gid);
-		member=group.get(mid);
+		Bot bot=OriginBotManager.INSTANCE.getBot(ID.$(bid));
+		Guild guild=bot.getGuild(ID.$(gid));
+
+		group=guild.getChannel(ID.$(cid));
+		member=group.getMember(ID.$(mid));
 	}
 	private void writeObject(ObjectOutputStream aOutputStream) throws IOException {
-		bid=member.getBot().getId();
-
-		gid=member.getGroup().getId();
-		mid=member.getId();
+		bid=group.getBot().getId().toString();
+		cid=group.getId().toString();
+		gid=group.getGuild().getId().toString();
+		mid=member.getId().toString();
 		aOutputStream.defaultWriteObject();
 	}
 	@Override
@@ -76,7 +81,7 @@ public class MiraiHumanUser extends MiraiUser implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MiraiHumanUser other = (MiraiHumanUser) obj;
+		SBHumanUser other = (SBHumanUser) obj;
 		if (member == null) {
 			if (other.member != null)
 				return false;
@@ -84,25 +89,17 @@ public class MiraiHumanUser extends MiraiUser implements Serializable {
 			return false;
 		return true;
 	}
-	public MiraiHumanUser(NormalMember member) {
-		super(member.getGroup());
+	public SBHumanUser(GuildMember member,Channel ch) {
+		super(ch);
 		this.member = member;
-		this.id=QQId.of(member.getId());
+		this.id=SBId.of(member.getId());
 	}
 	@Override
 	public void sendPrivate(String str) {
 		try {
-			SlowUtils.runSlowly(()->member.sendMessage(str));
+			SBAdapter.INSTANCE.sendMessage(member,str);
 		}catch(Exception ex) {
-			while(true) {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {}
-				try {
-					SlowUtils.runSlowly(()->member.sendMessage(str));
-					return;
-				}catch(Exception ex2) {}
-			}
+
 		}
 	}
 	@Override
@@ -111,35 +108,35 @@ public class MiraiHumanUser extends MiraiUser implements Serializable {
 	}
 	@Override
 	public String getMemberString() {
-		return member.getNameCard()/*+"("+getId()+")"*/;
+		return getNameCard();
 	}
+	String nco=null;
 	@Override
 	public void setNameCard(String s) {
-		member.setNameCard(s);
+		nco=s;
 	}
 	@Override
 	public String getNameCard() {
-		String nc=member.getNameCard();
-		if(nc==null||nc.length()==0)
-		return member.getNick();
-		return nc;
+		if(nco!=null)
+			return nco;
+		return member.getNickOrUsername()/*+"("+getId()+")"*/;
 	}
 	@Override
 	public void tryMute() {
 		try {
-			member.mute(3600);
+			member.muteBlocking(3600,TimeUnit.SECONDS);
 		} catch (Throwable t) {
 		}
 	}
 	@Override
 	public void tryUnmute() {
 		try {
-			member.unmute();
+			member.unmuteBlocking();
 		} catch (Throwable t) {
 		}
 	}
 	@Override
-	public QQId getId() {
+	public SBId getId() {
 		return id;
 	}
 	@Override
@@ -152,28 +149,19 @@ public class MiraiHumanUser extends MiraiUser implements Serializable {
 
 	@Override
 	public void sendPrivate(IMessage msg) {
-		net.mamoe.mirai.message.data.Message pmsg=MiraiAdapter.INSTANCE.toPlatform(msg,group);
+		
 		try {
-			SlowUtils.runSlowly(()->member.sendMessage(pmsg));
+			SBAdapter.INSTANCE.sendMessage(group,msg,group.getBot());
 		}catch(Exception ex) {
-			while(true) {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {}
-				try {
-					SlowUtils.runSlowly(()->member.sendMessage(pmsg));
-					return;
-				}catch(Exception ex2) {}
-			}
+			
 		}
 	}
 	@Override
 	public Permission getPermission() {
-		MemberPermission mp=member.getPermission();
-		switch(mp) {
-		case OWNER:return Permission.SYSTEM;
-		case ADMINISTRATOR:return Permission.ADMIN;
-		default:return Permission.USER;
-		}
+		if(member.isOwner())
+			return Permission.SYSTEM;
+		if(member.isAdmin())
+			return Permission.ADMIN;
+		return Permission.USER;
 	}
 }
