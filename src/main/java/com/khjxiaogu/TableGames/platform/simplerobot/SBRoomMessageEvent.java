@@ -40,7 +40,7 @@ public class SBRoomMessageEvent implements RoomMessageEvent {
 
 	@Override
 	public AbstractRoom getRoom() {
-		return SBGroup.createInstance(ev.getChannel());
+		return SBChannel.createInstance(ev.getChannel());
 	}
 
 }

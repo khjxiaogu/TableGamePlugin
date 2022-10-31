@@ -42,17 +42,17 @@ import love.forte.simbot.definition.GuildMember;
 
 
 
-public class SBGroup implements AbstractRoom,Serializable {
+public class SBChannel implements AbstractRoom,Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final Map<ID,SBGroup> cache=new HashMap<>();
+	private static final Map<ID,SBChannel> cache=new HashMap<>();
 	private String RobotId;
 	private String guildId;
 	private String groupId;
 	transient private Channel group;
-	private SBGroup(Channel group) {
+	private SBChannel(Channel group) {
 		this.group=group;
 	}
 	@Override
@@ -60,10 +60,10 @@ public class SBGroup implements AbstractRoom,Serializable {
 		return "SimbotGroup(" + group.getBot().getId() + "@" + group.getGuildId()+"." + group.getId() + ")";
 		
 	}
-	public static SBGroup createInstance(Channel g) {
-		SBGroup mg=cache.get(g.getId());
+	public static SBChannel createInstance(Channel g) {
+		SBChannel mg=cache.get(g.getId());
 		if(mg!=null)return mg;
-		mg=new SBGroup(g);
+		mg=new SBChannel(g);
 		
 		cache.put(g.getId(),mg);
 		return mg;
@@ -81,7 +81,7 @@ public class SBGroup implements AbstractRoom,Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SBGroup other = (SBGroup) obj;
+		SBChannel other = (SBChannel) obj;
 		if (group == null) {
 			if (other.group != null)
 				return false;

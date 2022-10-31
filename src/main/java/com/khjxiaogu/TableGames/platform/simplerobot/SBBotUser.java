@@ -166,7 +166,7 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 
 	@Override
 	public AbstractRoom getRoom() {
-		return SBGroup.createInstance(group);
+		return SBChannel.createInstance(group);
 	}
 
 	@Override

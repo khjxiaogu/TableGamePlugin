@@ -92,7 +92,7 @@ public abstract class SBUser implements AbstractUser,Serializable {
 	}
 	@Override
 	public AbstractRoom getRoom() {
-		return SBGroup.createInstance(group);
+		return SBChannel.createInstance(group);
 	}
 
 	@Override

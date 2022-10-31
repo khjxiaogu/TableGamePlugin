@@ -64,7 +64,8 @@ public class KookMain {
 		return new File("./data/com.khjxiaogu.mirai.TableGames/");
 	}
 
-
+	public static String token = System.getProperty("kooktoken");
+	public static String client=System.getProperty("kookclient");
 	public static KookAPI api = new KookAPI(token);
 
 	public static void main(String[] programargs) {
