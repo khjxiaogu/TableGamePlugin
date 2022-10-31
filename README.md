@@ -1,4 +1,4 @@
-# MiraiTableGamePlugin
+# UnifiedTableGamePlugin
 使用Mirai机器人主持桌游。  
 仅供个人学习游玩使用，一切问题概不负责。  
 开源自行构建免费，获取构建包收费100一次，获取详细使用说明收费150一次，定制功能50一个，如需购买请联系[khjxiaogu@qq.com](mailto:khjxiaogu@qq.com)。
