@@ -61,7 +61,7 @@ public class SBHumanUser extends SBUser implements Serializable {
 	private void writeObject(ObjectOutputStream aOutputStream) throws IOException {
 		bid=group.getBot().getId().toString();
 		cid=group.getId().toString();
-		gid=group.getGuild().getId().toString();
+		gid=group.getGuildId().toString();
 		mid=member.getId().toString();
 		aOutputStream.defaultWriteObject();
 	}
@@ -97,7 +97,7 @@ public class SBHumanUser extends SBUser implements Serializable {
 	@Override
 	public void sendPrivate(String str) {
 		try {
-			SBAdapter.INSTANCE.sendMessage(member,str);
+			KooKAdapter.INSTANCE.sendMessage(member,str);
 		}catch(Exception ex) {
 
 		}
@@ -114,24 +114,26 @@ public class SBHumanUser extends SBUser implements Serializable {
 	@Override
 	public void setNameCard(String s) {
 		nco=s;
+		KookMain.api.setNick(group.getGuildId().toString(),member.getId().toString(), s);
 	}
 	@Override
 	public String getNameCard() {
-		if(nco!=null)
-			return nco;
-		return member.getNickOrUsername()/*+"("+getId()+")"*/;
+		if(nco==null)
+			nco=KookMain.api.getNick(group.getGuildId().toString(),member.getId().toString());
+		return nco;
+		
 	}
 	@Override
 	public void tryMute() {
 		try {
-			member.muteBlocking(3600,TimeUnit.SECONDS);
+			KookMain.api.setMute(group.getId().toString(),member.getId().toString());
 		} catch (Throwable t) {
 		}
 	}
 	@Override
 	public void tryUnmute() {
 		try {
-			member.unmuteBlocking();
+			KookMain.api.setUnmute(group.getId().toString(),member.getId().toString());
 		} catch (Throwable t) {
 		}
 	}
@@ -151,16 +153,14 @@ public class SBHumanUser extends SBUser implements Serializable {
 	public void sendPrivate(IMessage msg) {
 		
 		try {
-			SBAdapter.INSTANCE.sendMessage(group,msg,group.getBot());
+			KooKAdapter.INSTANCE.sendMessage(group,msg,group.getBot());
 		}catch(Exception ex) {
 			
 		}
 	}
 	@Override
 	public Permission getPermission() {
-		if(member.isOwner())
-			return Permission.SYSTEM;
-		if(member.isAdmin())
+		if(KookMain.api.isAdmin(group.getGuildId().toString(), member.getId().toString()))
 			return Permission.ADMIN;
 		return Permission.USER;
 	}

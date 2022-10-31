@@ -68,8 +68,9 @@ public class WerewolfGame extends Game implements Serializable {
 		Vote("被驱逐", true, true, 0), Wolf("被杀死", true, false, 1), Poison("被毒死", false, false, 10),
 		Hunter("被射死", false, false, 3), DarkWolf("被狼王杀死", true, false, 3), Knight("被单挑死", false, false, 3),
 		Explode("自爆死", false, true, 3), Knight_s("以死谢罪", false, false, 3), Hunt("被猎杀", true, false, 2),
-		Shoot("被箭射死", false, false, 2),Shoot_r("被箭射死", false, false, 2), Reflect("被反伤", false, false, 4), Love("殉情", false, false, 3),
-		Shoot_s("射击失败", false, false, 3), Hunt_s("猎杀失败", false, false, 3), Burn("烧死", true, false, 1);
+		Shoot("被箭射死", false, false, 2), Shoot_r("被箭射死", false, false, 2), Reflect("被反伤", false, false, 4),
+		Love("殉情", false, false, 3), Shoot_s("射击失败", false, false, 3), Hunt_s("猎杀失败", false, false, 3),
+		Burn("烧死", true, false, 1);
 
 		String desc;
 		final boolean canUseSkill;
@@ -169,9 +170,11 @@ public class WerewolfGame extends Game implements Serializable {
 		public static Role getByName(String name) {
 			return namem.getOrDefault(name, VILLAGER);
 		}
+
 		public static Role getByNameOrNull(String name) {
 			return namem.get(name);
 		}
+
 		public static Role getRole(Villager v) {
 			return caram.get(v.getClass());
 		}
@@ -297,8 +300,7 @@ public class WerewolfGame extends Game implements Serializable {
 				m.sendPrivate(ParamUtils.getValue(this, cmds[1]));
 				return true;
 			} else if (cmds[0].equals("role")) {
-				m.sendPrivate(
-						String.join(",", ParamUtils.loadParams(getPlayerByNum(Integer.parseInt(cmds[1])))));
+				m.sendPrivate(String.join(",", ParamUtils.loadParams(getPlayerByNum(Integer.parseInt(cmds[1])))));
 				return true;
 			}
 		}
@@ -346,7 +348,7 @@ public class WerewolfGame extends Game implements Serializable {
 			}
 			v.setNameCard(min++ + "号 |" + nc);
 		}
-		
+
 		lastVoteOut = getPlayerByNums(lastVoteOutId);
 		cursed = getPlayerByNums(cursedId);
 		lastCursed = getPlayerByNums(lastCursedId);
@@ -506,7 +508,7 @@ public class WerewolfGame extends Game implements Serializable {
 							bot = DeadBot.class;
 						}
 						playerlist.add(cp = role.getRoleClass().getConstructor(WerewolfGame.class, AbstractUser.class)
-								.newInstance(this,this.getGroup().createBot(min, bot, this)));
+								.newInstance(this, this.getGroup().createBot(min, bot, this)));
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						// TODO Auto-generated catch block
@@ -516,20 +518,22 @@ public class WerewolfGame extends Game implements Serializable {
 
 					cp.sendPrivate("已经报名");
 					String nc = cp.getNameCard();
-					if (nc.indexOf('|') != -1) {
-						nc = nc.split("\\|")[1];
+
+					try {
+						if (nc.indexOf('|') != -1) {
+							nc = nc.split("\\|")[1];
+						}
+					} catch (Exception e) {
+						nc = "";
 					}
+					cp.origname = nc;
 					if (min != 0) {
 						cp.prev = playerlist.get(min - 1);
 						cp.prev.next = cp;
 					}
-					cp.setNameCard(min + "号 |" + nc);
-					if (roles.size() == 0) {
-						cp.next = playerlist.get(0);
-						cp.next.prev = cp;
-						this.sendPublicMessage("狼人杀已满人，游戏即将开始。");
-						getScheduler().execute(this::gameStart);
-					}
+					cp.index = min;
+					cp.sendPrivate("你是 " + min + "号 |" + cp.origname);
+
 				}
 			}
 		}
@@ -684,29 +688,29 @@ public class WerewolfGame extends Game implements Serializable {
 	public static List<Role> fairRollRole(int cplayer, double cps) {
 		List<List<Role>> rslts = new ArrayList<>();
 
-		double allowenceDelta=0.1;
+		double allowenceDelta = 0.1;
 		double rsltpoint = 1000;
 		for (int i = 0; i < 3; i++) {
 			List<Role> cur = WerewolfGame.rollRole(cplayer);
 			rslts.add(cur);
-			double npoint=WerewolfGame.calculateRolePoint(cur);
+			double npoint = WerewolfGame.calculateRolePoint(cur);
 			double curpoint = Math.abs(npoint - cps);
 			if (curpoint < Math.abs(rsltpoint - cps)) {
 				rsltpoint = npoint;
 			}
 		}
-		List<Role> ret=null;
-		double max=0;
-		for (List<Role> cur:rslts) {
-			double delta=Math.abs(WerewolfGame.calculateRolePoint(cur)-rsltpoint);
-			if(delta<=allowenceDelta) {
-				double ad=WerewolfGame.calculateRolePointAbs(cur);
-				if(ad>max) {
-					ret=cur;
-					max=ad;
-				}else if(ad==max) {
-					if(Math.random()>0.5)
-						ret=cur;
+		List<Role> ret = null;
+		double max = 0;
+		for (List<Role> cur : rslts) {
+			double delta = Math.abs(WerewolfGame.calculateRolePoint(cur) - rsltpoint);
+			if (delta <= allowenceDelta) {
+				double ad = WerewolfGame.calculateRolePointAbs(cur);
+				if (ad > max) {
+					ret = cur;
+					max = ad;
+				} else if (ad == max) {
+					if (Math.random() > 0.5)
+						ret = cur;
 				}
 			}
 		}
@@ -779,6 +783,7 @@ public class WerewolfGame extends Game implements Serializable {
 		}
 		return rslt;
 	}
+
 	public static double calculateRolePointAbs(List<Role> larr) {
 		double rslt = 0;
 
@@ -845,10 +850,8 @@ public class WerewolfGame extends Game implements Serializable {
 		if (isFirstNight)
 			cwt *= 2;
 		if (canNoKill)
-			return "请私聊选择要杀的人，你有" + cwt
-					+ "分钟的考虑时间\n也可以通过“#要说的话”来给所有在场狼人发送信息\n格式：“投票 游戏号码”\n如：“投票 1”\n如果想空刀，请发送“放弃”";
-		return "请私聊选择要杀的人，你有" + cwt
-				+ "分钟的考虑时间\n也可以通过“#要说的话”来给所有在场狼人发送信息\n格式：“投票 游戏号码”\n如：“投票 1”\n如果想系统随机选择，请发送“放弃”";
+			return "请私聊选择要杀的人，你有" + cwt + "分钟的考虑时间\n也可以通过“#要说的话”来给所有在场狼人发送信息\n格式：“投票 游戏号码”\n如：“投票 1”\n如果想空刀，请发送“放弃”";
+		return "请私聊选择要杀的人，你有" + cwt + "分钟的考虑时间\n也可以通过“#要说的话”来给所有在场狼人发送信息\n格式：“投票 游戏号码”\n如：“投票 1”\n如果想系统随机选择，请发送“放弃”";
 	}
 
 	// game control
@@ -968,22 +971,24 @@ public class WerewolfGame extends Game implements Serializable {
 		StringBuilder sb = new StringBuilder("存活：\n");
 		for (Villager p : playerlist) {
 			if (!p.isDead()) {
-					sb.append(p.getMemberString());
+				sb.append(p.getMemberString());
 				sb.append("\n");
 			}
 		}
 		return sb.toString();
 	}
+
 	public String getAliveList(Villager to) {
 		StringBuilder sb = new StringBuilder("存活：\n");
 		for (Villager p : playerlist) {
 			if (!p.isDead()) {
-					sb.append(p.getMemberString(to));
+				sb.append(p.getMemberString(to));
 				sb.append("\n");
 			}
 		}
 		return sb.toString();
 	}
+
 	public int getAliveCount() {
 		int cnt = 0;
 		for (Villager p : playerlist) {
@@ -1090,7 +1095,7 @@ public class WerewolfGame extends Game implements Serializable {
 						cp.prev = playerlist.get(min - 1);
 						cp.prev.next = cp;
 					}
-					cp.index=min;
+					cp.index = min;
 					cp.sendPrivate("你是 " + min + "号 |" + cp.origname);
 					if (roles.size() == 0) {
 						cp.next = playerlist.get(0);
@@ -1129,7 +1134,7 @@ public class WerewolfGame extends Game implements Serializable {
 		try {
 			Thread.sleep(1000);// sbtx好像有频率限制，先等他个1秒再说
 		} catch (InterruptedException e) {
-			
+
 		}
 		ct.sendPrivate(mc.toString());
 	}
@@ -1140,8 +1145,8 @@ public class WerewolfGame extends Game implements Serializable {
 		GameUtils.RemoveMember(p.getId());
 		try {
 			int n = playerlist.indexOf(p);
-			
-			String nc = o==null?"机器人":o.getNameCard();
+
+			String nc = o == null ? "机器人" : o.getNameCard();
 			try {
 				if (nc.indexOf('|') != -1) {
 					nc = nc.split("\\|")[1];
@@ -1149,7 +1154,7 @@ public class WerewolfGame extends Game implements Serializable {
 			} catch (Exception e) {
 				nc = "";
 			}
-			p.origname=nc;
+			p.origname = nc;
 			if (o == null) {
 				p.doTakeOver(this.getGroup().createBot(n, Role.getRole(p).getBotClass(), this));
 			} else {
@@ -1213,12 +1218,15 @@ public class WerewolfGame extends Game implements Serializable {
 	public Villager getPlayerByNum(long id) {
 		return playerlist.get((int) id);
 	}
+
 	public Villager getPlayerByNums(long id) {
-		if(id<0||id>=playerlist.size())return null;
+		if (id < 0 || id >= playerlist.size())
+			return null;
 		return playerlist.get((int) id);
 	}
+
 	public void WolfVote(Villager src, Villager id) {
-		
+
 		if (vu.vote(src, id)) {
 			skipWait(WaitReason.Vote);
 		}
@@ -1267,16 +1275,16 @@ public class WerewolfGame extends Game implements Serializable {
 		logger.title("游戏开始");
 		// muteAll(true);
 		this.sendPublicMessage(getGameRules());
-		//StringBuilder sb = new StringBuilder("玩家列表：\n");
+		// StringBuilder sb = new StringBuilder("玩家列表：\n");
 		for (Villager p : playerlist) {
-			//sb.append(p.getMemberString());
-			//sb.append("\n");
+			// sb.append(p.getMemberString());
+			// sb.append("\n");
 			if (p.getRealFraction() == Fraction.Wolf)
 				p.onGameStart();
 			p.onFinishTalk();
-			p.sendPrivate(p.getMemberString()+"，您已经参加狼人杀游戏，身份牌将在稍后发放！");
+			p.sendPrivate(p.getMemberString() + "，您已经参加狼人杀游戏，身份牌将在稍后发放！");
 		}
-		//this.sendPublicMessage(sb.toString());
+		// this.sendPublicMessage(sb.toString());
 
 		onDawn();
 	}
@@ -1396,40 +1404,40 @@ public class WerewolfGame extends Game implements Serializable {
 		pl2.setMember(p1m);
 		pl1.bind(pl1);
 		pl2.bind(pl2);
-		
+
 	}
 
 	public void wolfKill(Villager pkill) {
 		logger.logSkill("狼人", pkill, "杀死");
 		vu.clear();
-		
+
 		for (Villager px : playerlist) {
 			if (!px.isDead() && px.canWolfTurn()) {
-				px.sendPrivate(px.getMemberString()+"，昨晚最终决定杀死" + pkill.getMemberString(px));
+				px.sendPrivate(px.getMemberString() + "，昨晚最终决定杀死" + pkill.getMemberString(px));
 			}
 		}
 		if (isFirstNight) {
-			if(playerlist.size()<9||winrate<0.2){
+			if (playerlist.size() < 9 || winrate < 0.2) {
 				if (pkill.onWolfKilledAccuracy() <= 0.2) {
 					for (Villager px : playerlist) {
 						if (px == pkill)
 							continue;
 						if (px.onWolfKilledAccuracy() > 0.2 && px.getRealFraction() != Fraction.Wolf) {
 							swapRole(pkill, px);
-							pkill=px;
+							pkill = px;
 							break;
 						}
 					}
 				}
 			}
 			Villager prev = playerlist.get(playerlist.size() - 1);
-			int i=0;
+			int i = 0;
 			for (Villager v : playerlist) {
 				prev.next = v;
 				v.prev = prev;
 				prev = v;
 				v.game = this;
-				v.index=i;
+				v.index = i;
 				++i;
 			}
 			for (Villager px : playerlist) {
@@ -1447,7 +1455,9 @@ public class WerewolfGame extends Game implements Serializable {
 
 		afterWolf();
 	}
-	boolean isNameProtected=true;
+
+	boolean isNameProtected = true;
+
 	public void afterWolf() {
 		logger.logTurn(day, "技能回合");
 		this.sendPublicMessage("狼人请闭眼，有夜间技能的玩家请睁眼，请私聊选择你们的技能。");
@@ -1461,9 +1471,9 @@ public class WerewolfGame extends Game implements Serializable {
 		removeAllListeners();
 		if (isFirstNight()) {
 			int i = 0;
-			isNameProtected=false;
+			isNameProtected = false;
 			for (Villager v : playerlist) {
-				v.index=i;
+				v.index = i;
 				try {
 					v.setNameCard(v.getMemberString());
 				} catch (Exception ignored) {
@@ -1497,9 +1507,9 @@ public class WerewolfGame extends Game implements Serializable {
 		Collections.shuffle(sherifflist);
 		StringBuilder sb = new StringBuilder("警长竞选列表：\n");
 		for (Villager p : playerlist) {
-			if (p instanceof Werewolf&&!(p instanceof WolfBeauty)) {
+			if (p instanceof Werewolf && !(p instanceof WolfBeauty)) {
 				p.onPreSheriffSkill();
-				
+
 			}
 		}
 		if (restToVote.isEmpty()) {
@@ -1655,7 +1665,7 @@ public class WerewolfGame extends Game implements Serializable {
 		}
 		if (!shouldWait && tokill.isEmpty() && VictoryPending())
 			return;
-		if(isFirstNight)
+		if (isFirstNight)
 			startWait(60000, WaitReason.Generic);
 		else
 			startWait(30000, WaitReason.Generic);
@@ -1708,13 +1718,13 @@ public class WerewolfGame extends Game implements Serializable {
 				sb.append(p.getNameCard());
 				sb.append("\n");
 			}
-			
+
 			this.sendPublicMessage(sb.toString());
 			for (Villager p : tokill) {
 				p.onDied(p.getEffectiveDiedReason());
 				logger.logDeath(p, p.getEffectiveDiedReason());
 			}
-			
+
 		} else {
 			this.sendPublicMessage("昨夜无死者。");
 		}
@@ -1723,7 +1733,7 @@ public class WerewolfGame extends Game implements Serializable {
 		isFirstNight = false;
 		this.sendPublicMessage(getAliveList());
 		tokill.clear();
-		
+
 		int aliv = 0;
 		int tot = 0;
 		for (Villager p : playerlist) {
@@ -1759,14 +1769,14 @@ public class WerewolfGame extends Game implements Serializable {
 		boolean orderSelected = false;
 		for (Villager p : playerlist) {
 			if (!p.isDead()) {
-				
+
 				orderSelected |= p.onSelectOrder(lastdeath);
 				p.onTurnStart();
 			}
 		}
 		if (!orderSelected) {
 			canTalk.addAll(playerlist);
-			
+
 		}
 
 		isDayTime = true;
@@ -1854,7 +1864,7 @@ public class WerewolfGame extends Game implements Serializable {
 				tokill.clear();
 				for (Villager pe : lv) {
 					logger.logDeath(pe, pe.getEffectiveDiedReason());
-					boolean canSkill=false;
+					boolean canSkill = false;
 					if (pe.canDeathSkill(pe.getEffectiveDiedReason())) {
 						if (pe.shouldWaitDeathSkill()) {
 							pe.onDied(pe.getEffectiveDiedReason());
@@ -1866,11 +1876,11 @@ public class WerewolfGame extends Game implements Serializable {
 					pe.isDead = true;
 					if (VictoryPending())
 						return;
-					
-						pe.onDied(pe.getEffectiveDiedReason(), false);
-						
-						//game.startWait(300000, WaitReason.DieWord);
-					
+
+					pe.onDied(pe.getEffectiveDiedReason(), false);
+
+					// game.startWait(300000, WaitReason.DieWord);
+
 				}
 			}
 		}
@@ -1900,7 +1910,8 @@ public class WerewolfGame extends Game implements Serializable {
 		}
 		for (Villager p : game.playerlist) {
 			if (p.isDead()) {
-				if (p.getRealFraction() != Fraction.Wolf&&p.isSheriff)innos += 0.5;
+				if (p.getRealFraction() != Fraction.Wolf && p.isSheriff)
+					innos += 0.5;
 				continue;
 			}
 			total++;

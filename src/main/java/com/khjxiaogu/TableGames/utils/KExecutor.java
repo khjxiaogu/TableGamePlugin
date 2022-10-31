@@ -82,7 +82,7 @@ public class KExecutor implements ExecutorService {
 			try {
 				Thread.sleep(time);
 				command.run();
-			} catch (InterruptedException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

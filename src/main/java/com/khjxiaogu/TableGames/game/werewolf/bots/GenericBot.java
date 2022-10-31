@@ -96,7 +96,7 @@ public class GenericBot extends BotUser {
 	}
 	public void sendAtAsBot(String msg) {
 		game.getScheduler().executeLater(() -> {
-			getPlayer().sendAtAsBot("@" +game.getGroup().getHostNameCard() + msg);
+			getPlayer().sendAtAsBot(msg);
 		}, 6000);
 	}
 	public void sendBotMessage(String msg) {

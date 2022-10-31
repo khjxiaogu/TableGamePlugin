@@ -92,7 +92,7 @@ public class BindingDatabase {
 	}
 
 	public BindingTicket getTicket(UserIdentifier id) {
-		try (PreparedStatement ps = database.prepareStatement("SELECT (user,token) FROM tickets WHERE id = ?")) {
+		try (PreparedStatement ps = database.prepareStatement("SELECT user,token FROM tickets WHERE id = ?")) {
 			ps.setString(1, id.serialize());
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next())

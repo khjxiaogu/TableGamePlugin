@@ -39,7 +39,6 @@ import love.forte.simbot.ID;
 import love.forte.simbot.bot.OriginBotManager;
 import love.forte.simbot.definition.Channel;
 import love.forte.simbot.definition.GuildMember;
-import love.forte.simbot.message.Text;
 
 
 
@@ -135,12 +134,12 @@ public class SBGroup implements AbstractRoom,Serializable {
 
 	@Override
 	public void sendMessage(IMessage msg) {
-		SBAdapter.INSTANCE.sendMessage(group,msg,group.getBot());
+		KooKAdapter.INSTANCE.sendMessage(group,msg,group.getBot());
 	}
 
 	@Override
 	public void sendMessage(String msg) {
-		SBAdapter.INSTANCE.sendMessage(group,msg);
+		KooKAdapter.INSTANCE.sendMessage(group,msg);
 	}
 
 	@Override
@@ -170,14 +169,16 @@ public class SBGroup implements AbstractRoom,Serializable {
 	@Override
 	public void setMuteAll(boolean isMute) {
 		if(isMute)
-			group.muteBlocking();
+			KookMain.api.setAllMute(group.getId().toString());
 		else
-			group.unmuteBlocking();
+			KookMain.api.setAllUnmute(group.getId().toString());
 	}
-
+	String hnc;
 	@Override
 	public String getHostNameCard() {
-		return group.getBot().getUsername();
+		if(hnc==null)
+			hnc=KookMain.api.getNick(group.getGuildId().toString(),group.getBot().toMember().getId().toString());
+		return hnc;
 	}
 	@Override
 	public SBId getId() {

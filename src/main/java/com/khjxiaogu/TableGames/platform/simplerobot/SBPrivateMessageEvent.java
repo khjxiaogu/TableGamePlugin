@@ -21,18 +21,18 @@ import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.RoomMessageEvent;
 
-import love.forte.simbot.event.ContactMessageEvent;
+import love.forte.simbot.component.kook.event.KookContactMessageEvent;
 
 
 public class SBPrivateMessageEvent implements RoomMessageEvent {
-	ContactMessageEvent me;
-	public SBPrivateMessageEvent(ContactMessageEvent event) {
+	KookContactMessageEvent me;
+	public SBPrivateMessageEvent(KookContactMessageEvent event) {
 		me=event;
 	}
 
 	@Override
 	public AbstractUser getSender() {
-		return new SBUserFriend(me.getUser());
+		return new SBUserFriend(me.getSourceEvent().getAuthorId());
 	}
 
 	@Override

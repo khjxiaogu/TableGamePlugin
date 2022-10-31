@@ -104,7 +104,7 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	}
 	@Override
 	public void sendAtAsBot(String msg) {
-		sendBotMessage(msg);
+		sendBotMessage("@"+this.getRoom().getHostNameCard()+" "+msg);
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {

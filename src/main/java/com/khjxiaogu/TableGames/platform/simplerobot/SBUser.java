@@ -55,7 +55,7 @@ public abstract class SBUser implements AbstractUser,Serializable {
 	public void sendPublic(String str) {
 		try {
 			
-			SBAdapter.INSTANCE.sendMessage(group,str);
+			KooKAdapter.INSTANCE.sendMessage(group,this.getAt().asMessage().append(str),group.getBot());
 		}catch(Exception ex) {
 		}
 	}
@@ -63,7 +63,7 @@ public abstract class SBUser implements AbstractUser,Serializable {
 	@Override
 	public void sendPublic(IMessage msg) {
 		try {
-			SBAdapter.INSTANCE.sendMessage(group,msg,group.getBot());
+			KooKAdapter.INSTANCE.sendMessage(group,this.getAt().asMessage().append(msg.asMessage()),group.getBot());
 		}catch(Exception ex) {
 			
 		}
@@ -98,7 +98,7 @@ public abstract class SBUser implements AbstractUser,Serializable {
 	@Override
 	public void sendForName(String str) {
 		try {
-			SBAdapter.INSTANCE.sendMessage(group,this.getMemberString()+" "+str);
+			KooKAdapter.INSTANCE.sendMessage(group,this.getMemberString()+" "+str);
 		}catch(Exception ex) {
 
 		}
@@ -109,7 +109,7 @@ public abstract class SBUser implements AbstractUser,Serializable {
 		try {
 			MessageCompound msgx=msg.asMessage();
 			msgx.add(0,new Text(getMemberString()));
-			SBAdapter.INSTANCE.sendMessage(group,msgx,group.getBot());
+			KooKAdapter.INSTANCE.sendMessage(group,msgx,group.getBot());
 			
 		}catch(Exception ex) {
 		}

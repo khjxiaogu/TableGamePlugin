@@ -22,6 +22,7 @@ import java.io.Serializable;
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
+import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.SBId;
@@ -43,7 +44,7 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 	private static final long serialVersionUID = 3890210129608510286L;
 	protected int rbid;
 	transient Game sg;
-	protected String nameCard;
+	protected String nameCard="机器人";
 	private BotUserLogic logic;
 	
 	public SBBotUser(int botId,Channel in,Game g) {
@@ -60,6 +61,7 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 
 	@Override
 	public void sendPrivate(String str) {
+		GlobalMain.getLogger().debug(str);
 		onPrivate(str);
 	}
 
@@ -68,6 +70,7 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 		sg.getScheduler().executeLater(()->{
 			onPublic(str);
 		},500);
+		GlobalMain.getLogger().debug(str);
 		super.sendPublic(str);
 	}
 
@@ -103,12 +106,12 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 	}
 	@Override
 	public void sendAtAsBot(String msg) {
-		sendBotMessage(msg);
+		sendBotMessage("@"+this.getRoom().getHostNameCard()+" "+msg);
 		SBListenerUtils.dispatch(getId().getIdX(),MsgType.AT,new Text(msg).asMessage());
 	}
 	@Override
 	public void sendBotMessage(String msg) {
-		SBAdapter.INSTANCE.sendMessage(group,nameCard+"：\n"+msg);
+		KooKAdapter.INSTANCE.sendMessage(group,nameCard+"：\n"+msg);
 	}
 	@Override
 	public IMessage getAt() {

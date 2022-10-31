@@ -19,28 +19,33 @@ package com.khjxiaogu.TableGames.platform.simplerobot;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.MessageListener;
 import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.SBId;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
+import com.khjxiaogu.TableGames.platform.simplerobot.KooKAdapter.SendWrapper;
+import com.khjxiaogu.TableGames.platform.simplerobot.KooKAdapter.UserWrapper;
 import com.khjxiaogu.TableGames.utils.Game;
 
-import love.forte.simbot.definition.Contact;
+import love.forte.simbot.ID;
 
 
 public class SBUserFriend implements AbstractUser {
-	Contact member;
 	UserIdentifier id;
-	public SBUserFriend(Contact sender) {
-		this.member=sender;
-		id=SBId.of(member.getId());
+	SendWrapper sw;
+	public SBUserFriend(ID senderid) {
+		id=SBId.of(senderid);
+
+		sw=new UserWrapper(id.getId());
+		
 	}
 
 	@Override
 	public void sendPrivate(String str) {
 		try {
-			SBAdapter.INSTANCE.sendMessage(member,str);
+			sw.sendText(str);
 		}catch(Exception ex) {
 		
 		}
@@ -52,7 +57,7 @@ public class SBUserFriend implements AbstractUser {
 	@Override
 	public void sendPrivate(IMessage msg) {
 		try {
-			SBAdapter.INSTANCE.sendMessage(member,msg, member.getBot());
+			KooKAdapter.INSTANCE.sendMessage(sw,msg,null);
 		}catch(Exception ex) {
 
 		}
@@ -73,7 +78,7 @@ public class SBUserFriend implements AbstractUser {
 
 	@Override
 	public String getMemberString() {
-		return member.getUsername();
+		return getNameCard();
 	}
 
 	@Override
@@ -82,7 +87,7 @@ public class SBUserFriend implements AbstractUser {
 
 	@Override
 	public String getNameCard() {
-		return null;
+		return KookMain.api.getName(id.toString());
 	}
 
 	@Override
@@ -125,7 +130,7 @@ public class SBUserFriend implements AbstractUser {
 
 	@Override
 	public UserIdentifier getHostId() {
-		return SBId.of(member.getBot().getId());
+		return SBId.of("private");
 	}
 	@Override
 	public Permission getPermission() {
@@ -134,7 +139,7 @@ public class SBUserFriend implements AbstractUser {
 
 	@Override
 	public int hashCode() {
-		return member.getId().hashCode();
+		return id.hashCode();
 	}
 
 	@Override

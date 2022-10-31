@@ -45,18 +45,18 @@ public class SBMessageCompound extends AbstractList<IMessage> implements IMessag
 	@Override
 	public <T> T first(Class<T> cls) {
 		if(cls==At.class) {
-			return (T) SBAdapter.INSTANCE.toUnified(SBUtils.getAt(mc), b);
+			return (T) KooKAdapter.INSTANCE.toUnified(SBUtils.getAt(mc), b);
 		}else if(cls==Text.class) {
 			return (T) new Text(SBUtils.getPlainText(mc));
 		}else if(cls==Image.class) {
-			return (T) SBAdapter.INSTANCE.toUnified(SBUtils.getImage(mc), b);
+			return (T) KooKAdapter.INSTANCE.toUnified(SBUtils.getImage(mc), b);
 		}
 		return null;
 	}
 
 	@Override
 	public IMessage get(int index) {
-		return SBAdapter.INSTANCE.toUnified(mc.get(index),b);
+		return KooKAdapter.INSTANCE.toUnified(mc.get(index),b);
 	}
 
 	@Override
