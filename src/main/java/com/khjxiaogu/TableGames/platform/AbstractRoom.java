@@ -27,12 +27,20 @@ public interface AbstractRoom {
 	void sendMessage(IMessage msg);
 	void sendMessage(String msg);
 	Object getInstance();
-	void registerRoomListener(Object game,RoomMessageListener ml);
-	void registerListener(UserIdentifier id, MessageListener ml);
-	void releaseListener(UserIdentifier id);
+	default void registerRoomListener(Object game,RoomMessageListener ml) {
+		DynamicListeners.registerListener(game,getId(), ml);
+	}
+	default void releaseRoomListener(Object game) {
+		DynamicListeners.releaseListener(game);
+	}
+	default void registerListener(UserIdentifier id, MessageListener ml) {
+		DynamicListeners.registerListener(id,getId(), ml);
+	}
+	default void releaseListener(UserIdentifier id) {
+		DynamicListeners.releaseListener(id);
+	}
 	void setMuteAll(boolean isMute);
 	String getHostNameCard();
 	UserIdentifier getId();
-	void releaseRoomListener(Object game);
 	AbstractBotUser createBot(int id,Class<? extends BotUserLogic> logicCls,Game in);
 }

@@ -83,18 +83,6 @@ public abstract class MiraiUser implements AbstractUser,Serializable {
 		}
 	}
 	@Override
-	public void registerListener(MessageListener msgc) {
-		MiraiListenerUtils.registerListener(getId().getQQId(),group,msgc);
-	}
-	@Override
-	public void releaseListener() {
-		MiraiListenerUtils.releaseListener(getId().getQQId());
-	}
-	@Override
-	public void transferListener(AbstractUser another) {
-		MiraiListenerUtils.transferListener(getId().getQQId(),another);
-	}
-	@Override
 	public abstract QQId getId();
 	@Override
 	public Object getRoleObject() {

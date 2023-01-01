@@ -141,23 +141,23 @@ public class GlobalMatcher implements PermissionMatcher{
 			try {
 			if(ff.getName().endsWith(".permission")) {
 				String fn=ff.getName().split("\\.")[0];
-				if(Character.isDigit(fn.charAt(0))) {
-					UserIdentifier gn=UserIdentifierSerializer.read(fn);
-					BotMatcher bm=new BotMatcher();
-					try(FileInputStream fis=new FileInputStream(ff);Scanner sc=new Scanner(fis)){
-						int i=0;
-						while(sc.hasNextLine()) {
-							i++;
-							try {
-								bm.loadMatcher(sc.nextLine());
-							}catch(Exception ex) {
-								//GlobalMain.getLogger().warning(ex);
-								GlobalMain.getLogger().warning("权限配置文件"+ff.getName()+"的第"+i+"行有语法错误！");
-							}
+				
+				UserIdentifier gn=UserIdentifierSerializer.read(fn);
+				BotMatcher bm=new BotMatcher();
+				try(FileInputStream fis=new FileInputStream(ff);Scanner sc=new Scanner(fis)){
+					int i=0;
+					while(sc.hasNextLine()) {
+						i++;
+						try {
+							bm.loadMatcher(sc.nextLine());
+						}catch(Exception ex) {
+							//GlobalMain.getLogger().warning(ex);
+							GlobalMain.getLogger().warning("权限配置文件"+ff.getName()+"的第"+i+"行有语法错误！");
 						}
 					}
-					local.put(gn,bm);
 				}
+				local.put(gn,bm);
+			
 			}
 			}catch(Exception ex) {
 				//GlobalMain.getLogger().warning(ex);

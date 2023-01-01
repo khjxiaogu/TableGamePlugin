@@ -1,4 +1,4 @@
-package com.khjxiaogu.TableGames.platform.mirai;
+package com.khjxiaogu.TableGames.platform;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +47,6 @@ public class Markov {
 	private final int rank = 3;
 
 
-	@SuppressWarnings("unchecked")
 	private ArrayList<Pair<String,Long>> getRoll(String roll) {
 		try (PreparedStatement ps = database.prepareStatement("SELECT window,count FROM link4 WHERE roll = ?")) {
 			ps.setString(1, roll);

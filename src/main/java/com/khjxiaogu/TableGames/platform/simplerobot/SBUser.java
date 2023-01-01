@@ -18,11 +18,8 @@
 package com.khjxiaogu.TableGames.platform.simplerobot;
 
 import java.io.Serializable;
-import java.security.SecureRandom;
-
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
-import com.khjxiaogu.TableGames.platform.MessageListener;
 import com.khjxiaogu.TableGames.platform.SBId;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
@@ -30,7 +27,6 @@ import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Text;
 
 import love.forte.simbot.definition.Channel;
-import love.forte.simbot.definition.Group;
 
 
 public abstract class SBUser implements AbstractUser,Serializable {
@@ -68,18 +64,7 @@ public abstract class SBUser implements AbstractUser,Serializable {
 			
 		}
 	}
-	@Override
-	public void registerListener(MessageListener msgc) {
-		SBListenerUtils.registerListener(getId().getIdX(),group,msgc);
-	}
-	@Override
-	public void releaseListener() {
-		SBListenerUtils.releaseListener(getId().getIdX());
-	}
-	@Override
-	public void transferListener(AbstractUser another) {
-		SBListenerUtils.transferListener(getId().getIdX(),another);
-	}
+
 	@Override
 	public abstract SBId getId();
 	@Override

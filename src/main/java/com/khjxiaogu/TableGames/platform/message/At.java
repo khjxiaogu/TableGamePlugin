@@ -39,4 +39,8 @@ public class At implements IMessage {
 	public UserIdentifier getTarget() {
 		return id;
 	}
+	@Override
+	public String toString() {
+		return "@" + id+" ";
+	}
 }

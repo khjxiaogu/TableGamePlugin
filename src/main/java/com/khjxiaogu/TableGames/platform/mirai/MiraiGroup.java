@@ -140,25 +140,6 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 	public Object getInstance() {
 		return group;
 	}
-	@Override
-	public void registerRoomListener(Object game,RoomMessageListener ml) {
-		MiraiListenerUtils.registerListener(game,group, ml);
-	}
-	@Override
-	public void releaseRoomListener(Object game) {
-		MiraiListenerUtils.releaseListener(game);
-	}
-	@Override
-	public void registerListener(UserIdentifier id, MessageListener ml) {
-		if(id instanceof QQId)
-			MiraiListenerUtils.registerListener(((QQId) id).getQQId(), group, ml);
-	}
-
-	@Override
-	public void releaseListener(UserIdentifier id) {
-		if(id instanceof QQId)
-			MiraiListenerUtils.releaseListener(((QQId) id).getQQId());
-	}
 
 	@Override
 	public void setMuteAll(boolean isMute) {

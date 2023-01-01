@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.simplerobot;
+package com.khjxiaogu.TableGames.platform.mirai.message;
 
 import java.util.AbstractList;
 
@@ -24,39 +24,41 @@ import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.platform.message.Text;
+import com.khjxiaogu.TableGames.platform.mirai.MiraiAdapter;
+import com.khjxiaogu.TableGames.platform.mirai.MiraiUtils;
 
-import love.forte.simbot.bot.Bot;
-import love.forte.simbot.message.Messages;
+import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.message.data.MessageChain;
 
-public class SBMessageCompound extends AbstractList<IMessage> implements IMessageCompound  {
-	Messages mc;
+public class MiraiMessageCompound extends AbstractList<IMessage> implements IMessageCompound  {
+	public MessageChain mc;
 	Bot b;
-	public SBMessageCompound(Messages mc,Bot b) {
+	public MiraiMessageCompound(MessageChain mc,Bot b) {
 		this.mc = mc;
 		this.b=b;
 	}
 
 	@Override
 	public String getText() {
-		return SBUtils.getPlainText(mc);
+		return MiraiUtils.getPlainText(mc);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T first(Class<T> cls) {
 		if(cls==At.class) {
-			return (T) KooKAdapter.INSTANCE.toUnified(SBUtils.getAt(mc), b);
+			return (T) MiraiAdapter.INSTANCE.toUnified(MiraiUtils.getAt(mc), b);
 		}else if(cls==Text.class) {
-			return (T) new Text(SBUtils.getPlainText(mc));
+			return (T) new Text(MiraiUtils.getPlainText(mc));
 		}else if(cls==Image.class) {
-			return (T) KooKAdapter.INSTANCE.toUnified(SBUtils.getImage(mc), b);
+			return (T) MiraiAdapter.INSTANCE.toUnified(MiraiUtils.getImage(mc), b);
 		}
 		return null;
 	}
 
 	@Override
 	public IMessage get(int index) {
-		return KooKAdapter.INSTANCE.toUnified(mc.get(index),b);
+		return MiraiAdapter.INSTANCE.toUnified(mc.get(index),b);
 	}
 
 	@Override

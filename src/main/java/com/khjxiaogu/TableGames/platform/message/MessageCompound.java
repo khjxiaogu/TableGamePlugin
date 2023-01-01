@@ -52,6 +52,8 @@ public class MessageCompound extends ArrayList<IMessage> implements IMessageComp
 		for(IMessage im:this) {
 			if(im instanceof Text) {
 				sb.append(im);
+			}else if(im instanceof IMessageCompound) {
+				sb.append(((IMessageCompound) im).getText());
 			} else {
 				sb.append(" ");
 			}

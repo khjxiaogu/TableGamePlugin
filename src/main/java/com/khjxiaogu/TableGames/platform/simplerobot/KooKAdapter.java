@@ -17,26 +17,23 @@
  */
 package com.khjxiaogu.TableGames.platform.simplerobot;
 
-import java.util.concurrent.ExecutionException;
-
 import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.SBId;
-import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.At;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Text;
+import com.khjxiaogu.TableGames.platform.simplerobot.message.SBImage;
+import com.khjxiaogu.TableGames.platform.simplerobot.message.SBMessageCompound;
+import com.khjxiaogu.TableGames.platform.simplerobot.message.SBPlatformMessage;
 
 import love.forte.simbot.action.SendSupport;
 import love.forte.simbot.bot.Bot;
 import love.forte.simbot.component.kook.message.KookKMarkdownMessage;
-import love.forte.simbot.definition.Channel;
-import love.forte.simbot.definition.Contact;
 import love.forte.simbot.kook.objects.AtTarget;
 import love.forte.simbot.kook.objects.KMarkdownBuilder;
-import love.forte.simbot.message.Message;
 import love.forte.simbot.message.Message.Element;
 import love.forte.simbot.message.Messages;
 import love.forte.simbot.message.PlainText;
@@ -75,70 +72,14 @@ public class KooKAdapter {
 		void sendMarkdown(String msg);
 		void sendImage(String msg);
 	}
-	public static class UserWrapper implements SendWrapper{
-		final String id;
-		public UserWrapper(String id) {
-			super();
-			this.id = id;
-		}
 
-		@Override
-		public void sendText(String msg) {
-			KookMain.api.sendPrivateText(id, msg);
-		}
-
-		@Override
-		public void sendMarkdown(String msg) {
-			KookMain.api.sendPrivateMarkdown(id, msg);
-		}
-
-		@Override
-		public void sendImage(String msg) {
-			KookMain.api.sendPrivateImage(id, msg);
-		}
-		
-	}
-	public static class ChannelWrapper implements SendWrapper{
-		final String id;
-		public ChannelWrapper(String id) {
-			super();
-			this.id = id;
-		}
-
-		@Override
-		public void sendText(String msg) {
-			KookMain.api.sendText(id, msg);
-		}
-
-		@Override
-		public void sendMarkdown(String msg) {
-			KookMain.api.sendMarkdown(id, msg);
-		}
-
-		@Override
-		public void sendImage(String msg) {
-			KookMain.api.sendImage(id, msg);
-		}
-		
-	}
-
-	public void sendMessage(Object ss,String msgx) {
+	public void sendMessage(SendSupport ss,String msgx) {
 		GlobalMain.getLogger().info(msgx);
-		getId(ss).sendText(msgx);
+		ss.sendBlocking(msgx);
 		//ss.sendAsync(KookKMarkdownMessage.asMessage(new KMarkdownBuilder().text(msgx).build()));
 	}
-	public SendWrapper getId(Object ss) {
-		if(ss instanceof Channel) {
-			return new ChannelWrapper(((Channel) ss).getId().toString());
-		}else if(ss instanceof Contact) {
-			return new UserWrapper(((Contact) ss).getId().toString());
-		}else if(ss instanceof SendWrapper)
-			return (SendWrapper) ss;
-		return null;
-	}
-	public void sendMessage(Object ss,IMessage msgx,Bot g) {
+	public void sendMessage(SendSupport ss,IMessage msgx,Bot g) {
 		GlobalMain.getLogger().info(msgx.asMessage().getText());
-		SendWrapper s=getId(ss);
 		if(msgx instanceof IMessageCompound) {
 			((IMessageCompound)msgx).flatern();
 			KMarkdownBuilder kmdb=new KMarkdownBuilder();
@@ -151,30 +92,30 @@ public class KooKAdapter {
 					has=true;
 					kmdb.at(new AtTarget.User(((SBId)((At)single).getId()).getIdX().toString()));
 				}else if(single instanceof Image) {
-					s.sendMarkdown(kmdb.buildRaw());
+					ss.sendBlocking(new KookKMarkdownMessage(kmdb.build()));
 					kmdb=new KMarkdownBuilder();
 					has=false;
-					s.sendImage(KookMain.api.sendFile(((Image) single).getData()));
+					ss.sendBlocking(love.forte.simbot.message.Image.of(Resource.of(((Image) single).getData(),"MessageImage.jpg")));
 				}else if(single instanceof SBPlatformMessage) {
-					s.sendMarkdown(kmdb.buildRaw());
+					ss.sendBlocking(new KookKMarkdownMessage(kmdb.build()));
 					kmdb=new KMarkdownBuilder();
 					has=false;
 					if(ss instanceof SendSupport)
-					((SendSupport) ss).sendAsync(((SBPlatformMessage) single).getMsg());
+					((SendSupport) ss).sendBlocking(((SBPlatformMessage) single).getMsg());
 				}
 			}
 			if(has)
-				s.sendMarkdown(kmdb.buildRaw());
+				ss.sendBlocking(new KookKMarkdownMessage(kmdb.build()));
 			
 		}else if(msgx instanceof Text)
-			s.sendText(((Text)msgx).getText());
+			ss.sendBlocking(((Text)msgx).getText());
 		else if(msgx instanceof At)
-			s.sendMarkdown(new KMarkdownBuilder().at(new AtTarget.User(((SBId)((At)msgx).getId()).getIdX().toString())).buildRaw());
+			ss.sendBlocking(new KookKMarkdownMessage(new KMarkdownBuilder().at(new AtTarget.User(((SBId)((At)msgx).getId()).getIdX().toString())).build()));
 		else if(msgx instanceof Image)
-			s.sendImage(KookMain.api.sendFile(((Image) msgx).getData()));
+			ss.sendBlocking(love.forte.simbot.message.Image.of(Resource.of(((Image) msgx).getData(),"MessageImage.jpg")));
 		else if(msgx instanceof SBPlatformMessage)
 			if(ss instanceof SendSupport)
-			((SendSupport) ss).sendAsync(((SBPlatformMessage) msgx).getMsg());
+			((SendSupport) ss).sendBlocking(((SBPlatformMessage) msgx).getMsg());
 		
 	}
 	private love.forte.simbot.message.Message handleMessage(IMessage msg,Bot g) {

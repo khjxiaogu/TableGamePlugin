@@ -17,10 +17,26 @@
  */
 package com.khjxiaogu.TableGames.platform;
 
-public interface AbstractBotUser extends AbstractUser{
+import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
+import com.khjxiaogu.TableGames.platform.message.Text;
 
-	void sendAsBot(String msg);
-	void sendAtAsBot(String msg);
+public interface AbstractBotUser extends AbstractUser{
+	default void sendAsBot(IMessageCompound msg,MsgType type) {
+		DynamicListeners.dispatch(getId(), type, msg);
+	}
+	default void sendAsBot(String msg) {
+		DynamicListeners.dispatch(getId(), MsgType.PRIVATE,new Text(msg).asMessage());
+	}
+	default void sendAtAsBot(String msg) {
+		sendBotMessage("@"+this.getRoom().getHostNameCard()+" "+msg);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		DynamicListeners.dispatch(getId(), MsgType.AT,new Text(msg).asMessage());
+	}
 	void sendBotMessage(String msg);
 	
 }

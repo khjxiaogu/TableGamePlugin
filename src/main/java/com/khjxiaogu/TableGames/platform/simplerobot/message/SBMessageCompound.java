@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.mirai;
+package com.khjxiaogu.TableGames.platform.simplerobot.message;
 
 import java.util.AbstractList;
 
@@ -24,44 +24,46 @@ import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.platform.message.Text;
+import com.khjxiaogu.TableGames.platform.simplerobot.KooKAdapter;
+import com.khjxiaogu.TableGames.platform.simplerobot.SBUtils;
 
-import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.message.data.MessageChain;
+import love.forte.simbot.bot.Bot;
+import love.forte.simbot.message.Messages;
 
-public class MiraiMessageCompound extends AbstractList<IMessage> implements IMessageCompound  {
-	MessageChain mc;
+public class SBMessageCompound extends AbstractList<IMessage> implements IMessageCompound  {
+	Messages mc;
 	Bot b;
-	public MiraiMessageCompound(MessageChain mc,Bot b) {
+	public SBMessageCompound(Messages mc,Bot b) {
 		this.mc = mc;
 		this.b=b;
 	}
 
 	@Override
 	public String getText() {
-		return MiraiUtils.getPlainText(mc);
+		return SBUtils.getPlainText(mc);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T first(Class<T> cls) {
 		if(cls==At.class) {
-			return (T) MiraiAdapter.INSTANCE.toUnified(MiraiUtils.getAt(mc), b);
+			return (T) KooKAdapter.INSTANCE.toUnified(SBUtils.getAt(mc), b);
 		}else if(cls==Text.class) {
-			return (T) new Text(MiraiUtils.getPlainText(mc));
+			return (T) new Text(SBUtils.getPlainText(mc));
 		}else if(cls==Image.class) {
-			return (T) MiraiAdapter.INSTANCE.toUnified(MiraiUtils.getImage(mc), b);
+			return (T) KooKAdapter.INSTANCE.toUnified(SBUtils.getImage(mc), b);
 		}
 		return null;
 	}
 
 	@Override
 	public IMessage get(int index) {
-		return MiraiAdapter.INSTANCE.toUnified(mc.get(index),b);
+		return KooKAdapter.INSTANCE.toUnified(mc.get(index),b);
 	}
 
 	@Override
 	public int size() {
-		return mc.size();
+		return mc.getSize();
 	}
 
 	@Override

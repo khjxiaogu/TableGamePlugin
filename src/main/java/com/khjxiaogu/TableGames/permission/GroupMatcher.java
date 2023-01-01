@@ -72,27 +72,24 @@ public class GroupMatcher implements PermissionMatcher {
 	void load(String param) {
 		if(param.length()==0)return;
 		char isr=param.charAt(0);
-		if(Character.isDigit(isr)) {
-			memberpermissions.put(UserIdentifierSerializer.read(param),PermissionResult.DISALLOW);
-		}else {
-			boolean result=false;
-			String s;
-			switch(isr) {
-			case '#':return;
-			case '+':result=true;s=param.substring(1);break;
-			case '-':s=param.substring(1);break;
-			default:s=param;break;
-			}
-			if(Character.isDigit(s.charAt(0))) {
-				memberpermissions.put(UserIdentifierSerializer.read(s),PermissionResult.valueOf(result));
-			}else if(s.charAt(0)=='*') {
-				wildcard=PermissionResult.valueOf(result);
-			}else {
-				PermissionFactory pf=Matchers.get(s);
-				if(pf!=null) {
-					restricted.put(s,pf.create(result));
-				}
-			}
+		
+		boolean result=false;
+		String s;
+		switch(isr) {
+		case '#':return;
+		case '+':result=true;s=param.substring(1);break;
+		case '-':s=param.substring(1);break;
+		default:s=param;break;
 		}
+		if(s.charAt(0)=='*') {
+			wildcard=PermissionResult.valueOf(result);
+		}else {
+			PermissionFactory pf=Matchers.get(s);
+			if(pf!=null) {
+				restricted.put(s,pf.create(result));
+			}else
+				memberpermissions.put(UserIdentifierSerializer.read(param),PermissionResult.DISALLOW);
+		}
+		
 	}
 }

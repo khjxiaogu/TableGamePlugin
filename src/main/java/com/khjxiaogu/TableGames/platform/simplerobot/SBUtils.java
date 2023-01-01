@@ -53,54 +53,10 @@ public class SBUtils {
 		}
 		return null;
 	}
-	public static Image getImage(Messages msg) {
+	public static Image<?> getImage(Messages msg) {
 		for(Element<?> m:msg) {
 			if(m instanceof Image)
-				return (Image) m;
-		}
-		return null;
-	}
-	public static Message join(Message a,Message b) {
-		if(a instanceof Message.Element) {
-			if(b instanceof Message.Element) {
-				return Messages.toMessages((Message.Element)a,(Message.Element)b);
-			}
-			Messages m=(Messages) b;
-			Element[] elms=new Element[m.size()+1];
-			elms[0]=(Element) a;
-			int i=0;
-			for(Element e:m) {
-				elms[++i]=e;
-			}
-			return Messages.toMessages(elms);
-		}
-		if(b instanceof Message.Element) {
-			return ((Messages) a).plus((Element<?>) b);
-		}
-		Messages m=(Messages)a;
-		Messages m2=(Messages) b;
-		
-		Element[] elms=new Element[m.size()+m2.size()];
-		int i=0;
-		for(Element e:m) {
-			elms[i++]=e;
-		}
-		for(Element e:m2) {
-			elms[i++]=e;
-		}
-		return Messages.toMessages(elms);
-	}
-	public static Image sendTextAsImage(String text,Bot bot) {
-		return bot.uploadImageBlocking(ImageResource(Utils.textAsImage(text)));
-	}
-	public static Resource ImageResource(RenderedImage img) {
-		try(ByteArrayOutputStream baos=new ByteArrayOutputStream(4096)){
-			ImageIO.write(img,"jpg",baos);
-			
-			return Resource.of(baos.toByteArray(), "TextImage.jpg");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+				return (Image<?>) m;
 		}
 		return null;
 	}

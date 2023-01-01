@@ -15,46 +15,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.mirai;
+package com.khjxiaogu.TableGames.platform.simplerobot.message;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.utils.Utils;
 
-import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.Mirai;
-import net.mamoe.mirai.message.data.FlashImage;
+import love.forte.simbot.bot.Bot;
 
-public class MiraiImage extends Image {
-	net.mamoe.mirai.message.data.Image miri;
+public class SBImage extends Image {
+	love.forte.simbot.message.Image intern;
 	Bot bot;
 	boolean original=true;
-	public MiraiImage(net.mamoe.mirai.message.data.Image miri,Bot bot) {
-		this.miri = miri;
+	public SBImage(love.forte.simbot.message.Image miri,Bot bot) {
+		this.intern = miri;
 		this.bot=bot;
-	}
-
-	public MiraiImage(FlashImage msg, Bot b) {
-		miri=msg.component1();
-		bot=b;
 	}
 
 	@Override
 	public byte[] getData() {
-		String url = Mirai.getInstance().queryImageUrl(bot,miri);
-		bot.getLogger().info(url);
-		URL uri;
 		try {
-			uri = new URL(url);
-			HttpURLConnection huc=(HttpURLConnection) uri.openConnection();
-			huc.setDoInput(true);
-			huc.setRequestMethod("GET");
-			huc.connect();
-			//this.getLogger().info("mir get"+Integer.toString(huc.getResponseCode()));
-			data=Utils.readAll(huc.getInputStream());
+			data=Utils.readAll(intern.getResource().openStream());
 
 			return super.getData();
 		} catch (IOException e) {

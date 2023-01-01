@@ -22,6 +22,7 @@ import java.io.Serializable;
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
+import com.khjxiaogu.TableGames.platform.DynamicListeners;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.Permission;
@@ -97,18 +98,7 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 	public void onPrivate(String msg) {
 		logic.onPrivate(msg);
 	}
-	public void sendAsBot(IMessageCompound msg,MsgType type) {
-		SBListenerUtils.dispatch(getId().getIdX(), type, msg);
-	}
-	@Override
-	public void sendAsBot(String msg) {
-		SBListenerUtils.dispatch(getId().getIdX(),MsgType.PRIVATE,new Text(msg).asMessage());
-	}
-	@Override
-	public void sendAtAsBot(String msg) {
-		sendBotMessage("@"+this.getRoom().getHostNameCard()+" "+msg);
-		SBListenerUtils.dispatch(getId().getIdX(),MsgType.AT,new Text(msg).asMessage());
-	}
+	
 	@Override
 	public void sendBotMessage(String msg) {
 		KooKAdapter.INSTANCE.sendMessage(group,nameCard+"：\n"+msg);
@@ -171,7 +161,7 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 
 	@Override
 	public SBId getHostId() {
-		return SBId.of(group.getBot().getId());
+		return SBId.of(group.getBot().toMember().getId());
 	}
 
 	@Override

@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.concurrent.TimeUnit;
-
 import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.SBId;
 import com.khjxiaogu.TableGames.platform.message.At;
@@ -35,7 +33,6 @@ import love.forte.simbot.bot.OriginBotManager;
 import love.forte.simbot.definition.Channel;
 import love.forte.simbot.definition.Guild;
 import love.forte.simbot.definition.GuildMember;
-import love.forte.simbot.message.Message;
 
 
 public class SBHumanUser extends SBUser implements Serializable {
@@ -119,7 +116,7 @@ public class SBHumanUser extends SBUser implements Serializable {
 	@Override
 	public String getNameCard() {
 		if(nco==null)
-			nco=KookMain.api.getNick(group.getGuildId().toString(),member.getId().toString());
+			nco=member.getNickOrUsername();
 		return nco;
 		
 	}
@@ -160,7 +157,9 @@ public class SBHumanUser extends SBUser implements Serializable {
 	}
 	@Override
 	public Permission getPermission() {
-		if(KookMain.api.isAdmin(group.getGuildId().toString(), member.getId().toString()))
+		if(member.isOwner())
+			return Permission.SYSTEM;
+		if(member.isAdmin())
 			return Permission.ADMIN;
 		return Permission.USER;
 	}

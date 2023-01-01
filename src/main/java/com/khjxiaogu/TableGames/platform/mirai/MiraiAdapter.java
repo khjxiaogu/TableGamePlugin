@@ -25,6 +25,9 @@ import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Text;
+import com.khjxiaogu.TableGames.platform.mirai.message.MiraiImage;
+import com.khjxiaogu.TableGames.platform.mirai.message.MiraiMessageCompound;
+import com.khjxiaogu.TableGames.platform.mirai.message.MiraiPlatformMessage;
 
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Contact;

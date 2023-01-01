@@ -6,23 +6,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.function.BiConsumer;
-
-import org.apache.logging.log4j.LogManager;
-
 import com.khjxiaogu.TableGames.game.idiomsolitare.IdiomLibrary;
 import com.khjxiaogu.TableGames.game.undercover.UnderCoverTextLibrary;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
-import com.khjxiaogu.TableGames.platform.MsgType;
-import com.khjxiaogu.TableGames.platform.RoomMessageEvent;
+import com.khjxiaogu.TableGames.platform.MarkovHelper;
 import com.khjxiaogu.TableGames.platform.SBId;
-import com.khjxiaogu.TableGames.platform.UserIdentifierSerializer;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
-import com.khjxiaogu.TableGames.platform.message.Text;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 import kotlin.Unit;
-import love.forte.simbot.ID;
 import love.forte.simbot.application.ApplicationDslBuilder;
 import love.forte.simbot.application.Applications;
 import love.forte.simbot.application.EventProvider;
@@ -65,9 +57,10 @@ public class KookMain {
 	}
 
 	public static String token = System.getProperty("kooktoken");
-	public static String client=System.getProperty("kookclient");
+	public static String client = System.getProperty("kookclient");
 	public static KookAPI api = new KookAPI(token);
 
+	@SuppressWarnings("resource")
 	public static void main(String[] programargs) {
 		getDataFolder().mkdirs();
 
@@ -80,13 +73,13 @@ public class KookMain {
 			if (!f.exists()) {
 				f.createNewFile();
 				FileOutputStream fos = new FileOutputStream(f);
-				transfer(KookMain.class.getResourceAsStream("undtext.txt"), fos);
+				transfer(KookMain.class.getResourceAsStream("/undtext.txt"), fos);
 				fos.close();
 			}
 			if (!f2.exists()) {
 				f2.createNewFile();
 				FileOutputStream fos = new FileOutputStream(f2);
-				transfer(KookMain.class.getResourceAsStream("cyyy.csv"), fos);
+				transfer(KookMain.class.getResourceAsStream("/cyyy.csv"), fos);
 				fos.close();
 			}
 			try (FileInputStream fis = new FileInputStream(new File(getDataFolder(), "undtext.txt"))) {
@@ -101,74 +94,35 @@ public class KookMain {
 		}
 		EventListener friend = SimpleListeners.listener(/* target = */ ContactMessageEvent.Key,
 				/* invoker = */ (context, event) -> {
-					try {
-						String command = SBUtils.getPlainText(event.getMessageContent().getMessages());
-						GlobalMain.getLogger().info(command);
-						if (command.startsWith("##")) {
-							command = Utils.removeLeadings("##", command);
-							String[] args = command.split(" ");
-							BiConsumer<RoomMessageEvent, String[]> bae = GlobalMain.pvmgcmd.get(args[0]);
-							if (bae != null) {
-								SBPrivateMessageEvent uev = new SBPrivateMessageEvent((KookContactMessageEvent) event);
-								bae.accept(uev, args);
-							}
-						}
-						GlobalMain.dispatchexec.execute(() -> SBListenerUtils.dispatch(event.getUser().getId(),
-								MsgType.PRIVATE, (IMessageCompound) KooKAdapter.INSTANCE
-										.toUnified(event.getMessageContent().getMessages(), event.getBot())));
-						// 返回值可选, 如果不提供默认值则视为 EventResult.invalid() .
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
+					GlobalMain.defaultFirePrivate(SBUtils.getPlainText(event.getMessageContent().getMessages()),
+							SBId.of(event.getUser().getId()),
+							(IMessageCompound) KooKAdapter.INSTANCE.toUnified(event.getMessageContent().getMessages(), event.getBot()),
+							() -> new SBPrivateMessageEvent((KookContactMessageEvent) event));
 					return EventResult.defaults();
 				});
 		EventListener room = SimpleListeners.listener(/* target = */ ChannelMessageEvent.Key,
 				/* invoker = */ (context, event) -> {
 					try {
+						String command = SBUtils.getPlainText(event.getMessageContent().getMessages());
+						SBId sid=SBId.of(event.getAuthor().getId());
+						SBId rid=SBId.of(event.getChannel().getId());
+						String s=MarkovHelper.handleMarkov(command,rid,sid);
+						GlobalMain.getLogger().info(event.toString());
+						if(s!=null) {
+							event.getChannel().sendAsync(s);
+						}
 						At at = SBUtils.getAt(event.getMessageContent().getMessages());
 						boolean hasCmd = false;
-						String command = SBUtils.getPlainText(event.getMessageContent().getMessages());
-						command=command.trim();
-						GlobalMain.getLogger().info(command);
-						if ((at != null && at.getTarget() == event.getBot().getId())) {
+						
+						if ((at != null && event.getBot().isMe(at.getTarget()))) {
 							hasCmd = true;
 						} else if (command.startsWith("##")) {
 							hasCmd = true;
 							command = Utils.removeLeadings("##", command);
 						}
-
-						if (hasCmd) {
-
-							SBListenerUtils.dispatch((GuildMember) event.getAuthor(), event.getChannel(), MsgType.AT,
-									(IMessageCompound) KooKAdapter.INSTANCE
-											.toUnified(event.getMessageContent().getMessages(), event.getBot()));
-							{
-
-								String[] args = command.split(" ");
-
-								BiConsumer<RoomMessageEvent, String[]> bae = GlobalMain.normcmd.get(args[0]);
-								if (bae != null) {
-									SBRoomMessageEvent uev = new SBRoomMessageEvent(event);
-									bae.accept(uev, args);
-								} else if (GlobalMain.privmatcher
-										.match(new SBHumanUser((GuildMember) event.getAuthor(), event.getChannel()))
-										.isAllowed()) {
-									BiConsumer<RoomMessageEvent, String[]> bce = GlobalMain.privcmd.get(args[0]);
-									if (bce != null) {
-										SBRoomMessageEvent uev = new SBRoomMessageEvent(event);
-										bce.accept(uev, args);
-									} else if (args[0].startsWith("执行")) {
-										GlobalMain.dispatchexec.execute(() -> SBListenerUtils.dispatch(ID.$(args[1]),
-												MsgType.valueOf(args[2]), new Text(args[3]).asMessage()));
-									}
-								}
-							}
-						} else {
-							GlobalMain.dispatchexec.execute(() -> SBListenerUtils.dispatch(
-									(GuildMember) event.getAuthor(), event.getChannel(), MsgType.PUBLIC,
-									(IMessageCompound) KooKAdapter.INSTANCE
-											.toUnified(event.getMessageContent().getMessages(), event.getBot())));
-						}
+						GlobalMain.firePublicCommand(hasCmd?command:null,sid,()->new SBHumanUser((GuildMember) event.getAuthor(),event.getChannel()),()->new SBRoomMessageEvent(event),rid, (IMessageCompound) KooKAdapter.INSTANCE
+								.toUnified(event.getMessageContent().getMessages(), event.getBot()));
+						
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}

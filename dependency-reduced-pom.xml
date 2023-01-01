@@ -111,13 +111,13 @@
     <dependency>
       <groupId>love.forte.simbot</groupId>
       <artifactId>simbot-core</artifactId>
-      <version>3.0.0-M1-SNAPSHOT</version>
+      <version>3.0.0-M2-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>love.forte.simbot.component</groupId>
       <artifactId>simbot-component-kook-core</artifactId>
-      <version>3.0.0.0-alpha.1-SNAPSHOT</version>
+      <version>3.0.0.0-alpha.2-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

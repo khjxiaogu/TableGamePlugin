@@ -15,16 +15,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.mirai;
+package com.khjxiaogu.TableGames.platform.simplerobot.message;
 
 import com.khjxiaogu.TableGames.platform.message.PlatformMessage;
 
-import net.mamoe.mirai.message.data.Message;
+import love.forte.simbot.message.Message;
 
-public class MiraiPlatformMessage implements PlatformMessage {
+
+
+public class SBPlatformMessage implements PlatformMessage {
 	Message msg;
 
-	public MiraiPlatformMessage(Message msg) {
+	public SBPlatformMessage(Message msg) {
 		this.msg = msg;
 	}
 

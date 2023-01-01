@@ -11,12 +11,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.google.gson.Gson;
@@ -55,20 +57,21 @@ public class KookAPI {
 
 	private <T> T getResponse(HttpRequestBase request,Class<T> type) {
 		
-		try {
-			HttpClient httpClient = HttpClientBuilder.create().useSystemProperties().setDefaultRequestConfig(RequestConfig.custom().build()).build();
-			HttpResponse response = httpClient.execute(request);
-			HttpEntity responseEntity = response.getEntity();
-			JsonObject jo = JsonParser
-					.parseString(new String(Utils.readAll(responseEntity.getContent()), StandardCharsets.UTF_8))
-					.getAsJsonObject();
-			int code = jo.get("code").getAsInt();
-			String message = jo.get("message").getAsString();
-			if (code != 0) {
-				throw new KookAPIException(code, message);
+		try(CloseableHttpClient httpClient = HttpClientBuilder.create().useSystemProperties().setDefaultRequestConfig(RequestConfig.custom().build()).build()){
+			
+			try(CloseableHttpResponse response = httpClient.execute(request)){
+				HttpEntity responseEntity = response.getEntity();
+				JsonObject jo = JsonParser
+						.parseString(new String(Utils.readAll(responseEntity.getContent()), StandardCharsets.UTF_8))
+						.getAsJsonObject();
+				int code = jo.get("code").getAsInt();
+				String message = jo.get("message").getAsString();
+				if (code != 0) {
+					throw new KookAPIException(code, message);
+				}
+				if(type!=null)
+					return gs.fromJson(jo.get("data"), type);
 			}
-			if(type!=null)
-				return gs.fromJson(jo.get("data"), type);
 			return null;
 		} catch (Exception e) {
 			if(e instanceof KookAPIException)
@@ -112,7 +115,7 @@ public class KookAPI {
 		return getResponse(post,responsetype);
 	}
 
-	public String sendText(String id, String msg) {
+	/*public String sendText(String id, String msg) {
 		return jsonPost("/api/v3/message/create",new SendMessageRequest(id, msg),SendMessageResponse.class).msg_id;
 	}
 
@@ -131,22 +134,22 @@ public class KookAPI {
 	}
 	public String sendPrivateImage(String id, String uri) {
 		return jsonPost("/api/v3/direct-message/create",new SendMessageRequest(2,id, uri),SendMessageResponse.class).msg_id;
-	}
-	public String sendFile(byte[] file) {
+	}*/
+	/*public String sendFile(byte[] file) {
 		HttpPost post = new HttpPost(baseUrl + "/api/v3/asset/create");
 		setHeader(post);
 		post.setEntity(MultipartEntityBuilder.create().addBinaryBody("file", file,ContentType.IMAGE_JPEG,"ChatImage.jpg").build());
 		return getResponse(post,SendFileResponse.class).url;
-	}
+	}*/
 	public void setNick(String gid,String uid,String nick) {
 		jsonPost("/api/v3/guild/nickname",new ChangeNickRequest(gid,nick, uid),null);
 	}
-	public String getNick(String gid,String uid) {
+	/*public String getNick(String gid,String uid) {
 		return get("/api/v3/user/view",new GetUserInfoRequest(uid,gid),GetUserInfoResponse.class).nickname;
-	}
-	public String getName(String uid) {
+	}*/
+	/*public String getName(String uid) {
 		return get("/api/v3/user/view",new GetUserInfoRequest(uid),GetUserInfoResponse.class).username;
-	}
+	}*/
 	public void createUserRole(String cid,String uid) {
 		jsonPost("/api/v3/channel-role/create",new CreateRoleRequest(cid, uid),null);
 	}
@@ -178,9 +181,9 @@ public class KookAPI {
 		}
 		jsonPost("/api/v3/channel-role/update",new UpdateRoleRequest(cid,"role_id","0",0,4096|16384),null);
 	}
-	public boolean isAdmin(String gid,String uid) {
+	/*public boolean isAdmin(String gid,String uid) {
 		return Arrays.stream(get("/api/v3/user/view",new GetUserInfoRequest(uid,gid),GetUserInfoResponse.class).roles).anyMatch(t->t==5434834);
-	}
+	}*/
 	public void setAllUnmute(String cid) {
 		deleteRole(cid);
 	}

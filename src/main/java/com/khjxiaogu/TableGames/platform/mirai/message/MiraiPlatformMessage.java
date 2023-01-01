@@ -15,40 +15,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.platform.simplerobot;
+package com.khjxiaogu.TableGames.platform.mirai.message;
 
-import java.io.IOException;
-import com.khjxiaogu.TableGames.platform.message.Image;
-import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.TableGames.platform.message.PlatformMessage;
 
-import love.forte.simbot.bot.Bot;
+import net.mamoe.mirai.message.data.Message;
 
-public class SBImage extends Image {
-	love.forte.simbot.message.Image intern;
-	Bot bot;
-	boolean original=true;
-	public SBImage(love.forte.simbot.message.Image miri,Bot bot) {
-		this.intern = miri;
-		this.bot=bot;
+public class MiraiPlatformMessage implements PlatformMessage {
+	Message msg;
+
+	public MiraiPlatformMessage(Message msg) {
+		this.msg = msg;
+	}
+
+	public Message getMsg() {
+		return msg;
+	}
+
+	public void setMsg(Message msg) {
+		this.msg = msg;
 	}
 
 	@Override
-	public byte[] getData() {
-		try {
-			data=Utils.readAll(intern.getResource().openStream());
-
-			return super.getData();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return data;
-
-	}
-	@Override
-	public void setData(byte[] data) {
-		original=false;
-		super.setData(data);
+	public String toString() {
+		return msg.toString();
 	}
 
 }

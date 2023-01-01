@@ -19,33 +19,29 @@ package com.khjxiaogu.TableGames.platform.simplerobot;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
-import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.MessageListener;
 import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.SBId;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
-import com.khjxiaogu.TableGames.platform.simplerobot.KooKAdapter.SendWrapper;
-import com.khjxiaogu.TableGames.platform.simplerobot.KooKAdapter.UserWrapper;
 import com.khjxiaogu.TableGames.utils.Game;
 
-import love.forte.simbot.ID;
+import love.forte.simbot.definition.Contact;
 
 
 public class SBUserFriend implements AbstractUser {
-	UserIdentifier id;
-	SendWrapper sw;
-	public SBUserFriend(ID senderid) {
-		id=SBId.of(senderid);
+	Contact gm;
+	public SBUserFriend(Contact contact) {
+		this.gm=contact;
 
-		sw=new UserWrapper(id.getId());
+	
 		
 	}
 
 	@Override
 	public void sendPrivate(String str) {
 		try {
-			sw.sendText(str);
+			gm.sendBlocking(str);
 		}catch(Exception ex) {
 		
 		}
@@ -57,7 +53,7 @@ public class SBUserFriend implements AbstractUser {
 	@Override
 	public void sendPrivate(IMessage msg) {
 		try {
-			KooKAdapter.INSTANCE.sendMessage(sw,msg,null);
+			KooKAdapter.INSTANCE.sendMessage(gm,msg,null);
 		}catch(Exception ex) {
 
 		}
@@ -87,7 +83,7 @@ public class SBUserFriend implements AbstractUser {
 
 	@Override
 	public String getNameCard() {
-		return KookMain.api.getName(id.toString());
+		return gm.getUsername();
 	}
 
 	@Override
@@ -100,7 +96,7 @@ public class SBUserFriend implements AbstractUser {
 
 	@Override
 	public UserIdentifier getId() {
-		return id;
+		return SBId.of(gm.getId());
 	}
 
 	@Override
@@ -137,27 +133,7 @@ public class SBUserFriend implements AbstractUser {
 		return Permission.USER;
 	}
 
-	@Override
-	public int hashCode() {
-		return id.hashCode();
-	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SBUserFriend other = (SBUserFriend) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
-	}
 
 	@Override
 	public void transferListener(AbstractUser another) {
@@ -173,5 +149,30 @@ public class SBUserFriend implements AbstractUser {
 
 	@Override
 	public void tryAvailable() {
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((gm.getId() == null) ? 0 : gm.getId().hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SBUserFriend other = (SBUserFriend) obj;
+		if (gm.getId() == null) {
+			if (other.gm.getId() != null)
+				return false;
+		} else if (!gm.getId().equals(other.gm.getId()))
+			return false;
+		return true;
 	}
 }

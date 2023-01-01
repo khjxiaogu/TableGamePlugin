@@ -22,6 +22,7 @@ import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.WaitReason;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
+import com.khjxiaogu.TableGames.platform.mirai.message.MiraiMessageCompound;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 public class Werewolf extends Villager {
@@ -183,7 +184,7 @@ public class Werewolf extends Villager {
 				String tosendEnd=":" + Utils.removeLeadings("#", content);
 				for (Villager w : game.playerlist) {
 					if (w instanceof Werewolf && !w.isDead() && !w.equals(this)) {
-						w.sendPrivate(tosendHead+"->"+w.getMemberString()+tosendEnd);
+						w.sendPrivate(tosendHead+"->"+w.getMemberString()+":"+tosendEnd);
 					}
 				}
 			} else if (content.startsWith("放弃")) {

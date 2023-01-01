@@ -1657,10 +1657,10 @@ public class WerewolfGame extends Game implements Serializable {
 			p2.onTurn(4);
 		}
 
-		Set<Villager> tks = new HashSet<>(tokill);
+		Set<Villager> tokills = new HashSet<>(tokill);
 		tokill.clear();
 		boolean shouldWait = false;
-		for (Villager p : tks) {
+		for (Villager p : tokills) {
 			shouldWait |= p.onDiePending(p.getEffectiveDiedReason());
 		}
 		if (!shouldWait && tokill.isEmpty() && VictoryPending())
@@ -1671,7 +1671,7 @@ public class WerewolfGame extends Game implements Serializable {
 			startWait(30000, WaitReason.Generic);
 		removeAllListeners();
 		while (!tokill.isEmpty()) {
-			tks.addAll(tokill);
+			Set<Villager> tks = new HashSet<>(tokill);
 			tokill.clear();
 			boolean haswait = false;
 			for (Villager p : tks) {
@@ -1680,9 +1680,10 @@ public class WerewolfGame extends Game implements Serializable {
 			if (haswait) {
 				startWait(30000, WaitReason.Generic);
 			}
+			tokills.addAll(tks);
 			removeAllListeners();
 		}
-		tokill.addAll(tks);
+		tokill.addAll(tokills);
 		if (VictoryPending())
 			return;
 		getScheduler().execute(this::onDayTime);

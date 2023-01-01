@@ -40,9 +40,15 @@ public interface AbstractUser {
 	UserIdentifier getHostId();
 	void bind(Object obj);
 	void setGame(Game g);
-	void registerListener(MessageListener msgc);
-	void transferListener(AbstractUser another);
-	void releaseListener();
+	default void registerListener(MessageListener msgc) {
+		DynamicListeners.registerListener(getId(),getRoom().getId(),msgc);
+	}
+	default void releaseListener() {
+		DynamicListeners.releaseListener(getId());
+	}
+	default void transferListener(AbstractUser another) {
+		DynamicListeners.transferListener(getId(),another);
+	}
 	Object getRoleObject();
 	Permission getPermission();
 }

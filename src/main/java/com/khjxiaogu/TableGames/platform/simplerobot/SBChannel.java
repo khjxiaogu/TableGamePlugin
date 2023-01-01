@@ -28,8 +28,6 @@ import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
-import com.khjxiaogu.TableGames.platform.MessageListener;
-import com.khjxiaogu.TableGames.platform.RoomMessageListener;
 import com.khjxiaogu.TableGames.platform.SBId;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
@@ -146,25 +144,7 @@ public class SBChannel implements AbstractRoom,Serializable {
 	public Object getInstance() {
 		return group;
 	}
-	@Override
-	public void registerRoomListener(Object game,RoomMessageListener ml) {
-		SBListenerUtils.registerListener(game,group, ml);
-	}
-	@Override
-	public void releaseRoomListener(Object game) {
-		SBListenerUtils.releaseListener(game);
-	}
-	@Override
-	public void registerListener(UserIdentifier id, MessageListener ml) {
-		if(id instanceof SBId)
-			SBListenerUtils.registerListener(((SBId) id).getIdX(), group, ml);
-	}
 
-	@Override
-	public void releaseListener(UserIdentifier id) {
-		if(id instanceof SBId)
-			SBListenerUtils.releaseListener(((SBId) id).getIdX());
-	}
 
 	@Override
 	public void setMuteAll(boolean isMute) {
@@ -177,7 +157,7 @@ public class SBChannel implements AbstractRoom,Serializable {
 	@Override
 	public String getHostNameCard() {
 		if(hnc==null)
-			hnc=KookMain.api.getNick(group.getGuildId().toString(),group.getBot().toMember().getId().toString());
+			hnc=group.getBot().toMember().getNickOrUsername();
 		return hnc;
 	}
 	@Override

@@ -91,15 +91,13 @@ public class BotMatcher implements PermissionMatcher {
 				loadWildCard(args[0]);
 				return;
 			}
-			if (Character.isDigit(args[1].charAt(0))) {
-				UserIdentifier group = UserIdentifierSerializer.read(args[1]);
-				GroupMatcher gm = groupmatchers.get(group);
-				if (gm == null) {
-					gm = new GroupMatcher();
-					groupmatchers.put(group, gm);
-				}
-				gm.load(args[0]);
+			UserIdentifier group = UserIdentifierSerializer.read(args[1]);
+			GroupMatcher gm = groupmatchers.get(group);
+			if (gm == null) {
+				gm = new GroupMatcher();
+				groupmatchers.put(group, gm);
 			}
+			gm.load(args[0]);
 		}
 	}
 
@@ -107,33 +105,30 @@ public class BotMatcher implements PermissionMatcher {
 		if (param.length() == 0)
 			return;
 		char isr = param.charAt(0);
-		if (Character.isDigit(isr)) {
-			friendpermissions.put(UserIdentifierSerializer.read(param), PermissionResult.DISALLOW);
-		} else {
-			boolean result = false;
-			String s;
-			switch (isr) {
-			case '+':
-				result = true;
-				s = param.substring(1);
-				break;
-			case '-':
-				s = param.substring(1);
-				break;
-			default:
-				s = param;
-				break;
-			}
-			if (Character.isDigit(s.charAt(0))) {
-				friendpermissions.put(UserIdentifierSerializer.read(s), PermissionResult.valueOf(result));
-			} else if (s.charAt(0) == '*') {
-				wildcard = PermissionResult.valueOf(result);
-			} else {
-				PermissionFactory pf = Matchers.get(s);
-				if (pf != null)
-					restricted.put(s, pf.create(result));
-			}
+		boolean result = false;
+		String s;
+		switch (isr) {
+		case '+':
+			result = true;
+			s = param.substring(1);
+			break;
+		case '-':
+			s = param.substring(1);
+			break;
+		default:
+			s = param;
+			break;
 		}
+		if (s.charAt(0) == '*') {
+			wildcard = PermissionResult.valueOf(result);
+		} else {
+			PermissionFactory pf = Matchers.get(s);
+			if (pf != null)
+				restricted.put(s, pf.create(result));
+			else
+				friendpermissions.put(UserIdentifierSerializer.read(s), PermissionResult.valueOf(result));
+		}
+		
 	}
 
 	@Override

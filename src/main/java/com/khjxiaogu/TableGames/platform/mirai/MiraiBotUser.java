@@ -95,24 +95,6 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	public void onPrivate(String msg) {
 		logic.onPrivate(msg);
 	}
-	public void sendAsBot(IMessageCompound msg,MsgType type) {
-		MiraiListenerUtils.dispatch(getId().getQQId(), type, msg);
-	}
-	@Override
-	public void sendAsBot(String msg) {
-		MiraiListenerUtils.dispatch(getId().getQQId(),MsgType.PRIVATE,new Text(msg).asMessage());
-	}
-	@Override
-	public void sendAtAsBot(String msg) {
-		sendBotMessage("@"+this.getRoom().getHostNameCard()+" "+msg);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		MiraiListenerUtils.dispatch(getId().getQQId(),MsgType.AT,new Text(msg).asMessage());
-	}
 	@Override
 	public void sendBotMessage(String msg) {
 		SlowUtils.runSlowly(()->super.group.sendMessage(nameCard+"：\n"+msg));

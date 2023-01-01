@@ -27,17 +27,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
 
@@ -70,7 +74,11 @@ import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.Role;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfPlayerData;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfPreserve;
 import com.khjxiaogu.TableGames.permission.GlobalMatcher;
+import com.khjxiaogu.TableGames.platform.Markov.StateContainer;
+import com.khjxiaogu.TableGames.platform.message.IMessage;
+import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.Image;
+import com.khjxiaogu.TableGames.platform.message.Text;
 import com.khjxiaogu.TableGames.utils.DefaultGameCreater;
 import com.khjxiaogu.TableGames.utils.FileUtil;
 import com.khjxiaogu.TableGames.utils.Game;
@@ -82,6 +90,7 @@ import com.khjxiaogu.TableGames.utils.TimeUtil;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 
+
 public class GlobalMain {
 	public static PlayerDatabase db;
 	public static PlayerCreditData credit;
@@ -90,7 +99,7 @@ public class GlobalMain {
 	public static GlobalMatcher privmatcher=new GlobalMatcher();
 	public static File dataFolder;
 	private static boolean hasInited;
-
+	
 	public static UnifiedLogger getLogger() {
 		return logger;
 	}
@@ -103,12 +112,12 @@ public class GlobalMain {
 		GlobalMain.credit=new PlayerCreditData(dataFolder);
 		UserIdentifierSerializer.addRawSerializer(e->QQId.of(Long.parseLong(e)));
 		UserIdentifierSerializer.addRawSerializer(e->SBId.load(e));
-		
+		MarkovHelper.loadConfig(dataFolder);
 	}
 	public static void setLogger(UnifiedLogger logger) {
 		GlobalMain.logger=logger;
 	}
-
+	
 	
 	public static Map<String,BiConsumer<RoomMessageEvent,String[]>> normcmd=new ConcurrentHashMap<>();
 	public static Map<String,String> normhelp=new LinkedHashMap<>();
@@ -117,6 +126,44 @@ public class GlobalMain {
 	public static Map<String,BiConsumer<RoomMessageEvent,String[]>> privcmd=new ConcurrentHashMap<>();
 	public static ExecutorService dispatchexec=Executors.newCachedThreadPool();
 	public static List<String> gameList=new ArrayList<>();
+	public static void defaultFirePrivate(String command,UserIdentifier senderId,IMessageCompound msg,Supplier<RoomMessageEvent> ev) {
+		if (command.startsWith("##")) {
+			GlobalMain.firePrivateCommand(Utils.removeLeadings("##", command),ev);
+		}
+		DynamicListeners.dispatchAsync(senderId,
+				MsgType.PRIVATE,msg);
+	}
+	public static void firePrivateCommand(String command,Supplier<RoomMessageEvent> ev) {
+		String[] args = command.split(" ");
+		BiConsumer<RoomMessageEvent, String[]> bae = GlobalMain.pvmgcmd.get(args[0]);
+		if (bae != null) {
+			bae.accept(ev.get(), args);
+		}
+	}
+	public static void firePublicCommand(String command,UserIdentifier uid,Supplier<AbstractUser> user,Supplier<RoomMessageEvent> rev,UserIdentifier rid,IMessageCompound msg) {
+		if (command!=null) {
+
+			DynamicListeners.dispatch(uid,rid,user, MsgType.AT,msg);
+			{
+
+				String[] args = command.split(" ");
+
+				BiConsumer<RoomMessageEvent, String[]> bae = GlobalMain.normcmd.get(args[0]);
+				if (bae != null) {
+					bae.accept(rev.get(), args);
+				} else if (GlobalMain.privmatcher
+						.match(user.get())
+						.isAllowed()) {
+					BiConsumer<RoomMessageEvent, String[]> bce = GlobalMain.privcmd.get(args[0]);
+					if (bce != null) {
+						bce.accept(rev.get(), args);
+					}
+				}
+			}
+		} else {
+			DynamicListeners.dispatchAsync(uid,rid,user,MsgType.PUBLIC,msg);
+		}
+	}
 	public static void addCmd(String cmd,String help,BiConsumer<RoomMessageEvent,String[]> ls) {
 		normcmd.put(cmd,ls);
 		normhelp.put(cmd,help);
@@ -404,6 +451,27 @@ public class GlobalMain {
 				event.getSender().sendPrivate("权限设置失败！");
 				//getLogger().warning(ex);
 			}
+		});
+		addPCmd("执行","以他人身份执行",(event,args)->{
+			try {
+				DynamicListeners.dispatchAsync(UserIdentifierSerializer.read(args[1]),MsgType.valueOf(args[2]),new Text(args[3]).asMessage());
+				event.getSender().sendPrivate("成功！");
+			} catch (Exception ex) {
+				event.getSender().sendPrivate("失败！");
+				//getLogger().warning(ex);
+			}
+		});
+		addPCmd("enrb","打开马氏回声",(event,args)->{
+			AbstractRoom ar=event.getRoom();
+			MarkovHelper.ergroup.add(ar.getId());
+			ar.sendMessage("马氏回声已开启");
+			
+		});
+		addPCmd("derb","关闭马氏回声",(event,args)->{
+			AbstractRoom ar=event.getRoom();
+			MarkovHelper.ergroup.remove(ar.getId());
+			ar.sendMessage("已静默");
+			
 		});
 		addPCmd("测试权限", "测试成员权限",(event,args)->{
 			try {

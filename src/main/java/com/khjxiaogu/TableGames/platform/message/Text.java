@@ -32,4 +32,9 @@ public class Text implements IMessage {
 		this.text = text;
 	}
 
+	@Override
+	public String toString() {
+		return text ;
+	}
+
 }

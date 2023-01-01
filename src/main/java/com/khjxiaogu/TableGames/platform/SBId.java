@@ -28,7 +28,7 @@ public class SBId implements UserIdentifier {
 
 	@Override
 	public String serialize() {
-		return "0sb:"+getId();
+		return "sb:"+getId();
 	}
 	public static SBId of(String id) {
 		return cache.computeIfAbsent(id,SBId::new);
@@ -37,8 +37,8 @@ public class SBId implements UserIdentifier {
 		return cache.computeIfAbsent(id.toString(),t->new SBId(id));
 	}
 	public static SBId load(String id) {
-		if(id.startsWith("0sb:")) {
-			return of(id.substring(4));
+		if(id.startsWith("sb:")) {
+			return of(id.substring(3));
 		}
 		return null;
 	}
