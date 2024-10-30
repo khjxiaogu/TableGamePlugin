@@ -195,6 +195,11 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 	public void tryAvailable() {
 	}
 
+	@Override
+	public boolean isFriend() {
+		return false;
+	}
+
 
 
 	

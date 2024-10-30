@@ -15,13 +15,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.permission;
+package com.khjxiaogu.TableGames.data.application;
 
-@FunctionalInterface
-interface PermissionFactory {
-	PermissionMatcher create(PermissionResult is);
-
-	default PermissionMatcher create(boolean is) {
-		return this.create(PermissionResult.valueOf(is));
-	};
+public interface GenericPlayerData<T extends GenericPlayerData<T>>{
+	void plus(T another);
+	@SuppressWarnings("unchecked")
+	default void plusa(GenericPlayerData<?> another) {
+		if(another!=null) {
+			plus((T) another);
+		}
+	}
+	String getStatistic(String v);
 }

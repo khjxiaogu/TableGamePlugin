@@ -185,4 +185,9 @@ public class MiraiUserFriend implements AbstractUser {
 	@Override
 	public void tryAvailable() {
 	}
+
+	@Override
+	public boolean isFriend() {
+		return member.getBot().getFriend(member.getId())!=null;
+	}
 }

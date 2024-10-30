@@ -17,21 +17,14 @@
  */
 package com.khjxiaogu.TableGames.platform.simplerobot;
 
-import java.awt.image.RenderedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-
-import com.khjxiaogu.TableGames.utils.Utils;
-
-import love.forte.simbot.bot.Bot;
+import com.khjxiaogu.TableGames.platform.Permission;
+import love.forte.simbot.definition.GuildMember;
+import love.forte.simbot.definition.Member;
 import love.forte.simbot.message.At;
 import love.forte.simbot.message.Image;
-import love.forte.simbot.message.Message;
 import love.forte.simbot.message.Message.Element;
 import love.forte.simbot.message.Messages;
 import love.forte.simbot.message.PlainText;
-import love.forte.simbot.resources.Resource;
 
 
 
@@ -59,5 +52,12 @@ public class SBUtils {
 				return (Image<?>) m;
 		}
 		return null;
+	}
+	public static Permission getPermission(Member member) {
+		if(member.isOwner())
+			return Permission.SYSTEM;
+		if(member.isAdmin())
+			return Permission.ADMIN;
+		return Permission.USER;
 	}
 }

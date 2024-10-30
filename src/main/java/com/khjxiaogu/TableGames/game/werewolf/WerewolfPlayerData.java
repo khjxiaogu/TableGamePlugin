@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.khjxiaogu.TableGames.data.GenericPlayerData;
+import com.khjxiaogu.TableGames.data.application.GenericPlayerData;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.Role;
 import com.khjxiaogu.TableGames.utils.Utils;
 

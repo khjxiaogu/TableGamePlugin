@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
+import com.khjxiaogu.TableGames.data.application.PlayerDatabase.GameData;
 import com.khjxiaogu.TableGames.game.werewolf.bots.BearBot;
 import com.khjxiaogu.TableGames.game.werewolf.bots.DarkWolfBot;
 import com.khjxiaogu.TableGames.game.werewolf.bots.DeadBot;
@@ -798,7 +798,7 @@ public class WerewolfGame extends Game implements Serializable {
 		int godcount = (int) Math.ceil(cplayer / 3.0);
 		int wolfcount = (int) Math.ceil((cplayer - godcount) / 2.0);
 		int innocount = cplayer - godcount - wolfcount;
-		if (innocount < wolfcount) {
+		if (innocount < wolfcount&&innocount>0) {
 			--innocount;
 			roles.add(Role.ELDER);
 		}
@@ -904,6 +904,7 @@ public class WerewolfGame extends Game implements Serializable {
 		this.sendPublicMessage(mc.toString());
 		isEnded = true;
 		logger.sendLog(getGroup());
+		this.allUndeadPend();
 		super.forceStop();
 	}
 
@@ -937,6 +938,7 @@ public class WerewolfGame extends Game implements Serializable {
 		}
 		this.sendPublicMessage("游戏已暂停，请等待恢复");
 		isEnded = true;
+		this.allUndeadPend();
 		super.forceStop();
 	}
 
@@ -1097,6 +1099,7 @@ public class WerewolfGame extends Game implements Serializable {
 					}
 					cp.index = min;
 					cp.sendPrivate("你是 " + min + "号 |" + cp.origname);
+					sendPublicMessage(""+roles.size());
 					if (roles.size() == 0) {
 						cp.next = playerlist.get(0);
 						cp.next.prev = cp;
@@ -1298,8 +1301,18 @@ public class WerewolfGame extends Game implements Serializable {
 			return;
 		onDawn();
 	}
-
+	public void allDeadPend() {
+		for(Villager v:this.playerlist) {
+			v.doDeathPend();
+		}
+	}
+	public void allUndeadPend() {
+		for(Villager v:this.playerlist) {
+			v.doUndeathPend();
+		}
+	}
 	public void onDawn() {
+		allDeadPend();
 		try (FileOutputStream fileOut = new FileOutputStream(
 				new File(GlobalMain.dataFolder, "" + getGroup() + ".game"));
 				ObjectOutputStream out = new ObjectOutputStream(fileOut);) {
@@ -1731,6 +1744,7 @@ public class WerewolfGame extends Game implements Serializable {
 		}
 		if (VictoryPending())
 			return;
+		allDeadPend();
 		isFirstNight = false;
 		this.sendPublicMessage(getAliveList());
 		tokill.clear();
@@ -1990,6 +2004,7 @@ public class WerewolfGame extends Game implements Serializable {
 	// 结束回合循环
 	public boolean VictoryPending() {
 		Wininfo wi = victoryinfo.apply(this);
+		allUndeadPend();
 		if (wi != null) {
 			logger.title(wi.status);
 			GameData gd = null;

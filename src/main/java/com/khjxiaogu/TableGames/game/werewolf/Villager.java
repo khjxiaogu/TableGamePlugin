@@ -108,7 +108,24 @@ public class Villager extends UserFunction implements Serializable {
 		super.setGame(game);
 		onGameStart();
 	}
-
+	private boolean isDeaded=true;
+	public void doDeathPend() {
+		if(isDead!=isDeaded) {
+			if(isDead) {
+				member.tryUnmuteBackend();
+				isDeaded=true;
+			}else {
+				member.tryMuteBackend();
+				isDeaded=false;
+			}
+		}
+	}
+	public void doUndeathPend() {
+		if(!isDeaded) {
+			member.tryUnmuteBackend();
+			isDeaded=true;
+		}
+	}
 	public void onTurnStart() {
 		onDayStart();
 		addDaySkillListener();

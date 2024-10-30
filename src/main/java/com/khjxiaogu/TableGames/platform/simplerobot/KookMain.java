@@ -120,7 +120,7 @@ public class KookMain {
 							hasCmd = true;
 							command = Utils.removeLeadings("##", command);
 						}
-						GlobalMain.firePublicCommand(hasCmd?command:null,sid,()->new SBHumanUser((GuildMember) event.getAuthor(),event.getChannel()),()->new SBRoomMessageEvent(event),rid, (IMessageCompound) KooKAdapter.INSTANCE
+						GlobalMain.firePublicCommand(hasCmd?command:null,sid,()->new SBHumanUser((GuildMember) event.getAuthor(),event.getChannel()),()->new SBRoomMessageEvent(event),rid,SBUtils.getPermission(event.getAuthor()), rid, (IMessageCompound) KooKAdapter.INSTANCE
 								.toUnified(event.getMessageContent().getMessages(), event.getBot()));
 						
 					} catch (Exception ex) {

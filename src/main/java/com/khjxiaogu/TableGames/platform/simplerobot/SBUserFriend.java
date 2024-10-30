@@ -175,4 +175,9 @@ public class SBUserFriend implements AbstractUser {
 			return false;
 		return true;
 	}
+
+	@Override
+	public boolean isFriend() {
+		return true;
+	}
 }

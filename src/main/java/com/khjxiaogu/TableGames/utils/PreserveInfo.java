@@ -325,7 +325,7 @@ public abstract class PreserveInfo<T extends Game>{
 		List<AbstractUser> mems=new ArrayList<>(topreserve.keySet());
 		topreserve.clear();
 		Collections.shuffle(mems);
-		Collections.reverse(mems);
+		//Collections.reverse(mems);
 		mems.removeIf(m->gm.addMember(m));
 		this.group.sendMessage("游戏已经开始...");
 		return true;

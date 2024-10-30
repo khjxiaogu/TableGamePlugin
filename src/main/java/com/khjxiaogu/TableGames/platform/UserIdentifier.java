@@ -23,4 +23,7 @@ public interface UserIdentifier extends Serializable{
 	String getId();
 	String serialize();
 	boolean isActual();
+	public static UserIdentifier parseUserIdentifier(String s) {
+		return UserIdentifierSerializer.readOptional(s).orElse(null);
+	}
 }

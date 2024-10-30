@@ -20,34 +20,26 @@ package com.khjxiaogu.TableGames.permission;
 import java.util.Arrays;
 import java.util.List;
 
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.contact.Member;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
-public class MemberPermissionMatcher implements PermissionMatcher {
+public class QQMatcher implements PermissionMatcher {
 	PermissionResult result;
-	WildcardPermission perm;
+	UserIdentifier qq;
 	@Override
 	public PermissionResult match(MatchInfo info) {
-		if(info.groupid==null)return PermissionResult.UNSPECIFIED;
-		
-		if(info.groupid!=null)
-			return perm.isMatch(info.perm)?result:PermissionResult.UNSPECIFIED;
-
-		
+		if(info.caller.equals(qq))
+			return result;
 		return PermissionResult.UNSPECIFIED;
 	}
-
-
-	public MemberPermissionMatcher(WildcardPermission perm,PermissionResult result) {
-		this.perm=perm;
+	public QQMatcher(UserIdentifier qq,PermissionResult result) {
 		this.result = result;
+		this.qq=qq;
 	}
-	public MemberPermissionMatcher(WildcardPermission perm,boolean result) {
-		this(perm,PermissionResult.valueOf(result));
+	public QQMatcher(UserIdentifier qq,boolean result) {
+		this(qq,PermissionResult.valueOf(result));
 	}
-
 	@Override
 	public List<String> getValue() {
-		return Arrays.asList(result.getSymbol()+perm.name());
+		return Arrays.asList(result.getSymbol()+String.valueOf(qq));
 	}
 }

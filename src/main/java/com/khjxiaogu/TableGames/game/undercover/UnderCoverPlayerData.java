@@ -17,7 +17,7 @@
  */
 package com.khjxiaogu.TableGames.game.undercover;
 
-import com.khjxiaogu.TableGames.data.GenericPlayerData;
+import com.khjxiaogu.TableGames.data.application.GenericPlayerData;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 public class UnderCoverPlayerData implements GenericPlayerData<UnderCoverPlayerData>{

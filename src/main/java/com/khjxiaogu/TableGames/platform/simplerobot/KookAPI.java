@@ -170,6 +170,17 @@ public class KookAPI {
 		}
 		jsonPost("/api/v3/channel-role/update",new UpdateRoleRequest(cid, uid,0,4096|16384),null);
 	}
+	public void setInvisible(String cid,String uid) {
+		try {
+			createUserRole(cid,uid);
+		}catch(KookAPIException ex) {
+			
+		}
+		jsonPost("/api/v3/channel-role/update",new UpdateRoleRequest(cid, uid,0,2048|4096|16384),null);
+	}
+	public void setVisible(String cid,String uid) {
+		deleteUserRole(cid,uid);
+	}
 	public void setUnmute(String cid,String uid) {
 		deleteUserRole(cid,uid);
 	}

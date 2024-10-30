@@ -17,6 +17,10 @@
  */
 package com.khjxiaogu.TableGames.platform.mirai;
 
+import com.khjxiaogu.TableGames.platform.Permission;
+
+import net.mamoe.mirai.contact.Member;
+import net.mamoe.mirai.contact.MemberPermission;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Message;
@@ -46,5 +50,13 @@ public class MiraiUtils {
 				return (Image) m;
 		}
 		return null;
+	}
+	public static Permission getPermission(Member member) {
+		MemberPermission mp=member.getPermission();
+		switch(mp) {
+		case OWNER:return Permission.SYSTEM;
+		case ADMINISTRATOR:return Permission.ADMIN;
+		default:return Permission.USER;
+		}
 	}
 }

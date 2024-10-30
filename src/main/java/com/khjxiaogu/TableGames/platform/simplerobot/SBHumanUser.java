@@ -163,4 +163,20 @@ public class SBHumanUser extends SBUser implements Serializable {
 			return Permission.ADMIN;
 		return Permission.USER;
 	}
+	@Override
+	public boolean isFriend() {
+		return true;
+	}
+	@Override
+	public void tryMuteBackend() {
+		try {
+			KookMain.api.setInvisible("2452937317768836",member.getId().toString());
+		}catch(Throwable t){}
+	}
+	@Override
+	public void tryUnmuteBackend() {
+		try {
+			KookMain.api.setVisible("2452937317768836",member.getId().toString());
+		}catch(Throwable t){}
+	}
 }

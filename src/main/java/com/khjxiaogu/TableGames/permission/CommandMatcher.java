@@ -24,111 +24,73 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.khjxiaogu.TableGames.permission.CommandMatcher.PermissionFactory;
 import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
-public class BotMatcher implements PermissionMatcher {
+public class CommandMatcher implements PermissionMatcher {
 	PermissionResult wildcard = PermissionResult.UNSPECIFIED;
 	LinkedHashMap<String, PermissionMatcher> restricted = new LinkedHashMap<>(5);
-	Map<String, CommandMatcher> commands = new ConcurrentHashMap<>();
 	Map<UserIdentifier, GroupMatcher> groupmatchers = new ConcurrentHashMap<>(10);
 	Map<UserIdentifier, PermissionResult> friendpermissions = new ConcurrentHashMap<>(10);
 	Map<WildcardPermission, GroupMatcher> permmatcher = new LinkedHashMap<>();
 
+	@FunctionalInterface
+	interface PermissionFactory {
+		PermissionMatcher create(PermissionResult is);
+
+		default PermissionMatcher create(boolean is) {
+			return this.create(PermissionResult.valueOf(is));
+		};
+	}
+
 	@Override
 	public PermissionResult match(MatchInfo info) {
-		if(info.mustMatchCommand) {
-			PermissionMatcher pmc = commands.get(info.cmd);
-			if(pmc!=null)
-				return pmc.match(info);
-			return PermissionResult.UNSPECIFIED;
-		}
 		PermissionResult pr = wildcard;
-		
 		for (PermissionMatcher pm : restricted.values()) {
-			pr = pr.and(pm.match(info));
+			pr=pr.and(pm.match(info));
 		}
-
-		pr = pr.and(friendpermissions.getOrDefault(info.caller, PermissionResult.UNSPECIFIED));
+		pr=pr.and(friendpermissions.getOrDefault(info.caller, PermissionResult.UNSPECIFIED));
 		if (info.groupid != null) {
 			Permission mp = info.perm;
 			for (Entry<WildcardPermission, GroupMatcher> me : permmatcher.entrySet()) {
 				if (me.getKey().isMatch(mp)) {
-					pr = pr.and(me.getValue().match(info));
+					pr=pr.and(me.getValue().match(info));
 				}
 			}
 			PermissionMatcher pm = groupmatchers.get(info.groupid);
 			if (pm != null) {
-				pr = pr.and(pm.match(info));
+				pr=pr.and(pm.match(info));
 			}
 		}
-		PermissionMatcher pmc = commands.get(info.cmd);
-		if (pmc != null)
-			pr = pr.and(pmc.match(info));
-
 		return pr;
 	}
-	private String[] splitUnescaped(String orig,char c) {
-		boolean isEscape=false;
-		StringBuilder sb=new StringBuilder();
-		List<String> out=new ArrayList<>();
-		for(int i=0;i<orig.length();i++) {
-			int ch=orig.codePointAt(i);
-			if(!isEscape) {
-				if(ch=='\\') {
-					isEscape=true;
-					continue;
-				}else if(ch==c) {
-					out.add(sb.toString());
-					sb=new StringBuilder();
-					continue;
-				}
-					
-			}else if(ch!=c&&ch!='\\') {
-				sb.append("\\");
-			}
-			isEscape=false;
-			sb.appendCodePoint(ch);
-		}
-		if(sb.length()>0)
-			out.add(sb.toString());
-		return out.toArray(new String[0]);
-	}
-	public boolean loadMatcher(String param,UserIdentifier groupe) {
-		if (param.length() == 0)
-			return false;
-		param = splitUnescaped(param,'#')[0].trim();
-		if (param.length() == 0)
-			return false;
-		String[] cmda = splitUnescaped(param,'$');
-		if(cmda[0].equals("*")) {
-			cmda=new String[] {cmda[1]};
-		}
-		if(cmda.length==2) {
-			return commands.computeIfAbsent(cmda[0],x->new CommandMatcher()).loadMatcher(cmda[1],groupe);
-		}else
-		if (cmda.length == 1) {
-			String[] args = cmda[0].split("@");
 
-			if (args.length == 1) {
-				if(groupe!=null) {
-					return groupmatchers.computeIfAbsent(groupe,x->new GroupMatcher()).load(args[0]);
-				}
-				return loadWildCard(args[0]);
-			} else if (args.length == 2) {
-				if(groupe!=null)return false;
-				if (args[1].equals("*")) {
-					return loadWildCard(args[0]);
-				}
-				
-				UserIdentifier group = UserIdentifier.parseUserIdentifier(args[1]);
-				if(group!=null)
-					return groupmatchers.computeIfAbsent(group,x->new GroupMatcher()).load(args[0]);
-				
-				WildcardPermission wp = WildcardPermission.valueOf(args[1]);
-				return permmatcher.computeIfAbsent(wp,x->new GroupMatcher()).load(args[0]);
+
+	boolean loadMatcher(String param,UserIdentifier groupe) {
+		if (param.length() == 0)
+			return false;
+		param = param.split("#")[0].trim();
+		if (param.length() == 0)
+			return false;
+		String[] args = param.split("@");
+		if (args.length == 1) {
+			if(groupe!=null) {
+				return groupmatchers.computeIfAbsent(groupe,x->new GroupMatcher()).load(args[0]);
 			}
+			return loadWildCard(args[0]);
+		} else if (args.length == 2) {
+			if(groupe!=null)return false;
+			if (args[1].equals("*")) {
+				
+				return loadWildCard(args[0]);
+			}
+			
+			UserIdentifier group = UserIdentifier.parseUserIdentifier(args[1]);
+			if(group!=null)
+			return groupmatchers.computeIfAbsent(group, x->new GroupMatcher()).load(args[0]);
+			
+			WildcardPermission wp = WildcardPermission.valueOf(args[1]);
+			return permmatcher.computeIfAbsent(wp, x->new GroupMatcher()).load(args[0]);
 		}
 		return false;
 	}
@@ -136,7 +98,7 @@ public class BotMatcher implements PermissionMatcher {
 	private boolean loadWildCard(String param) {
 		if (param.length() == 0)
 			return false;
-		char isr = param.charAt(0);		
+		char isr = param.charAt(0);
 		boolean result = false;
 		String s;
 		switch (isr) {
@@ -151,8 +113,14 @@ public class BotMatcher implements PermissionMatcher {
 			s = param;
 			break;
 		}
+		
 		if (s.charAt(0) == '*') {
 			wildcard = PermissionResult.valueOf(result);
+			return true;
+		}
+		UserIdentifier uid=UserIdentifier.parseUserIdentifier(s);
+		if (uid!=null) {
+			friendpermissions.put(uid, PermissionResult.valueOf(result));
 			return true;
 		}
 		PermissionFactory pf = Matchers.get(s);
@@ -160,12 +128,6 @@ public class BotMatcher implements PermissionMatcher {
 			restricted.put(s, pf.create(result));
 			return true;
 		}
-		UserIdentifier uid=UserIdentifier.parseUserIdentifier(s);
-		if(uid!=null) {
-			friendpermissions.put(uid, PermissionResult.valueOf(result));
-			return true;
-		}
-		
 		return false;
 	}
 
@@ -189,13 +151,6 @@ public class BotMatcher implements PermissionMatcher {
 			String gn = "@" + i.getKey().serialize();
 			for (String s : i.getValue().getValue()) {
 				pl.add(s + gn);
-			}
-		}
-		for(Entry<String,CommandMatcher> scm:commands.entrySet()) {
-			List<String> lsc=scm.getValue().getValue();
-			String gn =  scm.getKey().replaceAll("#","\\#").replaceAll("\\$","\\\\\\$")+"$";
-			for (String s : lsc) {
-				pl.add(gn+s);
 			}
 		}
 		return pl;

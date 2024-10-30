@@ -85,7 +85,7 @@ public class MiraiMain extends JavaPlugin {
 		GlobalMain.init(super.getDataFolder());
 		
 		GlobalMain.privmatcher.load(this.getDataFolder());
-		
+		GlobalMain.privmatcher.rebuildConfig();
 		try {
 			File f=new File(super.getDataFolder(),"undtext.txt");
 			File f2=new File(super.getDataFolder(),"cyyy.csv");
@@ -131,7 +131,7 @@ public class MiraiMain extends JavaPlugin {
 					hasCmd=true;
 					command=Utils.removeLeadings("##",command);
 				}
-				GlobalMain.firePublicCommand(hasCmd?command:null,sid,()->new MiraiHumanUser((NormalMember) event.getSender()),()->new MiraiRoomMessageEvent(event),rid, (IMessageCompound) MiraiAdapter.INSTANCE.toUnified(event.getMessage(),event.getBot()));
+				GlobalMain.firePublicCommand(hasCmd?command:null,sid,()->new MiraiHumanUser((NormalMember) event.getSender()),()->new MiraiRoomMessageEvent(event),rid, MiraiUtils.getPermission(event.getSender()), rid, (IMessageCompound) MiraiAdapter.INSTANCE.toUnified(event.getMessage(),event.getBot()));
 			}
 			@EventHandler
 			public void onNewFriend(NewFriendRequestEvent ev) {

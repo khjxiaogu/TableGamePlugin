@@ -1,18 +1,18 @@
 /**
- * Mirai Tablegames Plugin
+ * Mirai Song Plugin
  * Copyright (C) 2021  khjxiaogu
  * 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ * GNU Affero General Public License for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.khjxiaogu.TableGames.permission;
@@ -31,71 +31,69 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
-import com.khjxiaogu.TableGames.platform.UserIdentifierSerializer;
 
-
-public class GlobalMatcher implements PermissionMatcher{
+public class GlobalMatcher implements PermissionMatcher {
 	BotMatcher global;
-	Map<UserIdentifier,BotMatcher> local=new ConcurrentHashMap<>();
+	Map<UserIdentifier, BotMatcher> local = new ConcurrentHashMap<>();
+	public PermissionResult match(String perm,AbstractUser sender) {
+		return match(new MatchInfo(perm,sender.getId(),sender.getRoom().getId(),sender.getPermission(),sender.getHostId()));
+	}
 	@Override
-	public PermissionResult match(AbstractUser m) {
-		BotMatcher bm=local.getOrDefault(m.getHostId(),global);
-		return bm.match(m);
+	public PermissionResult match(MatchInfo info) {
+		BotMatcher bm = local.getOrDefault(info.bot.getId(), global);
+		return bm.match(info);
 	}
 
-	@Override
-	public PermissionResult match(AbstractUser u, boolean temp) {
-		BotMatcher bm=local.getOrDefault(u.getHostId(),global);
-		return bm.match(u,temp);
+	public boolean loadString(String s, UserIdentifier bid) {
+		BotMatcher bm = local.computeIfAbsent(bid, x -> new BotMatcher());
+		if (bm.loadMatcher(s, null)) {
+			try (FileOutputStream fis = new FileOutputStream(new File(loadfrom, bid.serialize() + ".permission"), true);
+					PrintStream sc = new PrintStream(fis)) {
+				sc.println();
+				sc.print(s);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			return true;
+		}
+		return false;
 	}
 
-	@Override
-	public PermissionResult match(UserIdentifier id,UserIdentifier group,UserIdentifier botid) {
-		BotMatcher bm=local.getOrDefault(botid,global);
-		return bm.match(id,group,botid);
-	}
-	public void loadString(String s,UserIdentifier bid) {
-		BotMatcher bm=local.get(bid);
-		if(bm==null) {
-			bm=new BotMatcher();
-			local.put(bid,bm);
+	public boolean loadString(String s) {
+		if (global.loadMatcher(s, null)) {
+			try (FileOutputStream fis = new FileOutputStream(new File(loadfrom, "global.permission"), true);
+					PrintStream sc = new PrintStream(fis)) {
+				sc.println();
+				sc.print(s);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			return true;
 		}
-		bm.loadMatcher(s);
-		try(FileOutputStream fis=new FileOutputStream(new File(loadfrom,bid+".permission"),true);PrintStream sc=new PrintStream(fis)){
-			sc.println();
-			sc.print(s);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return false;
 	}
-	public void loadString(String s) {
-		global.loadMatcher(s);
-		try(FileOutputStream fis=new FileOutputStream(new File(loadfrom,"global.permission"),true);PrintStream sc=new PrintStream(fis)){
-			sc.println();
-			sc.print(s);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+
 	public void rebuildConfig() {
-		try(FileOutputStream fis=new FileOutputStream(new File(loadfrom,"global.permission"),false);PrintStream sc=new PrintStream(fis)){
-			boolean nfirst=false;
-			for(String s:global.getValue()) {
-				if(nfirst)
+		try (FileOutputStream fis = new FileOutputStream(new File(loadfrom, "global.permission"), false);
+				PrintStream sc = new PrintStream(fis)) {
+			boolean nfirst = false;
+			for (String s : global.getValue()) {
+				if (nfirst)
 					sc.println();
-				nfirst=true;
+				nfirst = true;
 				sc.print(s);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		for(Entry<UserIdentifier, BotMatcher> i:local.entrySet()){
-			try(FileOutputStream fis=new FileOutputStream(new File(loadfrom,i.getKey()+".permission"),false);PrintStream sc=new PrintStream(fis)){
-				boolean nfirst=false;
-				for(String s:global.getValue()) {
-					if(nfirst)
+		for (Entry<UserIdentifier, BotMatcher> i : local.entrySet()) {
+			try (FileOutputStream fis = new FileOutputStream(new File(loadfrom, i.getKey() + ".permission"), false);
+					PrintStream sc = new PrintStream(fis)) {
+				boolean nfirst = false;
+				for (String s : i.getValue().getValue()) {
+					if (nfirst)
 						sc.println();
-					nfirst=true;
+					nfirst = true;
 					sc.print(s);
 				}
 			} catch (IOException e) {
@@ -103,65 +101,60 @@ public class GlobalMatcher implements PermissionMatcher{
 			}
 		}
 	}
+
+	File loadfrom;
 	public void reload() {
 		load(loadfrom);
 	}
-	File loadfrom;
 	public void load(File f) {
-		loadfrom=f;
-		global=null;
+		loadfrom = f;
+		global = null;
 		local.clear();
-		File gc=new File(f,"global.permission");
-		global=new BotMatcher();
-		if(!gc.exists()) {
-			try {
-				gc.createNewFile();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		try(FileInputStream fis=new FileInputStream(gc);Scanner sc=new Scanner(fis)){
-			int i=0;
-			while(sc.hasNextLine()) {
+		File gc = new File(f, "global.permission");
+		global = new BotMatcher();
+		try (FileInputStream fis = new FileInputStream(gc); Scanner sc = new Scanner(fis)) {
+			int i = 0;
+			while (sc.hasNextLine()) {
 				i++;
 				try {
-					global.loadMatcher(sc.nextLine());
-				}catch(Exception ex) {
-					GlobalMain.getLogger().error(ex);;
-					GlobalMain.getLogger().warning("权限配置文件"+gc.getName()+"的第"+i+"行有语法错误！");
+					global.loadMatcher(sc.nextLine(), null);
+				} catch (Exception ex) {
+					GlobalMain.getLogger().error(ex);
+					GlobalMain.getLogger().warning("权限配置文件" + gc.getName() + "的第" + i + "行有语法错误！");
 				}
 			}
-		}catch(Exception ex) {
-			//GlobalMain.getLogger().warning(ex);
-			GlobalMain.getLogger().warning("权限配置文件"+gc.getName()+"读取失败！"+ex.getMessage());
-			
+		} catch (Exception ex) {
+			GlobalMain.getLogger().error(ex);
+			GlobalMain.getLogger().warning("权限配置文件" + gc.getName() + "读取失败！" + ex.getMessage());
+
 		}
-		for(File ff:f.listFiles()) {
+		for (File ff : f.listFiles()) {
 			try {
-			if(ff.getName().endsWith(".permission")) {
-				String fn=ff.getName().split("\\.")[0];
-				
-				UserIdentifier gn=UserIdentifierSerializer.read(fn);
-				BotMatcher bm=new BotMatcher();
-				try(FileInputStream fis=new FileInputStream(ff);Scanner sc=new Scanner(fis)){
-					int i=0;
-					while(sc.hasNextLine()) {
-						i++;
-						try {
-							bm.loadMatcher(sc.nextLine());
-						}catch(Exception ex) {
-							//GlobalMain.getLogger().warning(ex);
-							GlobalMain.getLogger().warning("权限配置文件"+ff.getName()+"的第"+i+"行有语法错误！");
+				if (ff.getName().endsWith(".permission")) {
+					String fn = ff.getName().split("\\.")[0];
+
+					UserIdentifier gn = UserIdentifier.parseUserIdentifier(fn);
+					if (gn != null) {
+						BotMatcher bm = new BotMatcher();
+						try (FileInputStream fis = new FileInputStream(ff); Scanner sc = new Scanner(fis)) {
+							int i = 0;
+							while (sc.hasNextLine()) {
+								i++;
+								try {
+									bm.loadMatcher(sc.nextLine(), null);
+									continue;
+								} catch (Exception ex) {
+									GlobalMain.getLogger().error(ex);
+								}
+								GlobalMain.getLogger().warning("权限配置文件" + ff.getName() + "的第" + i + "行有语法错误！");
+							}
 						}
+						local.put(gn, bm);
 					}
 				}
-				local.put(gn,bm);
-			
-			}
-			}catch(Exception ex) {
-				//GlobalMain.getLogger().warning(ex);
-				GlobalMain.getLogger().warning("权限配置文件"+ff.getName()+"读取失败："+ex.getMessage());
+			} catch (Exception ex) {
+				GlobalMain.getLogger().error(ex);
+				GlobalMain.getLogger().warning("权限配置文件" + ff.getName() + "读取失败：" + ex.getMessage());
 			}
 		}
 	}
@@ -170,4 +163,21 @@ public class GlobalMatcher implements PermissionMatcher{
 	public List<String> getValue() {
 		return global.getValue();
 	}
+
+	public boolean loadString(String s, UserIdentifier gid, UserIdentifier bid) {
+		BotMatcher bm = local.computeIfAbsent(bid, x -> new BotMatcher());
+		if (bm.loadMatcher(s, gid)) {
+			try (FileOutputStream fis = new FileOutputStream(new File(loadfrom, bid + ".permission"), true);
+					PrintStream sc = new PrintStream(fis)) {
+				sc.println();
+				sc.print(s);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	
 }

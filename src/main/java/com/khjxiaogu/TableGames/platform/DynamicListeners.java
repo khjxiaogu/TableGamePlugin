@@ -60,37 +60,21 @@ public class DynamicListeners {
 	
 	public DynamicListeners() {
 	}
-	public static void registerListener(Object game,UserIdentifier roomid, RoomMessageListener ml) {
-		gls.put(game,new RoomMessageListenerWrapper(ml, roomid));
-	}
-	public static void releaseListener(Object game) {
-		gls.remove(game);
-	}
-	public static void registerListener(UserIdentifier uid,UserIdentifier roomid,MessageListener ml) {
-		mls.put(uid, new MessageListenerWrapper(ml, roomid));
-	}
-
-	public static void registerListener(UserIdentifier uid, MessageListener ml) {
-		mls.put(uid, new MessageListenerWrapper(ml,null));
-	}
-
-
-	public static void releaseListener(UserIdentifier uid) {
-		mls.remove(uid);
-	}
+	public static void registerListener(Object game,UserIdentifier roomid, RoomMessageListener ml) {gls.put(game,new RoomMessageListenerWrapper(ml, roomid));}
+	public static void releaseListener(Object game) {gls.remove(game);}
+	public static void registerListener(UserIdentifier uid,UserIdentifier roomid,MessageListener ml) {mls.put(uid, new MessageListenerWrapper(ml, roomid));}
+	public static void registerListener(UserIdentifier uid, MessageListener ml) {mls.put(uid, new MessageListenerWrapper(ml,null));}
+	public static void releaseListener(UserIdentifier uid) {mls.remove(uid);}
 	public static void transferListener(UserIdentifier uid,AbstractUser id2) {
 		MessageListenerWrapper ml = mls.remove(uid);
 		if(ml!=null)
 			id2.registerListener(ml);
 	}
 	public static boolean dispatch(UserIdentifier uid, MsgType type, IMessageCompound messageCompound) {
-		
 		MessageListenerWrapper ml = mls.get(uid);
-		//System.out.println("dispatching " + uid);
 		if (ml == null || !ml.isValid)
 			return false;
 		ml.handle(messageCompound, type);
-		//System.out.println("dispatched " + uid);
 		return true;
 	}public static void dispatchAsync(UserIdentifier uid, MsgType type, IMessageCompound msg) {
 		GlobalMain.dispatchexec.execute(()->DynamicListeners.dispatch(uid, type, msg));
@@ -100,13 +84,9 @@ public class DynamicListeners {
 	}
 	public static boolean dispatch(UserIdentifier uid,UserIdentifier rid,Supplier<AbstractUser> user, MsgType type, IMessageCompound msg) {
 		gls.values().stream().filter(e->e.from==rid).forEach(e->e.handle(user.get(),msg, type));
-		
 		MessageListenerWrapper ml = mls.get(uid);
-		if (ml == null || !ml.isValid)
-			return false;
-		if (!(ml.from == null||rid.equals(ml.from)))
-			return false;
-		//System.out.println("dispatching msg to " + uid);
+		if (ml == null || !ml.isValid)return false;
+		if (!(ml.from == null||rid.equals(ml.from)))return false;
 		ml.handle(msg, type);
 		return true;
 	}

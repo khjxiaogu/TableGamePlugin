@@ -51,4 +51,11 @@ public interface AbstractUser {
 	}
 	Object getRoleObject();
 	Permission getPermission();
+	boolean isFriend();
+	default void tryMuteBackend() {
+		
+	}
+	default void tryUnmuteBackend() {
+		
+	}
 }

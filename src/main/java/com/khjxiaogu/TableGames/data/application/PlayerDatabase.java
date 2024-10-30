@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.data;
+package com.khjxiaogu.TableGames.data.application;
 
 import java.io.File;
 import java.sql.Connection;
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -163,7 +164,13 @@ public class PlayerDatabase {
 			ps.setString(1,game);
 			try(ResultSet rs=ps.executeQuery()){
 				while(rs.next()) {
-					ll.put(UserIdentifierSerializer.read(rs.getString(1)),gs.fromJson(rs.getString(2),dcls));
+					UserIdentifier id;
+					try {
+						id=UserIdentifierSerializer.read(rs.getString(1));
+					}catch(NoSuchElementException ex) {
+						continue;
+					}
+					ll.put(id,gs.fromJson(rs.getString(2),dcls));
 				}
 			}
 		} catch (Exception e) {

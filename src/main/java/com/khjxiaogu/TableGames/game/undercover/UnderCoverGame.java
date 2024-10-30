@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.khjxiaogu.TableGames.data.PlayerDatabase.GameData;
+import com.khjxiaogu.TableGames.data.application.PlayerDatabase.GameData;
 import com.khjxiaogu.TableGames.game.undercover.UnderCoverTextLibrary.WordPair;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;

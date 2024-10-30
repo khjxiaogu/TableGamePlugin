@@ -1,19 +1,19 @@
 /**
- * Mirai Tablegames Plugin
+ * Mirai Song Plugin
  * Copyright (C) 2021  khjxiaogu
  * 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ * GNU Affero General Public License for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * aUserIdentifier with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.khjxiaogu.TableGames.permission;
 
@@ -24,9 +24,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.khjxiaogu.TableGames.platform.AbstractUser;
+import com.khjxiaogu.TableGames.permission.CommandMatcher.PermissionFactory;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
-import com.khjxiaogu.TableGames.platform.UserIdentifierSerializer;
 
 public class GroupMatcher implements PermissionMatcher {
 	PermissionResult wildcard=PermissionResult.UNSPECIFIED;
@@ -34,28 +33,12 @@ public class GroupMatcher implements PermissionMatcher {
 	Map<UserIdentifier,PermissionResult> memberpermissions=new ConcurrentHashMap<>(10);
 	
 	@Override
-	public PermissionResult match(AbstractUser m) {
-		PermissionResult pr=wildcard;
-		
-		for(PermissionMatcher sp:restricted.values()) {
-			pr=pr.and(sp.match(m));
-		}
-		//MiraiSongPlugin.getMLogger().info("brm"+pr.name());
-		pr=pr.and(memberpermissions.getOrDefault(m.getId(),PermissionResult.UNSPECIFIED));
-		//MiraiSongPlugin.getMLogger().info("arm"+pr.name());
-		return pr;
-	}
-	@Override
-	public PermissionResult match(AbstractUser u, boolean temp) {
-		return PermissionMatcher.super.match(u, temp);
-	}
-	@Override
-	public PermissionResult match(UserIdentifier id,UserIdentifier group,UserIdentifier botid) {
+	public PermissionResult match(MatchInfo info) {
 		PermissionResult pr=wildcard;
 		for(PermissionMatcher sp:restricted.values()) {
-			pr=pr.and(sp.match(id, group,botid));
+			pr=pr.and(sp.match(info));
 		}
-		pr=pr.and(memberpermissions.getOrDefault(id,PermissionResult.UNSPECIFIED));
+		pr=pr.and(memberpermissions.getOrDefault(info.caller,PermissionResult.UNSPECIFIED));
 		return pr;
 	}
 	public List<String> getValue(){
@@ -69,27 +52,31 @@ public class GroupMatcher implements PermissionMatcher {
 		}
 		return pl;
 	}
-	void load(String param) {
-		if(param.length()==0)return;
+	boolean load(String param) {
+		if(param.length()==0)return false;
 		char isr=param.charAt(0);
-		
 		boolean result=false;
 		String s;
 		switch(isr) {
-		case '#':return;
+		case '#':return false;
 		case '+':result=true;s=param.substring(1);break;
 		case '-':s=param.substring(1);break;
 		default:s=param;break;
 		}
 		if(s.charAt(0)=='*') {
 			wildcard=PermissionResult.valueOf(result);
-		}else {
-			PermissionFactory pf=Matchers.get(s);
-			if(pf!=null) {
-				restricted.put(s,pf.create(result));
-			}else
-				memberpermissions.put(UserIdentifierSerializer.read(param),PermissionResult.DISALLOW);
+			return true;
 		}
-		
+		PermissionFactory pf=Matchers.get(s);
+		if(pf!=null) {
+			restricted.put(s,pf.create(result));
+			return true;
+		}
+		UserIdentifier uid=UserIdentifier.parseUserIdentifier(s);
+		if(uid!=null) {
+			memberpermissions.put(uid,PermissionResult.valueOf(result));
+			return true;
+		}
+		return false;
 	}
 }

@@ -191,6 +191,11 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	public void tryAvailable() {
 	}
 
+	@Override
+	public boolean isFriend() {
+		return true;
+	}
+
 
 
 	

@@ -49,7 +49,12 @@ public class MiraiHumanUser extends MiraiUser implements Serializable {
 	private void readObject(ObjectInputStream aInputStream) throws ClassNotFoundException, IOException
 	{
 		aInputStream.defaultReadObject();
-		Bot bot=Bot.getInstances().get(0);
+		Bot bot;
+		
+		bot=Bot.getInstanceOrNull(bid);
+		if(bot==null)
+			bot=Bot.getInstances().get(0);
+		
 		group=bot.getGroup(gid);
 		member=group.get(mid);
 	}
@@ -175,5 +180,9 @@ public class MiraiHumanUser extends MiraiUser implements Serializable {
 		case ADMINISTRATOR:return Permission.ADMIN;
 		default:return Permission.USER;
 		}
+	}
+	@Override
+	public boolean isFriend() {
+		return member.getBot().getFriend(member.getId())!=null;
 	}
 }
