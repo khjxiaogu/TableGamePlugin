@@ -28,7 +28,7 @@ public class SlowUtils {
 	public static void runSlowly(Runnable obj) {
 		synchronized(slowLock) {
 			try {
-				Thread.sleep(r.nextInt(1500));
+				Thread.sleep(r.nextInt(500));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

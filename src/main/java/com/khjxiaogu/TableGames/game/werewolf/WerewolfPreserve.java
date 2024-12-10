@@ -33,12 +33,12 @@ public class WerewolfPreserve extends PreserveInfo<WerewolfGame> {
 
 	@Override
 	protected int getSuitMembers() {
-		return 9;
+		return 12;
 	}
 
 	@Override
 	protected int getMinMembers() {
-		return 8;
+		return 6;
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class WerewolfPreserve extends PreserveInfo<WerewolfGame> {
 	@Override
 	public String getWelcomeMessage(AbstractUser ar) {
 		if (GlobalMain.credit.get(ar.getId()).hasItem("狼人杀vip券"))
-			return "\n您可以使用##狼人杀 vip <阵营> 来提高进入某个阵营的概率";
+			return "\n您可以使用##"+getName()+" vip <阵营> 来提高进入某个阵营的概率";
 		return "";
 	}
 

@@ -181,10 +181,10 @@ public class Werewolf extends Villager {
 				}
 			} else if (content.startsWith("#")) {
 				String tosendHead = this.getMemberString(this);
-				String tosendEnd=":" + Utils.removeLeadings("#", content);
+				String tosendEnd= Utils.removeLeadings("#", content);
 				for (Villager w : game.playerlist) {
 					if (w instanceof Werewolf && !w.isDead() && !w.equals(this)) {
-						w.sendPrivate(tosendHead+"->"+w.getMemberString()+":"+tosendEnd);
+						w.sendPrivate(tosendHead+":"+tosendEnd);
 					}
 				}
 			} else if (content.startsWith("放弃")) {

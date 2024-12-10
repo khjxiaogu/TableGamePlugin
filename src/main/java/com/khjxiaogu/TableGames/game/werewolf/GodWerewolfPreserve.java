@@ -18,16 +18,18 @@
 package com.khjxiaogu.TableGames.game.werewolf;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
+import com.khjxiaogu.TableGames.utils.GameCreater;
+import com.khjxiaogu.TableGames.utils.PreserveInfo;
 
-public class MiniWerewolfPreserve extends WerewolfPreserve {
+public class GodWerewolfPreserve extends PreserveInfo<WerewolfGame> {
 
-	public MiniWerewolfPreserve(AbstractRoom g) {
+	public GodWerewolfPreserve(AbstractRoom g) {
 		super(g);
 	}
 
 	@Override
 	protected int getSuitMembers() {
-		return 9;
+		return 8;
 	}
 
 	@Override
@@ -37,12 +39,19 @@ public class MiniWerewolfPreserve extends WerewolfPreserve {
 
 	@Override
 	protected int getMaxMembers() {
-		return 12;
+		return 18;
+	}
+
+	static GameCreater<WerewolfGame> gc = new GodWerewolfCreater();
+
+	@Override
+	protected GameCreater<WerewolfGame> getGameClass() {
+		return gc;
 	}
 
 	@Override
 	public String getName() {
-		return "小型狼人杀";
+		return "诸神狼人杀";
 	}
 
 }

@@ -54,7 +54,7 @@ public class Bear extends Villager {
 				continue;
 			}
 			if (pt.getPredictorFraction() == Fraction.Wolf) {
-				sendWolf();
+				game.isBearRoared|=true;
 				return;
 			}
 			break;
@@ -66,13 +66,12 @@ public class Bear extends Villager {
 				continue;
 			}
 			if (pt.getPredictorFraction() == Fraction.Wolf) {
-				sendWolf();
+				game.isBearRoared|=true;
 				return;
 			}
 			break;
 		}
-		game.logger.logRaw("熊没有咆哮");
-		game.sendPublicMessage("昨晚熊没有咆哮。");
+
 	}
 
 	@Override
@@ -91,8 +90,4 @@ public class Bear extends Villager {
 		return 4;
 	}
 
-	public void sendWolf() {
-		game.logger.logRaw("熊咆哮了");
-		game.sendPublicMessage("昨晚熊咆哮了。");
-	}
 }

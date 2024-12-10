@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.khjxiaogu.TableGames.data.application.GenericPlayerData;
+import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.Role;
 import com.khjxiaogu.TableGames.utils.Utils;
 
@@ -67,6 +68,17 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 			vaccuracy += vacc;
 			vaccuracydemon += vad;
 		}
+		public void modifier(float val) {
+			wins*=val;
+			loses*=val;
+			total*=val;
+			alive*=val;
+			death*=val;
+			saccuracy*=val;
+			saccuracydemon*=val;
+			vaccuracy*=val;
+			vaccuracydemon*=val;
+		}
 		public RoleWinInfo add(RoleWinInfo other) {
 			wins+=other.wins;
 			loses+=other.loses;
@@ -102,12 +114,43 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 	public long vaccuracydemon;
 	public double saccuracy;
 	public long saccuracydemon;
+	public Map<DiedReason,Integer> diedCount=new EnumMap<>(DiedReason.class);
+	public int notdiedCount=0;
 	public Map<Role, RoleWinInfo> winsrole = new EnumMap<>(Role.class);
 	public List<String> lastTen=new ArrayList<>();
 	public WerewolfPlayerData() {
 
 	}
-
+	public void modifier(float num) {
+		wins*=num;
+		loses*=num;
+		winaswolf*=num;
+		loseaswolf*=num;
+		winasvill*=num;
+		loseasvill*=num;
+		winasgod*=num;
+		loseasgod*=num;
+		
+		alive*=num;
+		dieasvill*=num;
+		aliveasvill*=num;
+		dieasgod*=num;
+		aliveasgod*=num;
+		dieaswolf*=num;
+		aliveaswolf*=num;
+		death*=num;
+		vaccuracy*=num;
+		vaccuracydemon*=num;
+		saccuracy*=num;
+		saccuracydemon*=num;
+		winsrole.forEach((k,v)->v.modifier(num));
+	}
+	public void recordDiedReason(DiedReason dr) {
+		if(dr==null)
+			notdiedCount++;
+		else
+			diedCount.merge(dr, 1, (a,b)->a+b);
+	}
 	public void winAsRole(Role r, boolean alive, double acc, long ad, double sacc, long sad) {
 		if (r == null)
 			return;
@@ -207,8 +250,14 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 		lastTen.add(s);	
 	}
 	public void lose(Villager p, Fraction frac, double acc, long cd, double vacc, long vcd) {
-		this.loseAsRole(Role.getRole(p), acc, cd, vacc, vcd);
+		
 		populateRank(p.getRole()+" 失败");
+		if(frac!=Fraction.Wolf&&p.isFirstNightDeath) {
+			return;
+		}
+		this.loseAsRole(Role.getRole(p), acc, cd, vacc, vcd);
+		
+		
 		switch (frac) {
 		case Innocent:
 			loseAsVill();
@@ -222,10 +271,11 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 		}
 	}
 
-	public boolean log(Villager player, Fraction win, boolean isAlive) {
+	public boolean log(Villager player, Fraction win, boolean isAlive, DiedReason dr) {
 		Fraction frac = player.getRealFraction();
+		
 		if (win == Fraction.Innocent && (frac == Fraction.God || frac == Fraction.Innocent)) {
-
+			this.recordDiedReason(dr);
 			saccuracydemon += player.skilled;
 			vaccuracydemon += player.voted;
 			saccuracy += player.skillAccuracy + 0.25 * player.skilled;
@@ -234,10 +284,15 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 					player.voteAccuracy + 0.25 * player.voted, player.voted);
 			return true;
 		} else if (win == Fraction.Wolf && frac == Fraction.Wolf) {
+			this.recordDiedReason(dr);
 			win(player, frac, isAlive, 0, 0, 0, 0);
 			return true;
 		} else {
 			if (frac != Fraction.Wolf) {
+				if(dr==null)
+					dr=DiedReason.Wolf;
+				else
+					this.recordDiedReason(dr);
 				saccuracydemon += player.skilled;
 				vaccuracydemon += player.voted;
 				saccuracy += player.skillAccuracy - (player.skilled > 0 ? 0.1 : 0);
@@ -255,7 +310,7 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 		StringBuilder apd = new StringBuilder();
 		apd.append("狼人杀统计数据").append("\n");
 		apd.append("总场数 ").append(total).append("\n");
-		apd.append("总胜率 ").append(Utils.percent(wins, wins + loses)).append("\n");
+		apd.append("总胜率 ").append(Utils.percent(wins, alive + death)).append("\n");
 		apd.append("神胜率 ").append(Utils.percent(winasgod, winasgod + loseasgod)).append("\n");
 		apd.append("民胜率 ").append(Utils.percent(winasvill, winasvill + loseasvill)).append("\n");
 		apd.append("狼胜率 ").append(Utils.percent(winaswolf, winaswolf + loseaswolf)).append("\n");
@@ -265,7 +320,8 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 		apd.append("狼存活率 ").append(Utils.percent(aliveaswolf, aliveaswolf + dieaswolf)).append("\n");
 		apd.append("综合准确率：").append(Utils.percent(saccuracy * 2 + vaccuracy, saccuracydemon * 2 + vaccuracydemon)).append("\n");
 		apd.append("输入##狼人杀分析 <角色/阵营> 查看角色统计").append("\n");
-		apd.append("输入##狼人杀分析 战绩 查看最近战绩");
+		apd.append("输入##狼人杀分析 战绩 查看最近战绩").append("\n");
+		apd.append("输入##狼人杀分析 死因 查看死因情况");
 		return apd.toString();
 	}
 
@@ -285,8 +341,8 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 			StringBuilder apd = new StringBuilder(" 全部职业分析");
 			for(Entry<Role, RoleWinInfo> rwi:winsrole.entrySet()) {
 				apd.append("\n").append(rwi.getKey().getName());
-				apd.append(" 胜率：" + Utils.percent(rwi.getValue().wins, rwi.getValue().total));
-				apd.append(" 存活率：" + Utils.percent(rwi.getValue().alive, rwi.getValue().total));
+				apd.append(" 胜率：" + Utils.percent(rwi.getValue().wins, rwi.getValue().alive+rwi.getValue().death));
+				apd.append(" 存活率：" + Utils.percent(rwi.getValue().alive, rwi.getValue().alive+rwi.getValue().death));
 				if(rwi.getKey().getFraction()!=Fraction.Wolf)
 					apd.append(" 准确率：" +Utils.percent(rwi.getValue().saccuracy * 2 + rwi.getValue().vaccuracy, rwi.getValue().saccuracydemon * 2 + rwi.getValue().vaccuracydemon));
 			}
@@ -302,6 +358,18 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 
 			}
 			return apd.toString();
+		}else if(v.equals("死因")) {
+			StringBuilder apd = new StringBuilder(" 死因分析");
+			int tot=notdiedCount;
+			for(Entry<DiedReason, Integer> rwi:diedCount.entrySet())
+				tot+=rwi.getValue();
+			apd.append("\n存活 占比："+Utils.percentDot2(notdiedCount,tot));
+			for(Entry<DiedReason, Integer> rwi:diedCount.entrySet()) {
+				apd.append("\n").append(rwi.getKey().toString());
+				apd.append(" 占比：" + Utils.percentDot2(rwi.getValue(),tot));
+
+			}
+			return apd.toString();
 		}
 		Fraction f=Fraction.getByName(v);
 		Role r = Role.getByNameOrNull(v);
@@ -312,8 +380,8 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 				return " 暂无数据";
 			StringBuilder apd = new StringBuilder();
 			apd.append(" "+r.getName() + "统计").append("\n");
-			apd.append("胜率：" + Utils.percent(rwi.wins, rwi.total)).append("\n");
-			apd.append("存活率：" + Utils.percent(rwi.alive, rwi.total)).append("\n");
+			apd.append("胜率：" + Utils.percent(rwi.wins, rwi.alive+rwi.death)).append("\n");
+			apd.append("存活率：" + Utils.percent(rwi.alive, rwi.alive+rwi.death)).append("\n");
 			if(r.getFraction()!=Fraction.Wolf)
 				apd.append("准确率：" +Utils.percent(rwi.saccuracy * 2 + rwi.vaccuracy, rwi.saccuracydemon * 2 + rwi.vaccuracydemon));
 			return apd.toString();
@@ -328,13 +396,17 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 			}
 			StringBuilder apd = new StringBuilder();
 			apd.append(" "+f.name+ "统计").append("\n");
-			apd.append("胜率：" + Utils.percent(rwi.wins, rwi.total)).append("\n");
-			apd.append("存活率：" + Utils.percent(rwi.alive, rwi.total)).append("\n");
+			apd.append("胜率：" + Utils.percent(rwi.wins, rwi.alive+rwi.death)).append("\n");
+			apd.append("存活率：" + Utils.percent(rwi.alive, rwi.alive+rwi.death)).append("\n");
 			if(f!=Fraction.Wolf)
 				apd.append("准确率：" +Utils.percent(rwi.saccuracy * 2 + rwi.vaccuracy, rwi.saccuracydemon * 2 + rwi.vaccuracydemon));
 			return apd.toString();
 		}
 		return " 角色/阵营不存在";
+	}
+	public void forcePlus(WerewolfPlayerData another) {
+		total+=another.total;
+		plus(another);
 	}
 
 	@Override
@@ -359,6 +431,9 @@ public class WerewolfPlayerData implements GenericPlayerData<WerewolfPlayerData>
 		for(Entry<Role, RoleWinInfo> rwi:another.winsrole.entrySet()) {
 			this.winsrole.compute(rwi.getKey(),(k,v)->v==null?rwi.getValue():v.add(rwi.getValue()));
 		}
+		for(Entry<DiedReason, Integer> i:another.diedCount.entrySet())
+			this.diedCount.merge(i.getKey(), i.getValue(), (a,b)->a+b);
+		this.notdiedCount+=another.notdiedCount;
 	}
 
 }

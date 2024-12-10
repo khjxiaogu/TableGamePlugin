@@ -58,6 +58,7 @@ public class Villager extends UserFunction implements Serializable {
 	boolean isMuted = false;
 	boolean lastIsMuted = false;
 	boolean isFrozen = false;
+	boolean isFirstNightDeath=false;
 	Set<DiedReason> diedReasonStack = Collections.synchronizedSet(new HashSet<>());
 	double voteAccuracy;
 	int voted;

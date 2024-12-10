@@ -54,6 +54,7 @@ public class Idiot extends Villager {
 		if (dir != DiedReason.Vote) {
 			super.onDied(dir, shouldSkill);
 		} else {
+			super.diedReasonStack.remove(DiedReason.Vote);
 			game.logger.logRaw(this.getMemberString(this) + " 白痴出局");
 			isDead = false;
 			canVote = false;
@@ -69,5 +70,10 @@ public class Idiot extends Villager {
 	@Override
 	public String getRole() {
 		return "白痴";
+	}
+
+	@Override
+	public boolean shouldSurvive(DiedReason dir) {
+		return dir==DiedReason.Vote;
 	}
 }

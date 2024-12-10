@@ -5,6 +5,7 @@
   <artifactId>TableGames</artifactId>
   <name>qq多人桌游</name>
   <version>0.0.2-SNAPSHOT</version>
+  <description>多人桌游</description>
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
     <resources>

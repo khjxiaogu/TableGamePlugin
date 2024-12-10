@@ -1,5 +1,0 @@
-name: ${mirai.plugin.name}
-author: ${mirai.plugin.author}
-version: ${project.version}
-main: ${mirai.plugin.main}
-info: ${mirai.plugin.info}

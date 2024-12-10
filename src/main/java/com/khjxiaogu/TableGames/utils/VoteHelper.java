@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import com.khjxiaogu.TableGames.platform.UserFunction;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
 
 public class VoteHelper<T extends UserFunction> {

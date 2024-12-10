@@ -73,6 +73,9 @@ public class PlayerDatabase {
 		public boolean setData(UserIdentifier id,String data) {
 			return db.setData(id, game, data);
 		}
+		public boolean setDataRaw(UserIdentifier id,String data) {
+			return db.setData(id, game, data,true);
+		}
 		public PlayerData getPlayer(UserIdentifier id) {
 			return new PlayerData(id,this);
 		}
@@ -81,6 +84,12 @@ public class PlayerDatabase {
 		}
 		public boolean setPlayer(UserIdentifier id,Object datacls) {
 			return setData(id,gs.toJson(datacls));
+		}
+		public <T> T getPlayerRaw(UserIdentifier id,Class<T> datacls) {
+			return gs.fromJson(db.getData(id, game,true),datacls);
+		}
+		public boolean setPlayerRaw(UserIdentifier id,Object datacls) {
+			return setDataRaw(id,gs.toJson(datacls));
 		}
 	}
 	static final String createPoM = "CREATE TABLE IF NOT EXISTS profile (" +
@@ -111,8 +120,14 @@ public class PlayerDatabase {
 		}
 	}
 	public JsonObject getData(UserIdentifier id,String game) {
+		return getData(id,game,false);
+	}
+	public JsonObject getData(UserIdentifier id,String game,boolean ignoreBinding) {
 		try(PreparedStatement ps=database.prepareStatement("SELECT data FROM profile WHERE qq = ? AND game = ?")){
-			ps.setString(1,GlobalMain.bindings.getBinding(id).serialize());
+			if(ignoreBinding)
+				ps.setString(1,id.serialize());
+			else
+				ps.setString(1,GlobalMain.bindings.getBinding(id).serialize());
 			ps.setString(2,game);
 			try(ResultSet rs=ps.executeQuery()){
 				if(rs.next())
@@ -128,8 +143,14 @@ public class PlayerDatabase {
 		return setData(id,game,gs.toJson(data));
 	}
 	public boolean setData(UserIdentifier id,String game,String data) {
+		return setData(id,game,data,false);
+	}
+	public boolean setData(UserIdentifier id,String game,String data,boolean ignoreBinding) {
 		try(PreparedStatement ps=database.prepareStatement("REPLACE INTO profile(qq,game,data) VALUES(?,?,?)")){
-			ps.setString(1,GlobalMain.bindings.getBinding(id).serialize());
+			if(ignoreBinding)
+				ps.setString(1,id.serialize());
+			else
+				ps.setString(1,GlobalMain.bindings.getBinding(id).serialize());
 			ps.setString(2,game);
 			ps.setString(3,data);
 			return ps.executeUpdate()>0;
@@ -141,6 +162,9 @@ public class PlayerDatabase {
 	}
 	public GenericPlayerData<?> getPlayer(UserIdentifier id,String game) {
 		return gs.fromJson(getData(id, game),PlayerDatabase.datacls.get(game));
+	}
+	public GenericPlayerData<?> getPlayerRaw(UserIdentifier id,String game) {
+		return gs.fromJson(getData(id, game,true),PlayerDatabase.datacls.get(game));
 	}
 	public GenericPlayerData<?>[] getPlayers(String game) {
 		List<GenericPlayerData<?>> ll=new LinkedList<>();

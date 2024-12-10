@@ -68,7 +68,8 @@ import com.khjxiaogu.TableGames.game.undercover.UnderCoverGame;
 import com.khjxiaogu.TableGames.game.undercover.UnderCoverHolder;
 import com.khjxiaogu.TableGames.game.undercover.UnderCoverHolderPreserve;
 import com.khjxiaogu.TableGames.game.undercover.UnderCoverPreserve;
-import com.khjxiaogu.TableGames.game.werewolf.MiniWerewolfPreserve;
+import com.khjxiaogu.TableGames.game.werewolf.GodWerewolfPreserve;
+import com.khjxiaogu.TableGames.game.werewolf.GodWerewolfCreater;
 import com.khjxiaogu.TableGames.game.werewolf.StandardWerewolfCreater;
 import com.khjxiaogu.TableGames.game.werewolf.StandardWerewolfPreserve;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame;
@@ -435,12 +436,34 @@ public class GlobalMain {
 				g.forceShow(event.getSender());
 			}
 		});
+		addPCmd("狼人杀胜率迭代", "迭代狼人杀胜率", (event, command) -> {
+			LinkedList<Map.Entry<UserIdentifier, WerewolfPlayerData>> ds = new LinkedList<>(
+					GlobalMain.db.getDatas("狼人杀", WerewolfPlayerData.class).entrySet());
+			ds.removeIf(v -> v.getValue().total <= 120);
+
+			for (Map.Entry<UserIdentifier, WerewolfPlayerData> ent:ds) {
+				ent.getValue().modifier(0.5f);
+				GlobalMain.db.getGame("狼人杀").setPlayer(ent.getKey(), ent.getValue());
+			}
+			event.getRoom().sendMessage("折算胜率完成。");
+		});
+		addPCmd("狼人杀胜率合并", "把1合并到2的狼人杀胜率", (event, command) -> {
+			UserIdentifier from=UserIdentifier.parseUserIdentifier(command[1]);
+			UserIdentifier to=UserIdentifier.parseUserIdentifier(command[2]);
+			
+			WerewolfPlayerData fromcls= GlobalMain.db.getGame("狼人杀").getPlayerRaw(from, WerewolfPlayerData.class);
+			WerewolfPlayerData tocls= GlobalMain.db.getGame("狼人杀").getPlayerRaw(to, WerewolfPlayerData.class);
+			tocls.forcePlus(fromcls);
+			GlobalMain.db.getGame("狼人杀").setPlayerRaw(to,tocls );
+			GlobalMain.db.getGame("狼人杀").setPlayerRaw(from,new WerewolfPlayerData() );
+			event.getRoom().sendMessage("折算胜率完成。");
+		});
 		addCmd("狼人杀胜率排行", "查看狼人杀胜率排名", (event, command) -> {
 			LinkedList<Map.Entry<UserIdentifier, WerewolfPlayerData>> ds = new LinkedList<>(
 					GlobalMain.db.getDatas("狼人杀", WerewolfPlayerData.class).entrySet());
-			ds.removeIf(v -> v.getValue().total < 10);
+			ds.removeIf(v -> v.getValue().total <= 40);
 
-			ds.sort(Comparator.comparingDouble(v -> v.getValue().wins * 1d / v.getValue().total));
+			ds.sort(Comparator.comparingDouble(v -> v.getValue().wins * 1d / (v.getValue().alive+v.getValue().death)));
 			StringBuilder sb = new StringBuilder("胜率前十：");
 			for (int i = 0; i < 10; i++) {
 				Map.Entry<UserIdentifier, WerewolfPlayerData> ent = ds.pollLast();
@@ -451,7 +474,7 @@ public class GlobalMain {
 						continue;
 					}
 					sb.append("\n").append(au.getNameCard()).append(" ")
-							.append(Utils.percent(ent.getValue().wins, ent.getValue().total)).append("/共")
+							.append(Utils.percent(ent.getValue().wins, ent.getValue().alive+ent.getValue().death)).append("/共")
 							.append(ent.getValue().total);
 				} else
 					break;
@@ -462,9 +485,9 @@ public class GlobalMain {
 		addCmd("狼人杀存活率排行", "查看狼人杀存活率排名", (event, command) -> {
 			LinkedList<Map.Entry<UserIdentifier, WerewolfPlayerData>> ds = new LinkedList<>(
 					GlobalMain.db.getDatas("狼人杀", WerewolfPlayerData.class).entrySet());
-			ds.removeIf(v -> v.getValue().total < 10);
+			ds.removeIf(v -> v.getValue().total <= 40);
 
-			ds.sort(Comparator.comparingDouble(v -> v.getValue().alive * 1d / v.getValue().total));
+			ds.sort(Comparator.comparingDouble(v -> v.getValue().alive * 1d / (v.getValue().alive+v.getValue().death)));
 			StringBuilder sb = new StringBuilder("存活率前十：");
 			for (int i = 0; i < 10; i++) {
 				Map.Entry<UserIdentifier, WerewolfPlayerData> ent = ds.pollLast();
@@ -475,7 +498,7 @@ public class GlobalMain {
 						continue;
 					}
 					sb.append("\n").append(au.getNameCard()).append(" ")
-							.append(Utils.percent(ent.getValue().alive, ent.getValue().total)).append("/共")
+							.append(Utils.percent(ent.getValue().alive, ent.getValue().alive+ent.getValue().death)).append("/共")
 							.append(ent.getValue().total);
 				} else
 					break;
@@ -486,9 +509,9 @@ public class GlobalMain {
 		addCmd("狼人杀存活率倒数", "查看狼人杀存活率倒数", (event, command) -> {
 			LinkedList<Map.Entry<UserIdentifier, WerewolfPlayerData>> ds = new LinkedList<>(
 					GlobalMain.db.getDatas("狼人杀", WerewolfPlayerData.class).entrySet());
-			ds.removeIf(v -> v.getValue().total < 10);
+			ds.removeIf(v -> v.getValue().total <= 40);
 
-			ds.sort(Comparator.comparingDouble(v -> v.getValue().alive * 1d / v.getValue().total));
+			ds.sort(Comparator.comparingDouble(v -> v.getValue().alive * 1d / (v.getValue().alive+v.getValue().death)));
 			StringBuilder sb = new StringBuilder("存活率倒十：");
 			for (int i = 0; i < 10; i++) {
 				Map.Entry<UserIdentifier, WerewolfPlayerData> ent = ds.poll();
@@ -499,7 +522,7 @@ public class GlobalMain {
 						continue;
 					}
 					sb.append("\n").append(au.getNameCard()).append(" ")
-							.append(Utils.percent(ent.getValue().alive, ent.getValue().total)).append("/共")
+							.append(Utils.percent(ent.getValue().alive, ent.getValue().alive+ent.getValue().death)).append("/共")
 							.append(ent.getValue().total);
 				} else
 					break;
@@ -510,9 +533,9 @@ public class GlobalMain {
 		addCmd("狼人杀胜率倒数", "查看狼人杀胜率倒数", (event, command) -> {
 			LinkedList<Map.Entry<UserIdentifier, WerewolfPlayerData>> ds = new LinkedList<>(
 					GlobalMain.db.getDatas("狼人杀", WerewolfPlayerData.class).entrySet());
-			ds.removeIf(v -> v.getValue().total < 10);
+			ds.removeIf(v -> v.getValue().total <= 40);
 
-			ds.sort(Comparator.comparingDouble(v -> v.getValue().wins * 1d / v.getValue().total));
+			ds.sort(Comparator.comparingDouble(v -> v.getValue().wins * 1d / (v.getValue().alive+v.getValue().death)));
 			StringBuilder sb = new StringBuilder("胜率倒十：");
 			for (int i = 0; i < 10; i++) {
 				Map.Entry<UserIdentifier, WerewolfPlayerData> ent = ds.poll();
@@ -523,7 +546,7 @@ public class GlobalMain {
 						continue;
 					}
 					sb.append("\n").append(au.getNameCard()).append(" ")
-							.append(Utils.percent(ent.getValue().wins, ent.getValue().total)).append("/共")
+							.append(Utils.percent(ent.getValue().wins,ent.getValue().alive+ent.getValue().death)).append("/共")
 							.append(ent.getValue().total);
 				} else
 					break;
@@ -964,7 +987,7 @@ public class GlobalMain {
 			is.startEmpty();
 		});
 		makeGame("狼人杀", WerewolfPreserve.class, new DefaultGameCreater<>(WerewolfGame.class));
-		makeGame("小型狼人杀", MiniWerewolfPreserve.class, new DefaultGameCreater<>(WerewolfGame.class));
+		makeGame("诸神狼人杀", GodWerewolfPreserve.class, new GodWerewolfCreater());
 		makeGame("标准狼人杀", StandardWerewolfPreserve.class, new StandardWerewolfCreater());
 		makeGame("谁是卧底", UnderCoverPreserve.class, new DefaultGameCreater<>(UnderCoverGame.class));
 		makeGame("谁是卧底发词", UnderCoverHolderPreserve.class, new DefaultGameCreater<>(UnderCoverHolder.class));

@@ -21,12 +21,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.function.Supplier;
 
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.utils.Game;
 
-public class UserFunction implements Serializable{
+public class UserFunction implements Serializable,Supplier<UserIdentifier>{
 	/**
 	 * 
 	 */
@@ -102,6 +103,33 @@ public class UserFunction implements Serializable{
 	}
 	public Object getRoleObject() {
 		return member.getRoleObject();
+	}
+	@Override
+	public UserIdentifier get() {
+		return member.getId();
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((member.getId() == null) ? 0 : member.getId().hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserFunction other = (UserFunction) obj;
+		if (member == null) {
+			if (other.member != null)
+				return false;
+		} else if (!member.getId().equals(other.member.getId()))
+			return false;
+		return true;
 	}
 }
 

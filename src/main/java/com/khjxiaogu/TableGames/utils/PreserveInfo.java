@@ -218,13 +218,13 @@ public abstract class PreserveInfo<T extends Game>{
 		Long crn=topreserve.get(m);
 		if(crn != null)
 		{
-			if(force||new Date().getTime()-crn>180000) {
+			//if(force||new Date().getTime()-crn>180000) {
 				m.sendPrivate(m.getNameCard()+"取消预定成功");
 				topreserve.remove(m);
 				sendPersonInfo();
-			} else {
-				m.sendPrivate(m.getNameCard()+"预定后的三分钟内不能取消预定！");
-			}
+			//} else {
+			//	m.sendPrivate(m.getNameCard()+"预定后的三分钟内不能取消预定！");
+			//}
 		} else {
 			m.sendPrivate(m.getNameCard()+"你还没预定。");
 		}
@@ -246,6 +246,7 @@ public abstract class PreserveInfo<T extends Game>{
 					group.sendMessage("游戏将会在3分钟后开始，还想参加的请抓紧时间预定，格式为“##预定"+getName()+"”");
 					Thread.sleep(60000);
 					Thread.sleep(60000);
+					acceled=true;
 					group.sendMessage("游戏将会在1分钟后开始，还想参加的请抓紧时间预定，格式为“##预定"+getName()+"”");
 					notifyPreserver();
 				} catch (InterruptedException e) {}
