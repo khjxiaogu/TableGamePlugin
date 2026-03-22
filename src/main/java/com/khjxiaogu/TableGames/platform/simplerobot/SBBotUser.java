@@ -27,6 +27,7 @@ import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.SBId;
+import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.MessageCompound;
@@ -48,18 +49,16 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 	protected String nameCard="机器人";
 	private BotUserLogic logic;
 	
-	public SBBotUser(int botId,Channel in,Game g) {
+	public SBBotUser(int botId,Channel in) {
 		super(in);
 		rbid=botId;
 		nameCard="机器人"+rbid;
-		sg=g;
 	}
 
-	public SBBotUser(int botId,AbstractRoom group,Class<? extends BotUserLogic> logicType, Game in) {
-		this(botId,(Channel) group.getInstance(),in);
-		logic=Utils.createLogic(logicType,this,in);
+	public SBBotUser(int botId,AbstractRoom group) {
+		this(botId,(Channel) group.getInstance());
+		
 	}
-
 	@Override
 	public void sendPrivate(String str) {
 		GlobalMain.getLogger().debug(str);
@@ -68,6 +67,7 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 
 	@Override
 	public void sendPublic(String str) {
+		if(sg!=null)
 		sg.getScheduler().executeLater(()->{
 			onPublic(str);
 		},500);
@@ -77,6 +77,7 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 
 	@Override
 	public void sendPublic(IMessage str) {
+		if(sg!=null)
 		sg.getScheduler().executeLater(()->{
 			if(str instanceof MessageCompound) {
 				onPublic(((IMessageCompound) str).getText());
@@ -90,13 +91,15 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 	 * @param msg
 	 */
 	public void onPublic(String msg) {
-		logic.onPublic(msg);
+		if(logic!=null)
+			logic.onPublic(msg);
 	}
 	/**
 	 * @param msg
 	 */
 	public void onPrivate(String msg) {
-		logic.onPrivate(msg);
+		if(logic!=null)
+			logic.onPrivate(msg);
 	}
 	
 	@Override
@@ -112,7 +115,13 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 	public String getMemberString() {
 		return nameCard;
 	}
-
+	@Override
+	public void requestOperation(boolean isPublic,boolean isTemperal,String temperalHint) {
+		logic.requestOperation(isPublic,isTemperal,temperalHint);
+	}
+	public void receiveMessage(UserIdentifier id,String msg,boolean isPublic) {
+		logic.receivedGameMessage(id, msg, isPublic);
+	};
 	@Override
 	public void setNameCard(String s) {
 		nameCard=s;
@@ -145,13 +154,14 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 
 	@Override
 	public void sendPrivate(IMessage str) {
-		sg.getScheduler().executeLater(()->{
-			if(str instanceof MessageCompound) {
-				onPrivate(((IMessageCompound) str).getText());
-			} else if(str instanceof Text) {
-				onPrivate(((Text) str).getText());
-			}
-		},500);
+		if(sg!=null)
+			sg.getScheduler().executeLater(()->{
+				if(str instanceof MessageCompound) {
+					onPrivate(((IMessageCompound) str).getText());
+				} else if(str instanceof Text) {
+					onPrivate(((Text) str).getText());
+				}
+			},500);
 	}
 
 	@Override
@@ -200,8 +210,31 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 		return false;
 	}
 
+	@Override
+	public void setLogic(Class<? extends BotUserLogic> logicType) {
+		logic=Utils.createLogic(logicType,this,sg);
+	}
 
 
-	
+	@Override
+	public boolean hasLogic() {
+		return logic!=null;
+	}
+	int refcount;
+	@Override
+	public void addRef() {
+		refcount++;
+	}
+
+	@Override
+	public void release() {
+		refcount--;
+	}
+
+	@Override
+	public boolean isReferred() {
+		return refcount>0;
+	}
+
 
 }

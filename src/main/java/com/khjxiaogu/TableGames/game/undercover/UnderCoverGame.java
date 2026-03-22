@@ -145,7 +145,7 @@ public class UnderCoverGame extends Game {
 				if(in.isDead) {
 					continue;
 				}
-				in.sendPublic("请在1分钟内描述你的词语，可以随时@我结束描述");
+				in.sendPublic("请在1分钟内描述你的词语，可以随时发送##结束描述");
 				getGroup().registerListener(in.getId(),(msg,type)->{
 					if(type==MsgType.AT) {
 						wt.stopWait();
@@ -185,7 +185,7 @@ public class UnderCoverGame extends Game {
 					}
 				});
 			}
-			this.sendPublicMessage("开始投票，请在两分钟内输入“投票 @要投的人”进行投票，或者 @我 弃权 弃票");
+			this.sendPublicMessage("开始投票，请在两分钟内输入“投票 @要投的人”进行投票，或者 ##弃权 弃票");
 			vu.hintVote(getScheduler());
 			wt.startWait(120000);
 			List<UCPlayer> vtd=vu.getMostVoted();
@@ -232,11 +232,13 @@ public class UnderCoverGame extends Game {
 				}
 			}
 			if(isEnded) {
+				
 				StringBuilder gr=new StringBuilder(status).append("\n游戏结果：");
 				for(UCPlayer in:innos) {
 					gr.append("\n").append(in.getMemberString()).append(in.isSpy?" 是卧底":" 不是卧底");
 				}
 				this.sendPublicMessage(Utils.sendTextAsImage(gr.toString(),getGroup()));
+				doFinalize();
 				break;
 			}
 		}

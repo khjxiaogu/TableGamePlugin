@@ -22,4 +22,6 @@ import java.io.Serializable;
 public interface BotUserLogic extends Serializable {
 	void onPublic(String msg);
 	void onPrivate(String msg);
+	void receivedGameMessage(UserIdentifier sender,String msg,boolean isPublic);
+	void requestOperation(boolean isPublic,boolean isTemperal,String temperalHint) ;
 }

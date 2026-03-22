@@ -56,9 +56,14 @@ public class WhiteWolf extends Werewolf {
 	@Override
 	public void onPreSheriffSkill() {
 		super.onPreSheriffSkill();
-		sendPrivate("白狼王，你可以在投票前随时翻牌自爆带走一个玩家并且立即进入黑夜，格式：“自爆 游戏号码”");
+		sendNoneBotOnlyPrivate("白狼王，你可以在投票前随时翻牌自爆带走一个玩家并且立即进入黑夜，格式：“自爆 游戏号码”");
 		addDaySkillListener();
 	}
+	@Override
+	public void onOneTalkEnd() {
+		super.requestTemperalOperation(false,"白狼王，你可以在投票前随时翻牌自爆带走一个玩家并且立即进入黑夜，格式：“自爆 游戏号码”");
+	}
+
 	@Override
 	public void doDaySkillPending(String content) {
 		if (isDead())

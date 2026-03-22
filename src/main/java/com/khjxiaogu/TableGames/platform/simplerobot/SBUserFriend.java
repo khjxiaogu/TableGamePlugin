@@ -180,4 +180,17 @@ public class SBUserFriend implements AbstractUser {
 	public boolean isFriend() {
 		return true;
 	}
+
+	@Override
+	public void addRef() {
+	}
+
+	@Override
+	public void release() {
+	}
+
+	@Override
+	public boolean isReferred() {
+		return false;
+	}
 }

@@ -53,7 +53,9 @@ public class MiracleArcher extends Villager {
 		StringBuilder sb = new StringBuilder(
 				"奇迹弓手，你可以射一个人，格式：“射 游戏号码”；你可以保护一个人，格式：“保护 游戏号码”，如果不需要使用技能，无需发送任何内容，等待时间结束即可。\n");
 		sb.append("你有一分钟的考虑时间。\n");
+		
 		super.sendPrivate(sb.toString());
+		super.requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;

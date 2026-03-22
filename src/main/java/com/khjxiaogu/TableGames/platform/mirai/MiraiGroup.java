@@ -21,8 +21,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
@@ -34,6 +37,7 @@ import com.khjxiaogu.TableGames.platform.RoomMessageListener;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.utils.Game;
+import com.khjxiaogu.TableGames.utils.GameUtils;
 
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
@@ -46,6 +50,7 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final Map<Long,MiraiGroup> cache=new HashMap<>();
 	private long RobotId;
+	private AtomicInteger botId=new AtomicInteger(0);
 	private long groupId;
 	transient private Group group;
 	private MiraiGroup(Group group) {
@@ -122,7 +127,12 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 			long qq=((QQId) id).getQQId();
 			if(group.contains(qq))
 				return new MiraiHumanUser(group.get(qq));
+			for(AbstractBotUser abu:currentBots) {
+				if(abu.getId().equals(id))
+					return abu;
+			}
 		}
+		
 		return null;
 	}
 
@@ -154,8 +164,18 @@ public class MiraiGroup implements AbstractRoom,Serializable {
 	public QQId getId() {
 		return QQId.of(group.getId());
 	}
+	List<AbstractBotUser> currentBots=new ArrayList<>();
 	@Override
-	public AbstractBotUser createBot(int id, Class<? extends BotUserLogic> logicCls, Game in) {
-		return new MiraiBotUser(id,this,logicCls,in);
+	public AbstractBotUser createBot() {
+		synchronized(currentBots) {
+			for(AbstractBotUser abu:currentBots) {
+				if(!abu.isReferred()&&!GameUtils.hasMember(abu.getId()))
+					return abu;
+			}
+			AbstractBotUser ret;
+			currentBots.add(ret= new MiraiBotUser(botId.incrementAndGet(),this));
+			return ret;
+		}
+		
 	}
 }

@@ -46,11 +46,24 @@ public class UserFunction implements Serializable,Supplier<UserIdentifier>{
 	private void writeObject(ObjectOutputStream aOutputStream) throws IOException {
 		aOutputStream.defaultWriteObject();
 	}
+	public void receivedMessage(UserIdentifier uid,String msg,boolean isPublic) {
+		
+	}
 	public UserFunction(AbstractUser p) {
 		member = p;
 	}
 	public void sendPrivate(String str) {
 		member.sendPrivate(str);
+	}
+	public void sendNoneBotOnlyPrivate(String str) {
+		if(!(member instanceof AbstractBotUser)) {
+			member.sendPrivate(str);
+		}
+	}
+	public void sendBotOnlyPrivate(String str) {
+		if(member instanceof AbstractBotUser) {
+			((AbstractBotUser) member).onPrivate(str);
+		}
 	}
 	public void sendPublic(String str) {
 		member.sendPublic(str);

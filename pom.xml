@@ -52,10 +52,10 @@
 						</includes>
 					</artifactSet>
 					<relocations>
-						<relocation>
+						<!-- <relocation>
 							<pattern>com.google.gson</pattern>
 							<shadedPattern>${project.groupId}.${project.artifactId}.gson</shadedPattern>
-						</relocation>
+						</relocation>-->
 						<!-- <relocation>
 							<pattern>org.sqlite</pattern>
 							<shadedPattern>${project.groupId}.${project.artifactId}.sqlite</shadedPattern>
@@ -194,6 +194,13 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.5.13</version>
 		</dependency>
+		<dependency>
+			<groupId>com.khjxiaogu</groupId>
+			<artifactId>AIWuxia</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		
 	</dependencies>
 	
 </project>

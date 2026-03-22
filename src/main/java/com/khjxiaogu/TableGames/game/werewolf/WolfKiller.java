@@ -47,6 +47,7 @@ public class WolfKiller extends Villager {
 		super.StartTurn();
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("猎魔人，你可以选择狩猎一个人。\n格式：“猎杀 游戏号码”\n或者可以放弃，格式：“放弃”");
+		super.requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;

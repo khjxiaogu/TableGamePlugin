@@ -19,6 +19,7 @@ package com.khjxiaogu.TableGames.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,7 @@ import com.khjxiaogu.TableGames.platform.UserIdentifier;
 
 public class VoteHelper<T extends UserFunction> {
 	public Map<T,Double> voted=new ConcurrentHashMap<>();
+	public Map<T,T> voteResult=new LinkedHashMap<>();
 	public Set<T> tovote=Collections.newSetFromMap(new ConcurrentHashMap<>());
 	boolean isEnded=true;
 	Thread hintThread;
@@ -87,6 +89,7 @@ public class VoteHelper<T extends UserFunction> {
 			giveups=0;
 			tovote.clear();
 			voted.clear();
+			voteResult.clear();
 			if(hintThread!=null) {
 				hintThread.interrupt();
 				hintThread=null;
@@ -98,6 +101,7 @@ public class VoteHelper<T extends UserFunction> {
 			if(!tovote.remove(src))return tovote.size()==0;
 			double vnum=voted.getOrDefault(id,0D);
 			voted.put(id,vnum+ticket);
+			voteResult.put(src, id);
 			if(tovote.size()==0)
 				return true;
 			return false;

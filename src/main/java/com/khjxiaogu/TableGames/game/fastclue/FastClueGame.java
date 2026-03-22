@@ -104,15 +104,9 @@ public class FastClueGame extends Game {
 	public FastClueGame(AbstractRoom g,int cplayer,Map<String,String> sets) {
 		super(g,cplayer,4);
 
-		if(sets.containsKey("机器人")) {
-			cplayer+=Integer.parseInt(sets.get("机器人"));
-		} else if(sets.containsKey("人数")) {
+		if(sets.containsKey("人数")) {
 			int tplayer=Integer.parseInt(sets.get("人数"));
-			int botnm=tplayer-cplayer;
 			cplayer=tplayer;
-			while(--botnm>=0) {
-				addBot();
-			}
 		}
 		tcp=cplayer;
 		putCards(cplayer);
@@ -178,72 +172,10 @@ public class FastClueGame extends Game {
 		}
 		return null;
 	}
-	public void addBot() {
-		try {
-			synchronized(players) {
-				int min=players.size();
-				CluePlayer cp=new CluePlayer(this,++botnum);
-				players.add(cp);
-
-				cp.sendPrivate("已经报名");
-				String nc=cp.getNameCard();
-				if(nc.indexOf('|')!=-1) {
-					nc=nc.split("\\|")[1];
-				}
-				if(min!=0) {
-					players.get(min-1).next=cp;
-				}
-				int cpx=cpp;
-				while(--cpx>=0) {
-					cp.addCard(allcard.remove(0));
-				}
-				cp.setNameCard(min+"号 |"+nc);
-				if(tcp==players.size()) {
-					cp.next=players.get(0);
-					this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
-					getScheduler().execute(this::gameStart);
-				}
-			}
-		} catch (IllegalArgumentException
-				| SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	@Override
 	public void forceStart() {
-		while(tcp!=players.size()) {
-			try {
-				synchronized(players) {
-					int min=players.size();
-					CluePlayer cp=new CluePlayer(this,++botnum);
-					players.add(cp);
-
-					cp.sendPrivate("已经报名");
-					String nc=cp.getNameCard();
-					if(nc.indexOf('|')!=-1) {
-						nc=nc.split("\\|")[1];
-					}
-					if(min!=0) {
-						players.get(min-1).next=cp;
-					}
-					int cpx=cpp;
-					while(--cpx>=0) {
-						cp.addCard(allcard.remove(0));
-					}
-					cp.setNameCard(min+"号 |"+nc);
-					if(tcp==players.size()) {
-						cp.next=players.get(0);
-						this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
-						getScheduler().execute(this::gameStart);
-					}
-				}
-			} catch (IllegalArgumentException
-					| SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		this.sendPublicMessage(getName()+"已满人，游戏即将开始。");
+		getScheduler().execute(this::gameStart);
 	}
 
 	@Override

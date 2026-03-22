@@ -43,10 +43,7 @@ public class CluePlayer extends UserFunction{
 	public CluePlayer(FastClueGame game,AbstractUser mem) {
 		super(mem);
 		this.game=game;
-	}
-	public CluePlayer(FastClueGame game,int id) {
-		super(game.getGroup().createBot(id,BotCluePlayer.class,game));
-		this.game = game;
+		super.setGame(game);
 	}
 	public void addCard(Card cd) {
 		inhand.add(cd);
@@ -73,6 +70,7 @@ public class CluePlayer extends UserFunction{
 		this.sendPublic("的回合。");
 		sendPrivate(game.getCardList());
 		sendPrivate("你可以提出假设：“假设 [凶手角色号码] [房间号码] [凶器号码]”。\n可以提出指控“指控 [凶手角色号码] [房间号码] [凶器号码]”。\n可以输入“我的卡片”查看手中的卡片。\n可以输入“已知卡片”查看所有我看过的卡片。\n输入“放弃”放弃当前回合。\n你有2分钟的时间考虑。");
+		super.member.requestOperation(false,false,null);
 		super.registerListener((msg,type)->{
 			if(type!=MsgType.PRIVATE)return;
 			String text=msg.getText();
@@ -200,6 +198,7 @@ public class CluePlayer extends UserFunction{
 			}
 			sb.append("\n你有15秒时间选择要出示的卡片，输入“出示 [卡片号码]”出示对应卡片，过时自动出示第一张。");
 			sendPrivate(sb.toString());
+			super.member.requestOperation(false,false,null);
 			super.registerListener((msg,type)->{
 				if(type!=MsgType.PRIVATE)return;
 				String text=msg.getText();

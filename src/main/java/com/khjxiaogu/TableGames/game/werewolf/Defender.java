@@ -52,6 +52,7 @@ public class Defender extends Villager {
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate(
 				"守卫，你可以保护一个人包括自己免于死亡，不能连续两次保护同一个人，请私聊选择保护的人，你有一分钟的考虑时间\n格式：“保护 游戏号码”\n如：“保护 1”\n如果放弃保护，则无需发送任何内容，等待时间结束即可。");
+		requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;

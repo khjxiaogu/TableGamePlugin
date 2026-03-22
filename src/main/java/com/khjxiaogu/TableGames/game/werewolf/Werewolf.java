@@ -17,6 +17,10 @@
  */
 package com.khjxiaogu.TableGames.game.werewolf;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.DiedReason;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.WaitReason;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
@@ -49,7 +53,10 @@ public class Werewolf extends Villager {
 	}
 	public void onTurnStart() {
 		super.onTurnStart();
-		super.sendPrivate(getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
+		super.sendNoneBotOnlyPrivate(getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
+	}
+	public void onOneTalkEnd() {
+		super.requestTemperalOperation(false,getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
 	}
 	public void SheriffDeselect(IMessageCompound msg, MsgType type) {
 		if (type == MsgType.PRIVATE) {
@@ -66,11 +73,19 @@ public class Werewolf extends Villager {
 	}
 	public void onSheriffState() {
 		onBeforeTalk();
-		sendPublic("你有五分钟时间进行竞选发言。\n可以随时@我结束你的讲话。");
+		sendPublic("你有五分钟时间进行竞选发言。\n可以随时发送##结束你的讲话。");
+		super.requestOperation(true);
 		super.registerListener((msg, type) -> {
 			if (type == MsgType.AT) {
 				super.releaseListener();
-				super.registerListener((msgx, typex) -> SheriffDeselect(msgx, typex));
+				if(Utils.getPlainText(msg).startsWith("退选")) {
+					game.logger.logRaw(this.getMemberString(this) + "已退选");
+					this.sendForName("已退选");
+					game.sherifflist.remove(this);
+					addDaySkillListener();
+				}else {
+					super.registerListener((msgx, typex) -> SheriffDeselect(msgx, typex));
+				}
 				game.skipWait(WaitReason.State);
 			} else if (type == MsgType.PRIVATE) {
 				if(Utils.getPlainText(msg).startsWith("退选")) {
@@ -141,9 +156,11 @@ public class Werewolf extends Villager {
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
+		super.requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
+			
 			String content = Utils.getPlainText(msg);
 			if (content.startsWith("投票")) {
 				try {
@@ -175,6 +192,11 @@ public class Werewolf extends Villager {
 					});
 					game.logger.logSkill(this, p, "狼人投票");
 					game.WolfVote(this, p);
+					List<Villager> wolfs=new ArrayList<>(game.vu.tovote);
+					if(!wolfs.isEmpty()) {
+						Random rnd=new Random();
+						wolfs.get(rnd.nextInt(wolfs.size())).requestOperation(false);
+					}
 					super.sendPrivate("已投票给 " + p.getMemberString(this));
 				} catch (Throwable t) {
 					super.sendPrivate("发生错误，正确格式为：“投票 游戏号码”！");
@@ -182,11 +204,18 @@ public class Werewolf extends Villager {
 			} else if (content.startsWith("#")) {
 				String tosendHead = this.getMemberString(this);
 				String tosendEnd= Utils.removeLeadings("#", content);
+				
 				for (Villager w : game.playerlist) {
 					if (w instanceof Werewolf && !w.isDead() && !w.equals(this)) {
 						w.sendPrivate(tosendHead+":"+tosendEnd);
 					}
 				}
+				List<Villager> wolfs=new ArrayList<>(game.vu.tovote);
+				if(!wolfs.isEmpty()) {
+					Random rnd=new Random();
+					wolfs.get(rnd.nextInt(wolfs.size())).requestOperation(false);
+				}
+				
 			} else if (content.startsWith("放弃")) {
 				EndTurn();
 				super.releaseListener();
@@ -206,6 +235,11 @@ public class Werewolf extends Villager {
 				});
 				game.NoVote(this);
 				super.sendPrivate("已放弃");
+				List<Villager> wolfs=new ArrayList<>(game.vu.tovote);
+				if(!wolfs.isEmpty()) {
+					Random rnd=new Random();
+					wolfs.get(rnd.nextInt(wolfs.size())).requestOperation(false);
+				}
 			}
 		});
 

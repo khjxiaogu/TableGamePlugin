@@ -21,9 +21,7 @@ import java.io.Serializable;
 
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
-import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
-import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.QQId;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
@@ -47,18 +45,24 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	protected String nameCard;
 	private BotUserLogic logic;
 	
-	public MiraiBotUser(int botId,Group in,Game g) {
+	public MiraiBotUser(int rbid,Group in) {
 		super(in);
-		rbid=botId;
-		nameCard="机器人"+rbid;
-		sg=g;
+		nameCard="机器人"+(100+rbid);
+		this.rbid=rbid;
 	}
 
-	public MiraiBotUser(int botId,AbstractRoom group,Class<? extends BotUserLogic> logicType, Game in) {
-		this(botId,(Group) group.getInstance(),in);
-		logic=Utils.createLogic(logicType,this,in);
+	public MiraiBotUser(int rbid,AbstractRoom group) {
+		this(rbid,(Group) group.getInstance());
+		
 	}
-
+	public void setLogic(Class<? extends BotUserLogic> logicType) {
+		if(logicType!=null)
+			logic=Utils.createLogic(logicType,this,sg);
+		else {
+			sg=null;
+			logic=null;
+		}
+	}
 	@Override
 	public void sendPrivate(String str) {
 		onPrivate(str);
@@ -66,34 +70,32 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 
 	@Override
 	public void sendPublic(String str) {
-		sg.getScheduler().executeLater(()->{
-			onPublic(str);
-		},500);
+		onPublic(str);
 		super.sendPublic(str);
 	}
 
 	@Override
 	public void sendPublic(IMessage str) {
-		sg.getScheduler().executeLater(()->{
-			if(str instanceof MessageCompound) {
-				onPublic(((IMessageCompound) str).getText());
-			} else if(str instanceof Text) {
-				onPublic(((Text) str).getText());
-			}
-		},500);
+		if(str instanceof MessageCompound) {
+			onPublic(((IMessageCompound) str).getText());
+		} else if(str instanceof Text) {
+			onPublic(((Text) str).getText());
+		}
 		super.sendPublic(str);
 	}
 	/**
 	 * @param msg
 	 */
 	public void onPublic(String msg) {
-		logic.onPublic(msg);
+		if(logic!=null)
+			logic.onPublic(msg);
 	}
 	/**
 	 * @param msg
 	 */
 	public void onPrivate(String msg) {
-		logic.onPrivate(msg);
+		if(logic!=null)
+			logic.onPrivate(msg);
 	}
 	@Override
 	public void sendBotMessage(String msg) {
@@ -141,13 +143,14 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 
 	@Override
 	public void sendPrivate(IMessage str) {
-		sg.getScheduler().executeLater(()->{
-			if(str instanceof MessageCompound) {
-				onPrivate(((IMessageCompound) str).getText());
-			} else if(str instanceof Text) {
-				onPrivate(((Text) str).getText());
-			}
-		},500);
+		if(sg!=null)
+			sg.getScheduler().executeLater(()->{
+				if(str instanceof MessageCompound) {
+					onPrivate(((IMessageCompound) str).getText());
+				} else if(str instanceof Text) {
+					onPrivate(((Text) str).getText());
+				}
+			},500);
 	}
 
 	@Override
@@ -164,7 +167,13 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	public Permission getPermission() {
 		return Permission.USER;
 	}
-
+	@Override
+	public void requestOperation(boolean isPublic,boolean isTemperal,String temperalHint) {
+		logic.requestOperation(isPublic,isTemperal,temperalHint);
+	}
+	public void receiveMessage(UserIdentifier id,String msg,boolean isPublic) {
+		logic.receivedGameMessage(id, msg, isPublic);
+	};
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -194,6 +203,26 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	@Override
 	public boolean isFriend() {
 		return true;
+	}
+
+	@Override
+	public boolean hasLogic() {
+		return logic!=null;
+	}
+	int refcount;
+	@Override
+	public void addRef() {
+		refcount++;
+	}
+
+	@Override
+	public void release() {
+		refcount--;
+	}
+
+	@Override
+	public boolean isReferred() {
+		return refcount>0;
 	}
 
 

@@ -91,6 +91,7 @@ import com.khjxiaogu.TableGames.utils.PreserveHolder;
 import com.khjxiaogu.TableGames.utils.PreserveInfo;
 import com.khjxiaogu.TableGames.utils.TimeUtil;
 import com.khjxiaogu.TableGames.utils.Utils;
+import com.khjxiaogu.aiwuxia.llm.LLMConnector;
 
 public class GlobalMain {
 	public static PlayerDatabase db;
@@ -109,6 +110,7 @@ public class GlobalMain {
 		if (hasInited)
 			return;
 		hasInited = true;
+		LLMConnector.initDefault();
 		GlobalMain.dataFolder = dataFolder;
 		GlobalMain.bindings = new BindingDatabase(dataFolder);
 		GlobalMain.db = new PlayerDatabase(dataFolder);
@@ -269,6 +271,17 @@ public class GlobalMain {
 		privcmd.put("强制取消预定" + name, (event, command) -> {
 			PreserveHolder.getPreserve(event.getRoom(), preserver)
 					.removePreserver(event.getRoom().get(UserIdentifierSerializer.read(command[1])), true);
+		});
+		privcmd.put("机器人预定" + name, (event, command) -> {
+			if(command.length==2) {
+				int max=Integer.parseInt(command[1]);
+				for(int i=0;i<max;i++)
+					PreserveHolder.getPreserve(event.getRoom(), preserver)
+					.addPreserver(event.getRoom().createBot());
+			}else {
+			PreserveHolder.getPreserve(event.getRoom(), preserver)
+			.addPreserver(event.getRoom().createBot());
+			}
 		});
 		/*
 		 * privcmd.put(name+"统计", (event,command)->{

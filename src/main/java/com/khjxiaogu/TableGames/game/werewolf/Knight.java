@@ -54,13 +54,15 @@ public class Knight extends Villager {
 	public String getJobDescription() {
 		return "你属于神阵营，你在白天可以翻牌挑战一个人。如果这个人是狼人，狼人死，立即进入黑夜，你失去技能。如果这个人是好人，则你死亡。";
 	}
-
+	public void onOneTalkEnd() {
+		requestTemperalOperation(false,"骑士，你可以翻牌挑战一个人。\n你可以在投票前随时使用本技能。\n格式：“挑战 游戏号码”\n");
+	}
 	@Override
 	public void onTurn() {
 		super.StartTurn();
 		if (hasSkill) {
 			super.sendPrivate("骑士，你可以翻牌挑战一个人。\n你可以在投票前随时使用本技能。\n格式：“挑战 游戏号码”\n");
-			super.sendPrivate(game.getAliveList(this));
+			//super.sendBotOnlyPrivate(game.getAliveList(this));
 		}
 	}
 

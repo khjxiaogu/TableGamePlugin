@@ -33,13 +33,16 @@ import java.lang.reflect.InvocationTargetException;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
+import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 
 public class Utils {
 	public static String getPlainText(IMessageCompound msg) {
 		return msg.getText().trim();
 	}
-
+	public static String getPlainText(IMessage msg) {
+		return msg.asMessage().getText().trim();
+	}
 	public static String removeLeadings(String leading, String orig) {
 		if (orig.startsWith(leading))
 			return orig.substring(leading.length()).replace(leading, "").trim();

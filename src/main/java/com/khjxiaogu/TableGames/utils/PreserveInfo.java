@@ -118,6 +118,7 @@ public abstract class PreserveInfo<T extends Game>{
 		if(AliveCounter==0) {
 			for(AbstractUser m:topreserve.keySet()) {
 				m.sendPrivate("由于超时未能开始，"+m.getMemberString()+" 的预定已被取消。");
+				
 			}
 			this.removeAll();
 		}
@@ -146,6 +147,7 @@ public abstract class PreserveInfo<T extends Game>{
 		if(topreserve.put(m,new Date().getTime()) == null) {
 			m.sendPrivate(m.getMemberString()+" 预定"+this.getName()+"成功"+getWelcomeMessage(m));
 			sendPersonInfo();
+			m.addRef();
 		} else {
 			m.sendPrivate(m.getMemberString()+"您已经预定了。");
 		}
@@ -177,6 +179,10 @@ public abstract class PreserveInfo<T extends Game>{
 	}
 	@SuppressWarnings("deprecation")
 	public void removeAll() {
+		for(AbstractUser m:topreserve.keySet()) {
+			m.release();
+			
+		}
 		topreserve.clear();
 		if(td!=null) {
 			td.stop();
@@ -216,12 +222,13 @@ public abstract class PreserveInfo<T extends Game>{
 	}
 	public void removePreserver(AbstractUser m,boolean force) {
 		Long crn=topreserve.get(m);
-		if(crn != null)
-		{
+		if(crn != null) {
+		
 			//if(force||new Date().getTime()-crn>180000) {
-				m.sendPrivate(m.getNameCard()+"取消预定成功");
-				topreserve.remove(m);
-				sendPersonInfo();
+			m.release();
+			m.sendPrivate(m.getNameCard()+"取消预定成功");
+			topreserve.remove(m);
+			sendPersonInfo();
 			//} else {
 			//	m.sendPrivate(m.getNameCard()+"预定后的三分钟内不能取消预定！");
 			//}
@@ -324,10 +331,14 @@ public abstract class PreserveInfo<T extends Game>{
 		userset.clear();
 		args=null;
 		List<AbstractUser> mems=new ArrayList<>(topreserve.keySet());
-		topreserve.clear();
+		
 		Collections.shuffle(mems);
 		//Collections.reverse(mems);
 		mems.removeIf(m->gm.addMember(m));
+		for(AbstractUser au:topreserve.keySet()) {
+			au.release();
+		}
+		topreserve.clear();
 		this.group.sendMessage("游戏已经开始...");
 		return true;
 	}

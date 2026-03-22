@@ -21,17 +21,19 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
-import com.khjxiaogu.TableGames.platform.BotUserLogic;
 import com.khjxiaogu.TableGames.platform.SBId;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
-import com.khjxiaogu.TableGames.utils.Game;
+import com.khjxiaogu.TableGames.utils.GameUtils;
 
 import love.forte.simbot.ID;
 import love.forte.simbot.bot.OriginBotManager;
@@ -49,6 +51,7 @@ public class SBChannel implements AbstractRoom,Serializable {
 	private String RobotId;
 	private String guildId;
 	private String groupId;
+	private AtomicInteger botId=new AtomicInteger(0);
 	transient private Channel group;
 	private SBChannel(Channel group) {
 		this.group=group;
@@ -126,6 +129,10 @@ public class SBChannel implements AbstractRoom,Serializable {
 			GuildMember member=group.getMember(id2);
 			if(member!=null)
 				return new SBHumanUser(member,group);
+			for(AbstractBotUser abu:currentBots) {
+				if(abu.getId().equals(id))
+					return abu;
+			}
 		}
 		return null;
 	}
@@ -164,8 +171,18 @@ public class SBChannel implements AbstractRoom,Serializable {
 	public SBId getId() {
 		return SBId.of(group.getId());
 	}
+	List<AbstractBotUser> currentBots=new ArrayList<>();
 	@Override
-	public AbstractBotUser createBot(int id, Class<? extends BotUserLogic> logicCls, Game in) {
-		return new SBBotUser(id,this,logicCls,in);
+	public AbstractBotUser createBot() {
+		synchronized(currentBots) {
+			for(AbstractBotUser abu:currentBots) {
+				if(!abu.isReferred()&&!GameUtils.hasMember(abu.getId()))
+					return abu;
+			}
+			AbstractBotUser ret;
+			currentBots.add(ret= new SBBotUser(botId.incrementAndGet(),this));
+			return ret;
+		}
+		
 	}
 }

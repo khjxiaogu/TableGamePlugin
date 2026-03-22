@@ -44,6 +44,7 @@ public class Crow extends Villager {
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate(
 				"你可以诅咒一个人，让他在明天的投票之中被额外投一票。\n请私聊选择诅咒的人，你有60秒的考虑时间。\n格式：“诅咒 游戏号码”\n如果无需诅咒，则无需发送任何内容，等待时间结束即可。");
+		requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;

@@ -94,6 +94,7 @@ public class HiddenWolf extends Villager {
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
+		requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;

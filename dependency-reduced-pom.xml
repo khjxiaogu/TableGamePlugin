@@ -53,12 +53,7 @@
               <include>com.google.code.gson:gson</include>
             </includes>
           </artifactSet>
-          <relocations>
-            <relocation>
-              <pattern>com.google.gson</pattern>
-              <shadedPattern>${project.groupId}.${project.artifactId}.gson</shadedPattern>
-            </relocation>
-          </relocations>
+          <relocations />
         </configuration>
       </plugin>
       <plugin>
@@ -213,6 +208,12 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.5.13</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.khjxiaogu</groupId>
+      <artifactId>AIWuxia</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

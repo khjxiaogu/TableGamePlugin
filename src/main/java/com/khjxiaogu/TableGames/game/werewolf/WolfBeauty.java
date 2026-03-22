@@ -55,6 +55,7 @@ public class WolfBeauty extends Werewolf {
 		super.StartTurn();
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("狼美人，你可以魅惑一个好人。\n格式：“魅惑 游戏号码”\n如：“魅惑 1”\n如果放弃魅惑，则无需发送任何内容，等待时间结束即可。");
+		super.requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;

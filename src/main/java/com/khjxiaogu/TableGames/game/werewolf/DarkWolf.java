@@ -54,6 +54,7 @@ public class DarkWolf extends Werewolf {
 		// dr = dir;
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("狼王，你死了，你可以选择打死另一个人，你有30秒的考虑时间\n格式：“杀死 游戏号码”\n如：“杀死 1”\n也可以放弃，格式：“放弃”");
+		requestOperation(false);
 		asked = true;
 		super.registerListener((msg, type) -> {
 			if ((dir == DiedReason.Vote || game.isFirstNight()) && type == MsgType.AT) {

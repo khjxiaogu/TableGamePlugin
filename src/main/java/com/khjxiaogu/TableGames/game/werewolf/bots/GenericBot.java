@@ -53,7 +53,7 @@ public class GenericBot extends BotUser {
 			sendAtAsBot(" 过");
 		}
 	}
-
+	
 	@Override
 	public void onPrivate(String msg) {
 		if (msg.startsWith("请私聊投票")) {

@@ -57,6 +57,7 @@ public class StatueDemon extends Villager {
 		super.StartTurn();
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("石像鬼，你可以查验一个人的身份，请私聊选择查验的人，你有30秒的考虑时间\n格式：“查验 游戏号码”\n如：“查验 1”");
+		super.requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
@@ -120,6 +121,7 @@ public class StatueDemon extends Villager {
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate(game.getWolfSentence());
 		game.vu.addToVote(this);
+		super.requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;

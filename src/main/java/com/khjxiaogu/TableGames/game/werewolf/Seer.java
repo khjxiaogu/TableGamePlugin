@@ -43,6 +43,7 @@ public class Seer extends Villager {
 		super.StartTurn();
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("预言家，你可以查验一个人，请私聊选择查验的人，你有一分钟的考虑时间\n格式：“查验 游戏号码”\n如：“查验 1”");
+		super.requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;

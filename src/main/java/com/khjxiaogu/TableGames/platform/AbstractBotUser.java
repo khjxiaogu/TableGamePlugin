@@ -38,5 +38,9 @@ public interface AbstractBotUser extends AbstractUser{
 		DynamicListeners.dispatch(getId(), MsgType.AT,new Text(msg).asMessage());
 	}
 	void sendBotMessage(String msg);
-	
+	void onPublic(String msg);
+
+	void onPrivate(String msg);
+	void setLogic(Class<? extends BotUserLogic> logicType);
+	boolean hasLogic();
 }

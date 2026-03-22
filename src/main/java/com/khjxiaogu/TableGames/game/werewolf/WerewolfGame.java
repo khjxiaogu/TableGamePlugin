@@ -30,28 +30,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import com.khjxiaogu.TableGames.data.application.PlayerDatabase.GameData;
-import com.khjxiaogu.TableGames.game.werewolf.bots.BearBot;
-import com.khjxiaogu.TableGames.game.werewolf.bots.DarkWolfBot;
 import com.khjxiaogu.TableGames.game.werewolf.bots.DeadBot;
-import com.khjxiaogu.TableGames.game.werewolf.bots.ElderBot;
 import com.khjxiaogu.TableGames.game.werewolf.bots.GenericBot;
-import com.khjxiaogu.TableGames.game.werewolf.bots.GraveKeeperBot;
-import com.khjxiaogu.TableGames.game.werewolf.bots.HunterBot;
-import com.khjxiaogu.TableGames.game.werewolf.bots.IdiotBot;
-import com.khjxiaogu.TableGames.game.werewolf.bots.SeerBot;
-import com.khjxiaogu.TableGames.game.werewolf.bots.WereWolfBot;
-import com.khjxiaogu.TableGames.game.werewolf.bots.WitchBot;
-import com.khjxiaogu.TableGames.game.werewolf.bots.WolfKillerBot;
+import com.khjxiaogu.TableGames.game.werewolf.bots.LLMBot;
+import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.BotUser;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
+import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.utils.Game;
 import com.khjxiaogu.TableGames.utils.GameUtils;
@@ -61,6 +55,18 @@ import com.khjxiaogu.TableGames.utils.VoteHelper;
 import com.khjxiaogu.TableGames.utils.WaitThread;
 
 public class WerewolfGame extends Game implements Serializable {
+
+	@Override
+	public void sendPublicMessage(IMessage msg) {
+		onMessage(null,Utils.getPlainText(msg),true);
+		super.sendPublicMessage(msg);
+	}
+
+	@Override
+	public void sendPublicMessage(String msg) {
+		onMessage(null,msg,true);
+		super.sendPublicMessage(msg);
+	}
 
 	private static final long serialVersionUID = 7731234732322205712L;
 
@@ -115,33 +121,33 @@ public class WerewolfGame extends Game implements Serializable {
 	}
 
 	public static enum Role {
-		DARKWOLF("狼王", DarkWolf.class, -1.5, DarkWolfBot.class, Fraction.Wolf),
-		ARSONER("纵火者", Arsoner.class, 1.25, GenericBot.class, Fraction.God),
-		WHITEWOLF("白狼王", WhiteWolf.class, -1.5, WereWolfBot.class, Fraction.Wolf),
-		BEAR("熊", Bear.class, 1.0, BearBot.class, Fraction.God),
-		STATUEDEMON("石像鬼", StatueDemon.class, -0.5, WereWolfBot.class, Fraction.Wolf),
-		CROW("乌鸦", Crow.class, 1.0, GenericBot.class, Fraction.God),
-		DEMON("恶魔", Demon.class, -1.35, WereWolfBot.class, Fraction.Wolf),
-		WITCH("女巫", Witch.class, 1.0, WitchBot.class, Fraction.God),
-		MUTER("禁言长老", Muter.class, 0.75, GenericBot.class, Fraction.God),
-		WOLFBEAUTY("狼美人", WolfBeauty.class, -1.5, WereWolfBot.class, Fraction.Wolf),
-		MIRACLEARCHER("奇迹弓手", MiracleArcher.class, 1.0, GenericBot.class, Fraction.God),
-		IDIOT("白痴", Idiot.class, 0.5, IdiotBot.class, Fraction.God),
-		TRAMP("老流氓", Tramp.class, 0.1, GenericBot.class, Fraction.Innocent),
-		HARDWOLF("巨狼", HardWolf.class, -1.25, WereWolfBot.class, Fraction.Wolf),
-		HUNTER("猎人", Hunter.class, 1.0, HunterBot.class, Fraction.God),
-		CORONER("验尸官", Coroner.class, 0.5, GenericBot.class, Fraction.God),
-		FOX("狐狸", Fox.class, 1.15, GenericBot.class, Fraction.God),
-		DEFENDER("守卫", Defender.class, 1.0, GenericBot.class, Fraction.God),
-		KNIGHT("骑士", Knight.class, 1.5, GenericBot.class, Fraction.God),
-		NIGHTMAREKNIGHT("恶灵骑士", NightmareKnight.class, -1.5, WereWolfBot.class, Fraction.Wolf),
-		GRAVEKEEPER("守墓人", GraveKeeper.class, 0.5, GraveKeeperBot.class, Fraction.God),
-		ELDER("长老", Elder.class, 0.1, ElderBot.class, Fraction.Innocent),
-		WEREWOLF("狼人", Werewolf.class, -1.0, WereWolfBot.class, Fraction.Wolf),
-		VILLAGER("平民", Villager.class, 0.0, GenericBot.class, Fraction.Innocent),
-		SEER("预言家", Seer.class, 1.0, SeerBot.class, Fraction.God),
-		WOLFKILLER("猎魔人", WolfKiller.class, 1.5, WolfKillerBot.class, Fraction.God),
-		HIDDENWOLF("隐狼", HiddenWolf.class, -0.55, WereWolfBot.class, Fraction.Wolf);
+		DARKWOLF("狼王", DarkWolf.class, -1.5, LLMBot.class, Fraction.Wolf),
+		ARSONER("纵火者", Arsoner.class, 1.25, LLMBot.class, Fraction.God),
+		WHITEWOLF("白狼王", WhiteWolf.class, -1.5, LLMBot.class, Fraction.Wolf),
+		BEAR("熊", Bear.class, 1.0, LLMBot.class, Fraction.God),
+		STATUEDEMON("石像鬼", StatueDemon.class, -0.5, LLMBot.class, Fraction.Wolf),
+		CROW("乌鸦", Crow.class, 1.0, LLMBot.class, Fraction.God),
+		DEMON("恶魔", Demon.class, -1.35, LLMBot.class, Fraction.Wolf),
+		WITCH("女巫", Witch.class, 1.0, LLMBot.class, Fraction.God),
+		MUTER("禁言长老", Muter.class, 0.75, LLMBot.class, Fraction.God),
+		WOLFBEAUTY("狼美人", WolfBeauty.class, -1.5, LLMBot.class, Fraction.Wolf),
+		MIRACLEARCHER("奇迹弓手", MiracleArcher.class, 1.0, LLMBot.class, Fraction.God),
+		IDIOT("白痴", Idiot.class, 0.5, LLMBot.class, Fraction.God),
+		TRAMP("老流氓", Tramp.class, 0.1, LLMBot.class, Fraction.Innocent),
+		HARDWOLF("巨狼", HardWolf.class, -1.25, LLMBot.class, Fraction.Wolf),
+		HUNTER("猎人", Hunter.class, 1.0, LLMBot.class, Fraction.God),
+		CORONER("验尸官", Coroner.class, 0.5, LLMBot.class, Fraction.God),
+		FOX("狐狸", Fox.class, 1.15, LLMBot.class, Fraction.God),
+		DEFENDER("守卫", Defender.class, 1.0, LLMBot.class, Fraction.God),
+		KNIGHT("骑士", Knight.class, 1.5, LLMBot.class, Fraction.God),
+		NIGHTMAREKNIGHT("恶灵骑士", NightmareKnight.class, -1.5, LLMBot.class, Fraction.Wolf),
+		GRAVEKEEPER("守墓人", GraveKeeper.class, 0.5, LLMBot.class, Fraction.God),
+		ELDER("长老", Elder.class, 0.1, LLMBot.class, Fraction.Innocent),
+		WEREWOLF("狼人", Werewolf.class, -1.0, LLMBot.class, Fraction.Wolf),
+		VILLAGER("平民", Villager.class, 0.0, LLMBot.class, Fraction.Innocent),
+		SEER("预言家", Seer.class, 1.0, LLMBot.class, Fraction.God),
+		WOLFKILLER("猎魔人", WolfKiller.class, 1.5, LLMBot.class, Fraction.God),
+		HIDDENWOLF("隐狼", HiddenWolf.class, -0.55, LLMBot.class, Fraction.Wolf);
 
 		private final String name;
 		private final Class<? extends Villager> roleClass;
@@ -452,15 +458,11 @@ public class WerewolfGame extends Game implements Serializable {
 
 	public WerewolfGame(AbstractRoom g, int cplayer, Map<String, String> sets) {
 		super(g, cplayer, cplayer * 2);
-		int botnm = 0;
 		for (int i = 0; i < wt.length; i++) {
 			wt[i] = new WaitThread();
 		}
-		if (sets.containsKey("机器人")) {
-			cplayer += botnm = Integer.parseInt(sets.get("机器人"));
-		} else if (sets.containsKey("人数")) {
+	 if (sets.containsKey("人数")) {
 			int tplayer = Integer.parseInt(sets.get("人数"));
-			botnm = tplayer - cplayer;
 			cplayer = tplayer;
 		}
 		double cpoint = Double.parseDouble(sets.getOrDefault("评分", "0.3"));
@@ -472,7 +474,6 @@ public class WerewolfGame extends Game implements Serializable {
 		doStat = sets.getOrDefault("统计", "true").equals("true");
 		isFirstNight = sets.getOrDefault("首夜遗言", "true").equals("true");
 		pointpool = Integer.parseInt(sets.getOrDefault("积分奖池", "-1"));
-		boolean isDeadBot = sets.getOrDefault("不接管", "false").equals("true");
 		Collections.shuffle(roles);
 		winrate = WerewolfGame.calculateRolePoint(roles);
 		hasSheriff = sets.getOrDefault("警长", String.valueOf(cplayer >= 9)).equals("true");
@@ -497,7 +498,7 @@ public class WerewolfGame extends Game implements Serializable {
 				hasWolfGod = true;
 				continue;
 			}
-		}
+		}/*
 		if (botnm > 0) {
 			while (botnm-- > 0) {
 				synchronized (playerlist) {
@@ -538,7 +539,7 @@ public class WerewolfGame extends Game implements Serializable {
 
 				}
 			}
-		}
+		}*/
 	}
 
 	public void calcCSR() {
@@ -584,7 +585,8 @@ public class WerewolfGame extends Game implements Serializable {
 		}
 		if (hasSheriff) {
 			sb.append("\n首日产生警长");
-		}
+		}else
+			sb.append("\n无警长");
 		sb.append("\n人数：").append(playerlist.size());
 		int inno = 0, wolf = 0, god = 0;
 		boolean hasArsoner=false,hasKnight=false,hasWitch=false;
@@ -1102,6 +1104,8 @@ public class WerewolfGame extends Game implements Serializable {
 						to = roles.remove(0);
 					playerlist.add(cp = to.getRoleClass().getConstructor(WerewolfGame.class, AbstractUser.class)
 							.newInstance(this, mem));
+					if(mem instanceof AbstractBotUser)
+						((AbstractBotUser) mem).setLogic(to.getBotClass());
 					String nc = cp.getNameCard();
 
 					try {
@@ -1144,7 +1148,10 @@ public class WerewolfGame extends Game implements Serializable {
 		cp.next.prev = cp;
 		getScheduler().execute(this::gameStart);
 	}
-
+	public void onMessage(UserIdentifier id,String msg,boolean isPublic) {
+		for (Villager p : playerlist) 
+			p.receivedMessage(id, msg,isPublic);
+	}
 	@Override
 	public void forceShow(AbstractUser ct) {
 		StringBuilder mc = new StringBuilder("游戏身份：");
@@ -1177,10 +1184,10 @@ public class WerewolfGame extends Game implements Serializable {
 				nc = "";
 			}
 			p.origname = nc;
-			if (o == null) {
-				p.doTakeOver(this.getGroup().createBot(n, Role.getRole(p).getBotClass(), this));
-			} else {
-				p.doTakeOver(o);
+
+			p.doTakeOver(o);
+			if(o instanceof AbstractBotUser&&!((AbstractBotUser) o).hasLogic()) {
+				((AbstractBotUser) o).setLogic(Role.getRole(p).getBotClass());
 			}
 			p.setNameCard(p.getMemberString());
 			return true;
@@ -1193,8 +1200,8 @@ public class WerewolfGame extends Game implements Serializable {
 	}
 
 	// wait utils
-	public void startWait(long millis, WaitReason lr) {
-		wt[lr.getId()].startWait(millis);
+	public boolean startWait(long millis, WaitReason lr) {
+		return wt[lr.getId()].startWait(millis);
 	}
 
 	public void skipWait(WaitReason lr) {
@@ -1384,7 +1391,14 @@ public class WerewolfGame extends Game implements Serializable {
 			p.onWolfTurn();
 		}
 
-		startWait(60000 * basetime * wolftime, WaitReason.Vote);
+		if(startWait(60000 * basetime * wolftime, WaitReason.Vote)) {
+			for(Villager v:vu.tovote) {
+				v.sendNoneBotOnlyPrivate("狼人回合仅剩30秒，请尽快做出表决");
+				
+			}
+			startWait(30000, WaitReason.Vote);
+			
+		}
 
 		removeAllListeners();
 		List<Villager> il = vu.getForceMostVoted();
@@ -1575,6 +1589,7 @@ public class WerewolfGame extends Game implements Serializable {
 			this.sendPublicMessage("请在两分钟内在私聊中完成投票！");
 			vu.hintVote(getScheduler());
 			startWait(120000, WaitReason.Vote);
+			sendVoteResult();
 			voteSheriff(vu.getForceMostVoted(), restToVote);
 			return;
 		} else if (sherifflist.size() == 1) {
@@ -1591,7 +1606,17 @@ public class WerewolfGame extends Game implements Serializable {
 
 		getScheduler().execute(this::onDiePending);
 	}
-
+	public void sendVoteResult() {
+		StringBuilder sbvu=new StringBuilder("投票结果：\n");
+		for(Entry<Villager, Villager> v:vu.voteResult.entrySet()) {
+			sbvu.append(v.getKey().getMemberString()+" 投给了 "+v.getValue().getMemberString()+"\n");
+		}
+		sbvu.append("票数统计\n");
+		for(Entry<Villager, Double> v:vu.voted.entrySet()) {
+			sbvu.append(v.getKey().getMemberString()+" 票数："+v.getValue()+"\n");
+		}
+		this.sendPublicMessage(sbvu.toString().trim());
+	}
 	public void voteSheriff(List<Villager> ps, List<Villager> vtb) {
 		vu.clear();
 		if (ps.size() > 1) {
@@ -1628,6 +1653,7 @@ public class WerewolfGame extends Game implements Serializable {
 				vu.hintVote(getScheduler());
 				getScheduler().execute(() -> {
 					startWait(120000, WaitReason.Vote);
+					sendVoteResult();
 					removeAllListeners();
 					voteSheriff(vu.getForceMostVoted(), vtb);
 				});
@@ -1779,7 +1805,7 @@ public class WerewolfGame extends Game implements Serializable {
 			return;
 		allDeadPend();
 		isFirstNight = false;
-		this.sendPublicMessage(getAliveList());
+		
 		tokill.clear();
 
 		int aliv = 0;
@@ -1790,7 +1816,7 @@ public class WerewolfGame extends Game implements Serializable {
 				aliv++;
 			}
 		}
-		this.sendPublicMessage("剩余人数：" + aliv + "/" + tot);
+
 		try {
 			Thread.sleep(3000);
 		} catch (InterruptedException e) {
@@ -1803,6 +1829,9 @@ public class WerewolfGame extends Game implements Serializable {
 				sendPublicMessage("昨晚，" + pb.getMemberString() + "燃起来了，他的身份是" + pb.getRole() + "。");
 			}
 		}
+		
+		this.sendPublicMessage(getAliveList());
+		this.sendPublicMessage("剩余人数：" + aliv + "/" + tot);
 		canTalk.clear();
 		if (isSkippedDay) {
 			isSkippedDay = false;
@@ -1832,6 +1861,11 @@ public class WerewolfGame extends Game implements Serializable {
 		for (Villager p : canTalk) {
 			if (!p.isDead() && !p.isMuted) {
 				p.onDayTime();
+				for(Villager p2:playerlist) {
+					if (!p2.isDead()) {
+						p2.onOneTalkEnd();
+					}
+				}
 			}
 		}
 		vu.skipHalf = true;
@@ -1855,6 +1889,7 @@ public class WerewolfGame extends Game implements Serializable {
 		vu.hintVote(getScheduler());
 
 		startWait(120000, WaitReason.Vote);
+		sendVoteResult();
 		removeAllListeners();
 		if (cursed != null) {
 			this.sendPublicMessage(cursed.getMemberString() + "被乌鸦诅咒了。");
@@ -1892,6 +1927,7 @@ public class WerewolfGame extends Game implements Serializable {
 				vu.hintVote(getScheduler());
 				getScheduler().execute(() -> {
 					startWait(120000, WaitReason.Vote);
+					sendVoteResult();
 					removeAllListeners();
 					voteKill(vu.getMostVoted());
 				});

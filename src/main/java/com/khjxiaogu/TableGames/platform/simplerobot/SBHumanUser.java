@@ -179,4 +179,14 @@ public class SBHumanUser extends SBUser implements Serializable {
 			KookMain.api.setVisible("2452937317768836",member.getId().toString());
 		}catch(Throwable t){}
 	}
+	@Override
+	public void addRef() {
+	}
+	@Override
+	public void release() {
+	}
+	@Override
+	public boolean isReferred() {
+		return false;
+	}
 }

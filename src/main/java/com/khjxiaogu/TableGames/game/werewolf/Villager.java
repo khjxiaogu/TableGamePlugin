@@ -34,8 +34,12 @@ import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.UserFunction;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
+import com.khjxiaogu.TableGames.platform.message.IMessage;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
+import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.utils.Utils;
+
+import okhttp3.internal.Util;
 
 public class Villager extends UserFunction implements Serializable {
 	/**
@@ -79,6 +83,7 @@ public class Villager extends UserFunction implements Serializable {
 		super(p);
 		this.game = game;
 		super.bind(this);
+		super.setGame(game);
 	}
 
 	public void onGameStart() {
@@ -96,7 +101,9 @@ public class Villager extends UserFunction implements Serializable {
 	public String getJobDescription() {
 		return "你白天可以进行陈述和投票，目标是与神合作去除狼人。";
 	}
-
+	public void onOneTalkEnd() {
+		
+	}
 	public void doTakeOver(AbstractUser ap) {
 		transferListener(ap);
 		member = ap;
@@ -169,7 +176,8 @@ public class Villager extends UserFunction implements Serializable {
 	public void onDayTime() {
 		onBeforeTalk();
 		try {
-			sendPublic("你有五分钟时间进行陈述。\n可以随时@我结束你的讲话。");
+			sendPublic("你有五分钟时间进行陈述。\n可以随时发送##结束你的讲话。");
+			requestOperation(true);
 			super.registerListener((msg, type) -> {
 				if (type == MsgType.AT) {
 					super.releaseListener();
@@ -178,6 +186,8 @@ public class Villager extends UserFunction implements Serializable {
 				} else if (type == MsgType.PRIVATE) {
 					doDaySkillPending(Utils.getPlainText(msg));
 				}
+				if(type!=MsgType.PRIVATE)
+					game.onMessage(this.getId(), Utils.getPlainText(msg),true);
 			});
 			game.startWait(300000, WaitReason.State);
 		} finally {
@@ -209,6 +219,7 @@ public class Villager extends UserFunction implements Serializable {
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("请私聊投票要驱逐的人，你有2分钟的考虑时间\n格式：“投票 游戏号码”\n如：“投票 1”\n弃票请输入“弃权”");
 		game.vu.addToVote(this);
+		requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type == MsgType.PRIVATE) {
 				String content = Utils.getPlainText(msg);
@@ -239,7 +250,7 @@ public class Villager extends UserFunction implements Serializable {
 						increaseVoteAccuracy(p.onVotedAccuracy());
 						game.logger.logSkill(this, p, "投票");
 						sendPrivate("已投票给 " + p.getMemberString(this));
-						sendForName("已投票给 " + p.getMemberString());
+						sendForName("已投票 ");
 						game.DayVote(this, p);
 
 					} catch (Throwable t) {
@@ -277,7 +288,9 @@ public class Villager extends UserFunction implements Serializable {
 	public interface DoSelect {
 		boolean select(List<Villager> canTalk, Villager lastDeath, Villager sheriff, List<Villager> all);
 	}
-
+	public void receivedMessage(UserIdentifier uid,String msg,boolean isPublic) {
+		member.receiveMessage(uid, msg,isPublic);
+	}
 	public static Map<String, DoSelect> orders = new HashMap<>();
 	static {
 		Villager.orders.put("警后", (l, a, b, c) -> {
@@ -356,6 +369,7 @@ public class Villager extends UserFunction implements Serializable {
 		this.sendPublic("请选择发言顺序。");
 		sendPrivate("请回复选择发言顺序：警后、警前、死后、死前、顺序、倒序。\n" + "你有30秒时间选择。");
 		game.canTalk.clear();
+		requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type == MsgType.PRIVATE) {
 				String content = Utils.getPlainText(msg);
@@ -387,6 +401,7 @@ public class Villager extends UserFunction implements Serializable {
 		if (isSheriff) {
 			this.sendPublic("请警长选择警徽的处置方式。");
 			sendPrivate("警长，你死了，你有1分钟时间决定警徽去向，如果要传给某人，可以使用：“传给 游戏号码”给该玩家警徽。\n" + "否则，可以使用“撕毁”撕毁警徽。\n");
+			requestOperation(false);
 			super.registerListener((msg, type) -> onSheriffSkillListener(msg, type));
 			game.startWait(60000, WaitReason.Generic);
 			isSheriff = false;
@@ -440,6 +455,7 @@ public class Villager extends UserFunction implements Serializable {
 
 	public void onSelectSheriff() {
 		super.sendPrivate("当前是警长竞选环节，如果要竞选警长，请在60秒内发送“竞选”，否则请发送“放弃”");
+		requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
@@ -458,16 +474,23 @@ public class Villager extends UserFunction implements Serializable {
 
 	public void onBeforeSheriffState() {
 		sendPrivate(getMemberString()+"，在竞选投票开始前，你随时都可以私聊发送“退选”进行退选。");
+		requestOperation(false);
 		super.registerListener((msgx, typex) -> SheriffDeselect(msgx, typex));
 	}
 
 	public void onSheriffState() {
 		onBeforeTalk();
-		sendPublic("你有五分钟时间进行竞选发言。\n可以随时@我结束你的讲话。");
+		sendPublic("你有五分钟时间进行竞选发言。\n可以随时发送##结束你的讲话。");
+		requestOperation(true);
 		super.registerListener((msg, type) -> {
 			if (type == MsgType.AT) {
 				super.releaseListener();
-				super.registerListener((msgx, typex) -> SheriffDeselect(msgx, typex));
+				if(Utils.getPlainText(msg).startsWith("退选")) {
+					game.logger.logRaw(this.getMemberString(this) + "已退选");
+					this.sendForName("已退选");
+					game.sherifflist.remove(this);
+				}else
+					super.registerListener((msgx, typex) -> SheriffDeselect(msgx, typex));
 				game.skipWait(WaitReason.State);
 			} else if (type == MsgType.PRIVATE && Utils.getPlainText(msg).startsWith("退选")) {
 				game.logger.logRaw(this.getMemberString(this) + "已退选");
@@ -475,6 +498,11 @@ public class Villager extends UserFunction implements Serializable {
 				game.sherifflist.remove(this);
 				this.releaseListener();
 				game.skipWait(WaitReason.State);
+			}
+		
+			if (type != MsgType.PRIVATE) {
+				
+				game.onMessage(this.getId(), Utils.getPlainText(msg),true);
 			}
 		});
 		game.startWait(300000, WaitReason.State);
@@ -499,6 +527,7 @@ public class Villager extends UserFunction implements Serializable {
 		sendPrivate(sb.toString());
 		super.sendPrivate("请私聊投票选择的警长，你有2分钟的考虑时间\n格式：“投票 游戏号码”\n如：“投票 1”\n弃票请输入“弃权”");
 		game.vu.addToVote(this);
+		requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type == MsgType.PRIVATE) {
 				String content = Utils.getPlainText(msg);
@@ -523,7 +552,8 @@ public class Villager extends UserFunction implements Serializable {
 						increaseVoteAccuracy(-p.onVotedAccuracy());
 						game.logger.logSkill(this, p, "投票");
 						sendPrivate("已投票给 " + p.getMemberString(this));
-						sendForName("已投票给 " + p.getMemberString());
+						sendForName("已投票");
+						
 						game.SheriffVote(this, p);
 					} catch (Throwable t) {
 						super.sendPrivate("发生错误，正确格式为：“投票 游戏号码”！");
@@ -546,13 +576,16 @@ public class Villager extends UserFunction implements Serializable {
 		if (game.isFirstNight() || dir.hasDiedWord) {
 			isDead = true;
 			onBeforeTalk();
-			sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时@我结束你的讲话。");
+			sendPublic("死了，你有五分钟时间说出你的遗言。\n可以随时发送##结束你的讲话。");
 			if (!shouldCheckSkill || !onDiePending(dir)) {
+				requestOperation(true);
 				super.registerListener((msg, type) -> {
 					if (type == MsgType.AT) {
 						super.releaseListener();
 						game.skipWait(WaitReason.DieWord);
 					}
+					if(type!=MsgType.PRIVATE)
+						game.onMessage(this.getId(), Utils.getPlainText(msg),true);
 				});
 			}
 			game.startWait(300000, WaitReason.DieWord);
@@ -664,6 +697,30 @@ public class Villager extends UserFunction implements Serializable {
 		return diedReasonStack.isEmpty();
 	}
 
+	@Override
+	public void sendPublic(String str) {
+		game.onMessage(this.getId(), str,true);
+		super.sendPublic(str);
+	}
+
+	@Override
+	public void sendPublic(MessageCompound msg) {
+		game.onMessage(this.getId(), Utils.getPlainText(msg),true);
+		super.sendPublic(msg);
+	}
+
+	@Override
+	public void sendForName(String str) {
+		game.onMessage(this.getId(), str,true);
+		super.sendForName(str);
+	}
+
+	@Override
+	public void sendForName(IMessage msg) {
+		game.onMessage(this.getId(), Utils.getPlainText(msg),true);
+		super.sendForName(msg);
+	}
+
 	public boolean hasDiedReason(DiedReason dir) {
 		return diedReasonStack.contains(dir);
 	}
@@ -699,7 +756,12 @@ public class Villager extends UserFunction implements Serializable {
 	public boolean isDead() {
 		return isDead;
 	}
-
+	public void requestOperation(boolean isPublic) {
+		member.requestOperation(isPublic,false,null);
+	}
+	public void requestTemperalOperation(boolean isPublic,String hint) {
+		member.requestOperation(isPublic,true,hint);
+	}
 	public void onPreSheriffSkill() {
 	}
 

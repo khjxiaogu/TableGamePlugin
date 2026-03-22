@@ -42,5 +42,6 @@ public interface AbstractRoom {
 	void setMuteAll(boolean isMute);
 	String getHostNameCard();
 	UserIdentifier getId();
-	AbstractBotUser createBot(int id,Class<? extends BotUserLogic> logicCls,Game in);
+	AbstractBotUser createBot();
+	
 }

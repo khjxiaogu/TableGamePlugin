@@ -55,7 +55,7 @@ public class WaitThread {
 	 * @param millis the millis<br>毫秒
 	 * @exception TerminatedException 如果terminateWait方法被调用
 	 */
-	public void startWait(long millis) {
+	public boolean startWait(long millis) {
 		try {
 			synchronized(waitlock){
 				waiting=Thread.currentThread();
@@ -63,8 +63,10 @@ public class WaitThread {
 			}
 			try {
 				Thread.sleep(millis);
+				return true;
 			} catch (InterruptedException e) {
 			}
+			
 		}catch(Throwable T) {}finally {
 			synchronized(waitlock) {
 				waiting=null;
@@ -74,6 +76,7 @@ public class WaitThread {
 				}
 			}
 		}
+		return false;
 	}
 
 	/**

@@ -79,6 +79,7 @@ public class Witch extends Villager {
 		sb.append("你可以使用其中一瓶\n如：“救 1”，\n");
 		sb.append("你有一分钟的考虑时间。\n如果不需要使用药，无需发送任何内容，等待时间结束即可。");
 		super.sendPrivate(sb.toString());
+		super.requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;

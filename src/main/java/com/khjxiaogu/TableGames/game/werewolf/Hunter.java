@@ -63,6 +63,7 @@ public class Hunter extends Villager {
 		} else {
 			super.sendPrivate("猎人，你死了，你可以选择翻牌并开枪打死另一个人，也可以不开枪\n格式：“杀死 游戏号码”\n如：“杀死 1”。\n如果放弃开枪，请输入：“放弃”。");
 		}
+		requestOperation(false);
 		asked = true;
 		super.registerListener((msg, type) -> {
 			if (type == MsgType.AT) {
@@ -109,7 +110,7 @@ public class Hunter extends Villager {
 					game.logger.logSkill(this, p, "猎人杀死");
 					super.sendPrivate("你杀死了" + p.getMemberString(this));
 					if (game.isDayTime) {
-						super.sendPrivate("你的遗言回合还未结束，请在说完后在群里@机器人结束。");
+						super.sendPrivate("你的遗言回合还未结束，请在说完后在群聊发送##结束。");
 					}
 					boolean hasDarkWolf = false;
 					for (Villager vill : game.playerlist) {

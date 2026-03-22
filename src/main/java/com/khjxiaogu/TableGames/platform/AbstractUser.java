@@ -52,10 +52,19 @@ public interface AbstractUser {
 	Object getRoleObject();
 	Permission getPermission();
 	boolean isFriend();
+	default void receiveMessage(UserIdentifier id,String msg,boolean isPublic) {
+		
+	};
 	default void tryMuteBackend() {
 		
 	}
 	default void tryUnmuteBackend() {
 		
 	}
+	default void requestOperation(boolean isPublic, boolean isTemperal, String temperalHint) {
+		
+	}
+	void addRef();
+	void release();
+	boolean isReferred();
 }

@@ -35,6 +35,7 @@ public class Arsoner extends Villager {
 			return;
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate("纵火者，你可以纵火烧一个人，你有一分钟考虑时间，\n格式：“烧 游戏号码”\n如：“烧 1”\n如果放弃纵火，则无需发送任何内容，等待时间结束即可。");
+		super.requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;

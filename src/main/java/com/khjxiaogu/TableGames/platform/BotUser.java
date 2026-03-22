@@ -34,7 +34,14 @@ public class BotUser implements BotUserLogic {
 	@Override
 	public void onPrivate(String msg) {
 	}
-
+	@Override
+	public void receivedGameMessage(UserIdentifier sender,String msg,boolean isPublic) {
+		
+	}
+	@Override
+	public void requestOperation(boolean isPublic,boolean isTemperal,String tempralHint) {
+		
+	}
 	public AbstractBotUser getPlayer() {
 		return internal;
 	}

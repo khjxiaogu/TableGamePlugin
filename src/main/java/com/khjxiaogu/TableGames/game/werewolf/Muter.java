@@ -45,6 +45,7 @@ public class Muter extends Villager {
 		sendPrivate(game.getAliveList(this));
 		super.sendPrivate(
 				"你可以禁言一个人，让他在明天的发言回合不能发言。\n请私聊选择禁言的人，你有60秒的考虑时间。\n格式：“禁言 游戏号码”\n如果无需禁言，则无需发送任何内容，等待时间结束即可。");
+		super.requestOperation(false);
 		super.registerListener((msg, type) -> {
 			if (type != MsgType.PRIVATE)
 				return;
