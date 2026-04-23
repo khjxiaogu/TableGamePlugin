@@ -77,7 +77,7 @@ public class QianghunKill extends Game {
 			if(!rank.isEmpty()) {
 				ImagePrintStream gamelog = new ImagePrintStream();
 				for(Entry<AbstractUser, Integer> ent:rank.entrySet()) {
-					gamelog.append(ent.getKey().getMemberString()+"打死了"+ent.getValue()+"个枪魂");
+					gamelog.println(ent.getKey().getMemberString()+"打死了"+ent.getValue()+"个枪魂");
 				}
 				this.sendPublicMessage(new Image(gamelog.asImage()));
 			}
