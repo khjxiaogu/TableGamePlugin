@@ -115,7 +115,7 @@ public abstract class PreserveInfo<T extends Game>{
 	private void decreaseTimer() {
 		if(topreserve.isEmpty())return;
 		long crntime=new Date().getTime()-40*60*1000;
-		if(td==null)
+		/*if(td==null)
 			topreserve.entrySet().removeIf(ent->{
 				if(ent.getValue()<=crntime) {
 					AbstractUser m=ent.getKey();
@@ -123,7 +123,7 @@ public abstract class PreserveInfo<T extends Game>{
 					return true;
 				}
 				return false;
-			});
+			});*/
 		AliveCounter--;
 		if(AliveCounter==0) {
 			for(AbstractUser m:topreserve.keySet()) {
@@ -281,9 +281,9 @@ public abstract class PreserveInfo<T extends Game>{
 			}
 			if(getActualCurrentNum()<getMinMembers())return;
 			
-
-			startGame();
 			td=null;
+			startGame();
+			
 			AliveCounter=0;
 			acceled=false;
 		});
