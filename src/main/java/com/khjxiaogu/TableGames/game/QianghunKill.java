@@ -61,7 +61,7 @@ public class QianghunKill extends Game {
 				AbstractUser qh=qhs.remove(0);
 				AbstractUser nqh=nqhs.remove(0);
 				boolean win=Math.random()>0.3;
-				this.sendPublicMessage(qh+"与"+nqh+"决斗，"+(win?nqh.getMemberString():qh.getMemberString())+"赢了！");
+				this.sendPublicMessage(qh.getMemberString()+"与"+nqh.getMemberString()+"决斗，"+(win?nqh.getMemberString():qh.getMemberString())+"赢了！");
 				if(win)
 					nqhs.add(nqh);
 				else
