@@ -2,12 +2,17 @@ package com.khjxiaogu.TableGames.game;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
+import com.khjxiaogu.TableGames.platform.message.Image;
 import com.khjxiaogu.TableGames.utils.Game;
+import com.khjxiaogu.TableGames.utils.ImagePrintStream;
 
 public class QianghunKill extends Game {
 
@@ -24,7 +29,6 @@ public class QianghunKill extends Game {
 
 	@Override
 	public void forceStart() {
-		boolean isQh=false;
 		List<AbstractUser> qhs=new ArrayList<>();
 
 		List<AbstractUser> nqhs=new ArrayList<>();
@@ -37,9 +41,12 @@ public class QianghunKill extends Game {
 				nqhs.add(a);
 			}
 		}
+		List<AbstractUser> bqhs=new ArrayList<>(qhs);
 		Collections.shuffle(nqhs);
 		Collections.shuffle(qhs);
+		Map<AbstractUser,Integer> rank=new HashMap<>();
 		getScheduler().executeLater(()->{
+			boolean isWon=false;
 			while(true) {
 				try {
 					Thread.sleep(1000);
@@ -48,25 +55,34 @@ public class QianghunKill extends Game {
 					Thread.currentThread().interrupt();
 					break;
 				}
-				if (qhs.isEmpty()&&nqhs.isEmpty()){
-					this.sendPublicMessage("游戏结束，同归于尽！");
-					break;
-				}else if(qhs.isEmpty()) {
-					this.sendPublicMessage("游戏结束，枪魂失败！");
-					break;
-				}else if(nqhs.isEmpty()) {
-					this.sendPublicMessage("游戏结束，枪魂胜利！");
-					break;
+				if(qhs.isEmpty()) {
+
+					isWon=true;
+					if(bqhs.isEmpty())break;
+					qhs.addAll(bqhs);
+					Collections.shuffle(qhs);
 				}
+				if(nqhs.isEmpty())break;
 				AbstractUser qh=qhs.remove(0);
 				AbstractUser nqh=nqhs.remove(0);
 				boolean win=Math.random()>0.3;
 				this.sendPublicMessage(qh.getMemberString()+"与"+nqh.getMemberString()+"决斗，"+(win?nqh.getMemberString():qh.getMemberString())+"赢了！");
-				if(win)
+				if(win) {
+					rank.merge(nqh, 1, (a,b)->a+b);
 					nqhs.add(nqh);
-				else
+				}else
 					qhs.add(qh);
 					
+			}
+			ImagePrintStream gamelog = new ImagePrintStream();
+			for(Entry<AbstractUser, Integer> ent:rank.entrySet()) {
+				gamelog.append(ent.getKey().getMemberString()+"打死了"+ent.getValue()+"个枪魂");
+			}
+			this.sendPublicMessage(new Image(gamelog.asImage()));
+			if(isWon) {
+				this.sendPublicMessage("游戏结束，枪魂失败！");
+			}else{
+				this.sendPublicMessage("游戏结束，枪魂胜利！");
 			}
 			
 		},1000);
