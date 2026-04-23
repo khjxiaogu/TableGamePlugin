@@ -147,7 +147,8 @@ public class WerewolfGame extends Game implements Serializable {
 		VILLAGER("平民", Villager.class, 0.0, LLMBot.class, Fraction.Innocent),
 		SEER("预言家", Seer.class, 1.0, LLMBot.class, Fraction.God),
 		WOLFKILLER("猎魔人", WolfKiller.class, 1.5, LLMBot.class, Fraction.God),
-		HIDDENWOLF("隐狼", HiddenWolf.class, -0.55, LLMBot.class, Fraction.Wolf);
+		HIDDENWOLF("隐狼", HiddenWolf.class, -0.55, LLMBot.class, Fraction.Wolf),
+		LLAMA("羊驼", Llama.class, 0.75, LLMBot.class, Fraction.God);
 
 		private final String name;
 		private final Class<? extends Villager> roleClass;
@@ -1829,9 +1830,13 @@ public class WerewolfGame extends Game implements Serializable {
 				sendPublicMessage("昨晚，" + pb.getMemberString() + "燃起来了，他的身份是" + pb.getRole() + "。");
 			}
 		}
-		
-		this.sendPublicMessage(getAliveList());
-		this.sendPublicMessage("剩余人数：" + aliv + "/" + tot);
+		for (Villager pb : playerlist) {
+			if (pb.isLlamaSplited) {
+				pb.isLlamaSplited = false;
+				sendPublicMessage("" + pb.getMemberString() + "的身上有臭烘烘的口水味。");
+			}
+		}
+		this.sendPublicMessage("剩余人数：" + aliv + "/" + tot+"\n"+getAliveList());
 		canTalk.clear();
 		if (isSkippedDay) {
 			isSkippedDay = false;

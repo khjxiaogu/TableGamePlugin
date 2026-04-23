@@ -59,8 +59,8 @@ public class KExecutor implements ExecutorService {
 			if(!(ex instanceof TerminatedException||ex instanceof InterruptedException)) {
 				ByteArrayOutputStream baos=new ByteArrayOutputStream();
 				ex.printStackTrace(new PrintStream(baos));
-				UserIdentifier uid=UserIdentifierSerializer.readOptional("1905387052").or(()->
-				UserIdentifierSerializer.readOptional("sb:841570688")).orElse(null);
+				UserIdentifier uid=UserIdentifierSerializer.readOptional("1905387052").orElseGet(()->
+				UserIdentifierSerializer.readOptional("sb:841570688").orElse(null));
 				if(uid!=null) {
 					AbstractUser author=tosend.get(uid);
 					if(author!=null) {

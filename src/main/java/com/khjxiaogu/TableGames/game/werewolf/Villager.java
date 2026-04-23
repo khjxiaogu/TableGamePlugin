@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,6 +64,7 @@ public class Villager extends UserFunction implements Serializable {
 	boolean lastIsMuted = false;
 	boolean isFrozen = false;
 	boolean isFirstNightDeath=false;
+	boolean isLlamaSplited=false;
 	Set<DiedReason> diedReasonStack = Collections.synchronizedSet(new HashSet<>());
 	double voteAccuracy;
 	int voted;
@@ -171,7 +173,28 @@ public class Villager extends UserFunction implements Serializable {
 		}
 		return null;
 	}
-
+	public Villager getRandomWolf() {
+		List<Villager> wolfs=new ArrayList<>();
+		for (Villager v:game.playerlist) {
+			if(!v.isDead()&&v instanceof Werewolf&&v!=this) {
+				wolfs.add(v);
+			}
+		}
+		if(!wolfs.isEmpty()) {
+			Collections.shuffle(wolfs);
+			return wolfs.get(0);
+		}
+		for (Villager v:game.playerlist) {
+			if(!v.isDead()&&v.getRealFraction() == Fraction.Wolf&&v!=this) {
+				wolfs.add(v);
+			}
+		}
+		if(!wolfs.isEmpty()) {
+			Collections.shuffle(wolfs);
+			return wolfs.get(0);
+		}
+		return null;
+	}
 	public void onDayTime() {
 		onBeforeTalk();
 		try {

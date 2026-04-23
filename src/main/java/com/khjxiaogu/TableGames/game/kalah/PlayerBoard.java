@@ -75,7 +75,10 @@ public class PlayerBoard extends KalahBoard {
 		StringBuilder sb=new StringBuilder("对方基地：");
         for (int i = COUNT_HOLE*2-1; i > COUNT_HOLE-1; i--)
         	sb.append(String.format("%2s",String.valueOf(pits[i].count))).append(" ");
-        sb.append("\n积分区域：").append(String.format("%2s",String.valueOf(score2.count))).append(" "+"   ".repeat(COUNT_HOLE-2)).append(String.format("%2s",String.valueOf(score.count)));
+        sb.append("\n积分区域：").append(String.format("%2s",String.valueOf(score2.count))).append(" ");
+        for(int i=0;i<COUNT_HOLE-2;i++)
+        	sb.append("   ");
+        sb.append(String.format("%2s",String.valueOf(score.count)));
         sb.append("\n己方基地：");
          
         //输出当前玩家基地中棋子数

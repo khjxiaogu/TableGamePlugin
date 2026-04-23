@@ -25,6 +25,7 @@ import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -54,6 +55,8 @@ import com.khjxiaogu.TableGames.data.application.CreditTrade;
 import com.khjxiaogu.TableGames.data.application.GenericPlayerData;
 import com.khjxiaogu.TableGames.data.application.PlayerCreditData;
 import com.khjxiaogu.TableGames.data.application.PlayerDatabase;
+import com.khjxiaogu.TableGames.game.QianghunKill;
+import com.khjxiaogu.TableGames.game.QianghunKillPreserve;
 import com.khjxiaogu.TableGames.game.clue.ClueGame;
 import com.khjxiaogu.TableGames.game.clue.CluePreserve;
 import com.khjxiaogu.TableGames.game.fastclue.FastClueGame;
@@ -945,7 +948,6 @@ public class GlobalMain {
 				e.printStackTrace();
 			}
 		});
-		Random ckr = new SecureRandom();
 		List<String> cards = new ArrayList<>();
 		cards.add("平民");
 		cards.add("平民");
@@ -954,9 +956,7 @@ public class GlobalMain {
 		cards.add("平民");
 		cards.add("平民");
 		cards.add("平民");
-		cards.add("平民");
 		cards.add("长老");
-		cards.add("老流氓");
 		cards.add("狼人");
 		cards.add("狼人");
 		cards.add("狼人");
@@ -965,18 +965,10 @@ public class GlobalMain {
 		cards.add("狼人");
 		cards.add("狼人");
 		cards.add("狼人");
-		cards.add("石像鬼");
-		cards.add("白狼王");
-		cards.add("白痴");
-		cards.add("预言家");
-		cards.add("猎人");
-		cards.add("女巫");
-		cards.add("守卫");
-		cards.add("乌鸦");
-		cards.add("骑士");
-		cards.add("守墓人");
-		cards.add("守卫");
-		cards.add("猎魔人");
+		for(Role r:WerewolfGame.Role.values()) {
+			cards.add(r.getName());
+		}
+		ArrayList<String> rcards = new ArrayList<>();
 		addPCmd("狼人杀摇号", "模拟狼人杀摇号", (event, args) -> {
 			List<Role> larr = WerewolfGame.fairRollRole(Integer.parseInt(args[1]));
 			double pts = WerewolfGame.calculateRolePoint(larr);
@@ -988,7 +980,11 @@ public class GlobalMain {
 			event.getRoom().sendMessage(sb.toString());
 		});
 		addCmd("狼人杀抽卡", "进行一次虚拟抽卡", (event, args) -> {
-			event.getSender().sendPublic(cards.get(ckr.nextInt(cards.size())));
+			if(rcards.isEmpty()) {
+				rcards.addAll(cards);
+				Collections.shuffle(rcards);
+			}
+			event.getSender().sendPublic(rcards.remove(0));
 		});
 		addCmd("成语接龙", "开始成语接龙", (event, args) -> {
 			Game g = GameUtils.getGames().get(event.getRoom());
@@ -999,6 +995,7 @@ public class GlobalMain {
 			IdiomSolitare is = GameUtils.createGame(IdiomSolitare::new, event.getRoom(), 1);
 			is.startEmpty();
 		});
+		makeGame("枪魂杀", QianghunKillPreserve.class, new DefaultGameCreater<>(QianghunKill.class));
 		makeGame("狼人杀", WerewolfPreserve.class, new DefaultGameCreater<>(WerewolfGame.class));
 		makeGame("诸神狼人杀", GodWerewolfPreserve.class, new GodWerewolfCreater());
 		makeGame("标准狼人杀", StandardWerewolfPreserve.class, new StandardWerewolfCreater());

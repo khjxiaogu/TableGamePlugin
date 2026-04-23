@@ -167,6 +167,13 @@ public class Witch extends Villager {
 	}
 
 	@Override
+	public double onWolfKilledAccuracy() {
+		if (hasHeal)
+			return 1;
+		return super.onWolfKilledAccuracy();
+	}
+
+	@Override
 	public Fraction getRealFraction() {
 		return Fraction.God;
 	}
