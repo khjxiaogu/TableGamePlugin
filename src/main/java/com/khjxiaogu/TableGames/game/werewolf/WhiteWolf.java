@@ -87,9 +87,9 @@ public class WhiteWolf extends Werewolf {
 				game.getScheduler().execute(() -> {
 					game.removeAllListeners();
 					game.preSkipDay();
-					p.onDied(DiedReason.Explode);
+					p.kill(DiedReason.Explode);
 					game.logger.logDeath(p, DiedReason.Explode);
-					this.onDied(DiedReason.Explode);
+					this.kill(DiedReason.Explode);
 					game.logger.logDeath(this, DiedReason.Explode);
 					
 					if (game.isSheriffSelection) {

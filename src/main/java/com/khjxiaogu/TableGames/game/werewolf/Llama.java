@@ -46,7 +46,7 @@ public class Llama extends Villager {
 
 	@Override
 	public String getJobDescription() {
-		return "你属于神阵营，从第二晚开始，若你被狼刀，则会在公屏上显示随机一个狼人被喷羊驼了一口。";
+		return "你属于神阵营，从第二晚开始，若你被狼刀，则会在公屏上显示随机一个狼人被羊驼喷了一口。";
 	}
 
 	@Override

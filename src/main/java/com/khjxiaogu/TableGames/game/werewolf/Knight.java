@@ -45,8 +45,8 @@ public class Knight extends Villager {
 	boolean hasSkill = true;
 
 	@Override
-	public void onTurnStart() {
-		super.onTurnStart();
+	public void onBeforeDeclare() {
+		super.onBeforeDeclare();
 		onTurn();
 	}
 
@@ -91,8 +91,8 @@ public class Knight extends Villager {
 						nk.isSkillUsed = true;
 						game.sendPublicMessage(p.getMemberString() + "是恶灵骑士，同归于尽，进入黑夜。");
 						game.getScheduler().execute(() -> {
-							p.onDied(DiedReason.Knight);
-							this.onDied(DiedReason.Reflect);
+							p.kill(DiedReason.Knight);
+							this.kill(DiedReason.Reflect);
 							game.skipDay();
 						});
 						return;
@@ -102,14 +102,14 @@ public class Knight extends Villager {
 					game.logger.logDeath(p, DiedReason.Knight);
 					game.sendPublicMessage(p.getMemberString() + "是狼人，被骑士杀死，进入黑夜。");
 					game.getScheduler().execute(() -> {
-						p.onDied(DiedReason.Knight);
+						p.kill(DiedReason.Knight);
 						game.skipDay();
 					});
 				} else {
 					isDead = true;
 					this.increaseSkilledAccuracy(this.onSkilledAccuracy() - p.onSkilledAccuracy());
 					game.sendPublicMessage(p.getMemberString() + "不是狼人，骑士以死谢罪。");
-					this.onDied(DiedReason.Knight_s);
+					this.kill(DiedReason.Knight_s);
 				}
 			} catch (Throwable t) {
 				super.sendPrivate("发生错误，正确格式为：“挑战 游戏号码”！");

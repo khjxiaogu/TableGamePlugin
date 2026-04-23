@@ -133,7 +133,7 @@ public class Villager extends UserFunction implements Serializable {
 			isDeaded=true;
 		}
 	}
-	public void onTurnStart() {
+	public void onBeforeDeclare() {
 		addDaySkillListener();
 	}
 	public void onDayStart() {
@@ -192,7 +192,7 @@ public class Villager extends UserFunction implements Serializable {
 		}
 		return null;
 	}
-	public void onDayTime() {
+	public void onDeclareTurn() {
 		onBeforeTalk();
 		try {
 			sendPublic("你有五分钟时间进行陈述。\n可以随时发送##结束你的讲话。");
@@ -582,7 +582,7 @@ public class Villager extends UserFunction implements Serializable {
 		});
 	}
 
-	public void onDied(DiedReason dir) {
+	public void kill(DiedReason dir) {
 		populateDiedReason(dir);
 		onDied(dir, true);
 	}

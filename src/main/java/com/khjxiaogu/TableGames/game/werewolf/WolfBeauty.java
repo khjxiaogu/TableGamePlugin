@@ -48,7 +48,7 @@ public class WolfBeauty extends Werewolf {
 	public String getJobDescription() {
 		return "你属于狼人阵营，你每晚除了杀人外可以额外魅惑一个人，当你白天受到伤害时此人同时出局。";
 	}
-	public void onTurnStart() {
+	public void onBeforeDeclare() {
 
 	}
 	@Override
@@ -115,7 +115,7 @@ public class WolfBeauty extends Werewolf {
 	}
 
 	@Override
-	public void onDied(DiedReason dir) {
+	public void kill(DiedReason dir) {
 		if (dir == DiedReason.Vote || dir == DiedReason.Hunter || dir == DiedReason.Knight
 				|| dir == DiedReason.Explode) {
 			if (pid == -1)
@@ -128,7 +128,7 @@ public class WolfBeauty extends Werewolf {
 			game.kill(p, DiedReason.Love);
 			game.logger.logDeath(p, DiedReason.Love);
 		}
-		super.onDied(dir);
+		super.kill(dir);
 	}
 
 	@Override

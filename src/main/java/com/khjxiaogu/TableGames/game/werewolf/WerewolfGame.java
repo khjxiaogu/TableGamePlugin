@@ -1831,7 +1831,7 @@ public class WerewolfGame extends Game implements Serializable {
 
 			this.sendPublicMessage(sb.toString());
 			for (Villager p : tokill) {
-				p.onDied(p.getEffectiveDiedReason());
+				p.kill(p.getEffectiveDiedReason());
 				logger.logDeath(p, p.getEffectiveDiedReason());
 			}
 
@@ -1893,7 +1893,12 @@ public class WerewolfGame extends Game implements Serializable {
 
 				orderSelected |= p.onSelectOrder(lastdeath);
 				p.onDayStart();
-				p.onTurnStart();
+				
+			}
+		}
+		for (Villager p : playerlist) {
+			if (!p.isDead()) {
+				p.onBeforeDeclare();
 			}
 		}
 		if (!orderSelected) {
@@ -1905,7 +1910,7 @@ public class WerewolfGame extends Game implements Serializable {
 		logger.logTurn(day, "白天陈述");
 		for (Villager p : canTalk) {
 			if (!p.isDead() && !p.isMuted) {
-				p.onDayTime();
+				p.onDeclareTurn();
 				for(Villager p2:playerlist) {
 					if (!p2.isDead()) {
 						p2.onOneTalkEnd();
@@ -1956,7 +1961,7 @@ public class WerewolfGame extends Game implements Serializable {
 				for (Villager p : ps) {
 					mcb.append(p.getAt());
 					mcb.append("\n");
-					p.onDayTime();
+					p.onDeclareTurn();
 				}
 				mcb.append("请在两分钟内在私聊中完成投票！");
 				this.sendPublicMessage(mcb);
@@ -1998,7 +2003,7 @@ public class WerewolfGame extends Game implements Serializable {
 					boolean canSkill = false;
 					if (pe.canDeathSkill(pe.getEffectiveDiedReason())) {
 						if (pe.shouldWaitDeathSkill()) {
-							pe.onDied(pe.getEffectiveDiedReason());
+							pe.kill(pe.getEffectiveDiedReason());
 							continue;
 						}
 						pe.onDieSkill(pe.getEffectiveDiedReason());

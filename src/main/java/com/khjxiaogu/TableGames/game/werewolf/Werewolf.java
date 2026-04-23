@@ -51,7 +51,8 @@ public class Werewolf extends Villager {
 		super.StartTurn();
 		super.sendNoneBotOnlyPrivate(getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
 	}
-	public void onTurnStart() {
+	public void onBeforeDeclare() {
+		super.onBeforeDeclare();
 		super.sendNoneBotOnlyPrivate(getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
 		
 	}
@@ -114,7 +115,7 @@ public class Werewolf extends Villager {
 				game.getScheduler().execute(() -> {
 					game.removeAllListeners();
 					game.preSkipDay();
-					this.onDied(DiedReason.Explode);
+					this.kill(DiedReason.Explode);
 					if (game.isSheriffSelection) {
 						game.isSheriffSelection = false;
 						game.isSkippedDay = true;
