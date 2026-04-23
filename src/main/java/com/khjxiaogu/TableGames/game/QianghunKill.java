@@ -56,7 +56,7 @@ public class QianghunKill extends Game {
 				if(qhs.isEmpty()) {
 					isWon=true;
 					if(qhau.isEmpty())break;
-
+					row++;
 					this.sendPublicMessage("第"+row+"轮");
 					qhs.addAll(qhau);
 					Collections.shuffle(qhs);
