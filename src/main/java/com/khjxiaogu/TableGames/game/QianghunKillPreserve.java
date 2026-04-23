@@ -14,7 +14,7 @@ public class QianghunKillPreserve extends PreserveInfo<QianghunKill> {
 
 	@Override
 	protected int getSuitMembers() {
-		return 2;
+		return 3;
 	}
 
 	@Override
