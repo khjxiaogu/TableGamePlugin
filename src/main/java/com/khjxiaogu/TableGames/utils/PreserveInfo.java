@@ -115,14 +115,15 @@ public abstract class PreserveInfo<T extends Game>{
 	private void decreaseTimer() {
 		if(topreserve.isEmpty())return;
 		long crntime=new Date().getTime()-40*60*1000;
-		topreserve.entrySet().removeIf(ent->{
-			if(ent.getValue()<=crntime) {
-				AbstractUser m=ent.getKey();
-				m.sendPrivate("由于超时未能开始，"+m.getMemberString()+" 的预定已被取消。");
-				return true;
-			}
-			return false;
-		});
+		if(td==null)
+			topreserve.entrySet().removeIf(ent->{
+				if(ent.getValue()<=crntime) {
+					AbstractUser m=ent.getKey();
+					m.sendPrivate("由于超时未能开始，"+m.getMemberString()+" 的预定已被取消。");
+					return true;
+				}
+				return false;
+			});
 		AliveCounter--;
 		if(AliveCounter==0) {
 			for(AbstractUser m:topreserve.keySet()) {
@@ -279,9 +280,10 @@ public abstract class PreserveInfo<T extends Game>{
 				try {Thread.sleep(120000);} catch (InterruptedException e) {}
 			}
 			if(getActualCurrentNum()<getMinMembers())return;
-			td=null;
+			
 
 			startGame();
+			td=null;
 			AliveCounter=0;
 			acceled=false;
 		});
@@ -328,6 +330,10 @@ public abstract class PreserveInfo<T extends Game>{
 		System.out.println("starting game");
 		this.group.sendMessage("尝试开始游戏中...");
 		topreserve.keySet().removeIf(m->GameUtils.hasMember(m.getId()));
+		if(topreserve.size()<getMinMembers()) {
+			this.group.sendMessage("未能开始游戏，可参与人数不足。");
+			return false;
+		}
 		Game gm;
 		if(args==null) {
 			gm=GameUtils.createGame(getGameClass(),group,topreserve.size());
