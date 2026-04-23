@@ -16,8 +16,8 @@ public class QianghunKill extends Game {
 	private static final long serialVersionUID = 1L;
 	List<AbstractUser> au=new ArrayList<>();
 	int cpl;
-	public QianghunKill(AbstractRoom group, int cplayer, int nthread) {
-		super(group, cplayer, nthread);
+	public QianghunKill(AbstractRoom group, int cplayer) {
+		super(group, cplayer, 2);
 		cpl=cplayer;
 	}
 
