@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.khjxiaogu.TableGames.data.application.PlayerDatabase.GameData;
@@ -119,7 +120,45 @@ public class WerewolfGame extends Game implements Serializable {
 			return id;
 		}
 	}
+	@FunctionalInterface
+	public interface TransitBuff{
+		TransitBuff DECAY=(g,v,a)->false;
+		TransitBuff PERSIST=(g,v,a)->false;
+		static TransitBuff converts(Buff another) {
+			return (g,v,a)->{
+				a.accept(another);
+				return false;
+			};
+		}
+		boolean translate(WerewolfGame game,Villager villager,Consumer<Buff> appender);
+	}
+	public static enum Buff {
+		
+		GUARDED_LAST(TransitBuff.DECAY,TransitBuff.PERSIST),
+		GUARDED(TransitBuff.converts(GUARDED_LAST),TransitBuff.PERSIST),
+		WITCH_SAVED(TransitBuff.DECAY,TransitBuff.PERSIST),
+		DEMON_CHECKED(TransitBuff.PERSIST,TransitBuff.PERSIST),
+		BURNED(TransitBuff.DECAY,(g,v,a)->{
+			g.sendPublicMessage("昨晚，" + v.getMemberString() + "燃起来了，他的身份是" + v.getRole() + "。");
+			return false;
+		}),
+		ARCHER_SAVED(TransitBuff.DECAY,TransitBuff.PERSIST),
+		MUTED_LAST(TransitBuff.DECAY,TransitBuff.PERSIST),
+		MUTED(TransitBuff.converts(MUTED_LAST),TransitBuff.PERSIST),
+		LLAMA_SPIT(TransitBuff.DECAY,(g,v,a)->{
+			g.sendPublicMessage("" + v.getMemberString() + "的身上有臭烘烘的口水味。");
+			return false;
+		});
+		final TransitBuff morning;
+		final TransitBuff announce;
+		private Buff(TransitBuff morning, TransitBuff announce) {
+			this.morning = morning;
+			this.announce = announce;
+		}
 
+		
+		
+	}
 	public static enum Role {
 		DARKWOLF("狼王", DarkWolf.class, -1.5, LLMBot.class, Fraction.Wolf),
 		ARSONER("纵火者", Arsoner.class, 1.25, LLMBot.class, Fraction.God),
