@@ -114,6 +114,15 @@ public abstract class PreserveInfo<T extends Game>{
 	}
 	private void decreaseTimer() {
 		if(topreserve.isEmpty())return;
+		long crntime=new Date().getTime()-40*60*1000;
+		topreserve.entrySet().removeIf(ent->{
+			if(ent.getValue()<=crntime) {
+				AbstractUser m=ent.getKey();
+				m.sendPrivate("由于超时未能开始，"+m.getMemberString()+" 的预定已被取消。");
+				return true;
+			}
+			return false;
+		});
 		AliveCounter--;
 		if(AliveCounter==0) {
 			for(AbstractUser m:topreserve.keySet()) {
