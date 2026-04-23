@@ -33,6 +33,8 @@ public class CreditTrade {
 		new CreditTrade(10,"狼人杀vip券",4);
 		new CreditTrade(20,"狼人杀vip券",9);
 		new CreditTrade(30,"狼人杀vip券",15);
+		new CreditTrade(5,"AI生图券",1);
+		new CreditTrade(8,"100k配额券",1);
 	}
 	public CreditTrade(int pt, String itm, int cnt) {
 		this.pt = pt;
