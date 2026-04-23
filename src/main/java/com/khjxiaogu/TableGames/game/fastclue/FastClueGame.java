@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.khjxiaogu.TableGames.game.fastclue.Card.CardType;
+import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
@@ -140,6 +141,8 @@ public class FastClueGame extends Game {
 					while(--cpx>=0) {
 						cp.addCard(allcard.remove(0));
 					}
+					if(mem instanceof AbstractBotUser)
+						((AbstractBotUser) mem).setLogic(BotCluePlayer.class);
 					cp.setNameCard(min+"号 |"+nc);
 					if(tcp==players.size()) {
 						cp.next=players.get(0);

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.khjxiaogu.TableGames.game.fastclue;
+package com.khjxiaogu.TableGames.game.clue;
 
 import java.util.Random;
 
@@ -28,10 +28,10 @@ public class BotCluePlayer extends BotUser {
 	 * 
 	 */
 	private static final long serialVersionUID = -748442401094635373L;
-	FastClueGame game;
+	ClueGame game;
 	static Random trnd=new Random();
 	Random botrandom=new Random(BotCluePlayer.trnd.nextLong());
-	public BotCluePlayer(AbstractBotUser player,FastClueGame in) {
+	public BotCluePlayer(AbstractBotUser player,ClueGame in) {
 		super(player);
 		game=in;
 	}
@@ -41,9 +41,8 @@ public class BotCluePlayer extends BotUser {
 		//game.getGroup().getBot().getLogger().info(msg);
 		if(msg.startsWith("你可以")) {
 			int rgp=botrandom.nextInt(game.players.size());
-			int rrl=botrandom.nextInt(game.rooms.size());
 			int rwp=botrandom.nextInt(game.weapons.size());
-			game.getScheduler().execute(()->super.getPlayer().sendAsBot("假设 "+rgp+" "+rrl+" "+rwp));
+			game.getScheduler().execute(()->super.getPlayer().sendAsBot("假设 "+rgp+" "+rwp));
 		}else
 			if(msg.startsWith("格式")) {
 				game.getScheduler().execute(()->super.getPlayer().sendAsBot("放弃"));

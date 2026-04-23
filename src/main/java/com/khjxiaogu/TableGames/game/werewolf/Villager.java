@@ -135,7 +135,6 @@ public class Villager extends UserFunction implements Serializable {
 		}
 	}
 	public void onTurnStart() {
-		onDayStart();
 		addDaySkillListener();
 	}
 	public void onDayStart() {

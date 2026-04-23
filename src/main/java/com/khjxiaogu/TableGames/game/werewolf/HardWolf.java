@@ -29,7 +29,7 @@ public class HardWolf extends Werewolf {
 
 	@Override
 	public boolean shouldSurvive() {
-		super.diedReasonStack.removeIf(dr->dr!=DiedReason.Burn||dr!=DiedReason.Shoot_r);
+		super.diedReasonStack.removeIf(dr->dr!=DiedReason.Burn&&dr!=DiedReason.Shoot_r);
 		return super.diedReasonStack.isEmpty();
 	}
 

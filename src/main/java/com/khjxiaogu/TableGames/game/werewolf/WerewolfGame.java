@@ -1848,6 +1848,7 @@ public class WerewolfGame extends Game implements Serializable {
 			if (!p.isDead()) {
 
 				orderSelected |= p.onSelectOrder(lastdeath);
+				p.onDayStart();
 				p.onTurnStart();
 			}
 		}

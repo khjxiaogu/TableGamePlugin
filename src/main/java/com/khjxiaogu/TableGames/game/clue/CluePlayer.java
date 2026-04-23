@@ -43,6 +43,7 @@ public class CluePlayer extends UserFunction {
 	public CluePlayer(ClueGame game,AbstractUser member) {
 		super(member);
 		this.game=game;
+		super.bind(this);
 		super.setGame(game);
 	}
 	public void addCard(Card cd) {
@@ -100,7 +101,7 @@ public class CluePlayer extends UserFunction {
 					Card weapon=game.getWeapon(weaponi);
 					Card role=game.getRole(rolei);
 					Card room=current.present;
-					this.sendPublic("假设 "+role.getName()+" 在 "+room.getName()+" 使用 "+weapon.getName()+" 杀人。\n请等待15秒检查玩家卡片。");
+					this.sendPublic("假设 "+role.getDisplayName()+" 在 "+room.getDisplayName()+" 使用 "+weapon.getDisplayName()+" 杀人。\n请等待15秒检查玩家卡片。");
 					super.releaseListener();
 					game.doPrompt.terminateWait();
 					game.getScheduler().submit(()->checkAllCardPresnet(room,weapon,role));

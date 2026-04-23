@@ -49,11 +49,11 @@ public class Werewolf extends Villager {
 	@Override
 	public void onTurn() {
 		super.StartTurn();
-		super.sendPrivate(getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
+		super.sendNoneBotOnlyPrivate(getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
 	}
 	public void onTurnStart() {
-		super.onTurnStart();
 		super.sendNoneBotOnlyPrivate(getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");
+		
 	}
 	public void onOneTalkEnd() {
 		super.requestTemperalOperation(false,getMemberString()+"，你是"+getRole() + "，你可以在投票前随时翻牌自爆并且立即进入黑夜，格式：“自爆”");

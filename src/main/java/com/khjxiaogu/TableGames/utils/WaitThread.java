@@ -38,10 +38,9 @@ public class WaitThread {
 		private static final long serialVersionUID = 1L;
 
 	}
-	private Thread waiting;
-	private boolean terminate=false;
+	private boolean interrupted=false;
 	private Object waitlock=new Object();
-
+	private Thread waiting;
 	/**
 	 * Instantiates a new WaitThread.<br>
 	 * 新建一个WaitThread类<br>
@@ -56,27 +55,35 @@ public class WaitThread {
 	 * @exception TerminatedException 如果terminateWait方法被调用
 	 */
 	public boolean startWait(long millis) {
-		try {
-			synchronized(waitlock){
-				waiting=Thread.currentThread();
-				terminate=false;
-			}
-			try {
-				Thread.sleep(millis);
-				return true;
-			} catch (InterruptedException e) {
-			}
-			
-		}catch(Throwable T) {}finally {
-			synchronized(waitlock) {
-				waiting=null;
-				if(terminate) {
-					terminate=false;
+
+		
+		
+		synchronized(waitlock){
+			waiting=Thread.currentThread();
+			long endTimeMillis=System.currentTimeMillis()+millis;
+			interrupted=false;
+			while(true) {
+				long currentTimeMillis=System.currentTimeMillis();
+				long timeRemaining=endTimeMillis-currentTimeMillis;
+				if(timeRemaining<=0)
+					return false;
+				if(interrupted)
+					return true;
+				if(Thread.currentThread().isInterrupted()) {
+					Thread.currentThread().interrupt();
 					throw new TerminatedException();
 				}
+				try {
+					waitlock.wait(timeRemaining);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					Thread.currentThread().interrupt();
+					throw new TerminatedException();
+				}
+				
+			
 			}
 		}
-		return false;
 	}
 
 	/**
@@ -84,12 +91,8 @@ public class WaitThread {
 	 */
 	public void stopWait() {
 		synchronized(waitlock) {
-			terminate=false;
-			if(waiting!=null) {
-				Thread td=waiting;
-				waiting=null;
-				td.interrupt();
-			}
+			interrupted=true;
+			waitlock.notifyAll();
 		}
 	}
 
@@ -98,7 +101,6 @@ public class WaitThread {
 	 */
 	public void endWait() {
 		synchronized(waitlock) {
-			terminate=false;
 			waiting=null;
 		}
 	}
@@ -109,11 +111,9 @@ public class WaitThread {
 	public void terminateWait() {
 		synchronized(waitlock) {
 			if(waiting!=null) {
-				terminate=true;
 				Thread td=waiting;
 				waiting=null;
 				td.interrupt();
-
 			}
 		}
 	}

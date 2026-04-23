@@ -104,6 +104,8 @@ public class SBBotUser extends SBUser implements Serializable,AbstractBotUser {
 	
 	@Override
 	public void sendBotMessage(String msg) {
+
+		DynamicListeners.dispatch(getId(), MsgType.PUBLIC,new Text(msg).asMessage());
 		KooKAdapter.INSTANCE.sendMessage(group,nameCard+"：\n"+msg);
 	}
 	@Override

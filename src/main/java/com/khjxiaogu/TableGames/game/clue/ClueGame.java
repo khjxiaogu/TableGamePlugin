@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.khjxiaogu.TableGames.game.clue.Card.CardType;
+import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
@@ -124,6 +125,8 @@ public class ClueGame extends Game {
 					if(min!=0) {
 						players.get(min-1).next=cp;
 					}
+					if(mem instanceof AbstractBotUser)
+						((AbstractBotUser) mem).setLogic(BotCluePlayer.class);
 					int cpx=cpp;
 					while(--cpx>=0) {
 						cp.addCard(allcard.remove(0));

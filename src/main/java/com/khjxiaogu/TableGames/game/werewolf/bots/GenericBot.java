@@ -100,6 +100,7 @@ public class GenericBot extends BotUser {
 		}, 6000);
 	}
 	public void sendBotMessage(String msg) {
+		
 		try {
 			Thread.sleep(800);
 		} catch (InterruptedException e) {

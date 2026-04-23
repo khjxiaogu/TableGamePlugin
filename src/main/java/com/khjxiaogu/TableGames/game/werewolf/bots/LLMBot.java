@@ -150,7 +150,7 @@ public class LLMBot extends GenericBot {
 				b.object().add("role", Role.USER.getRoleName()).add("content", temperal).end();
 			try {
 				System.out.println("Triggered AI:");
-				AIOutput op = LLMConnector.call(AIRequest.builder().taskType(TaskType.STORY).strength(ReasoningStrength.WEAK).build(b.end().add("temperature", 1.3).add("max_tokens", 8192).end()));
+				AIOutput op = LLMConnector.call(AIRequest.builder("werewolf").taskType(TaskType.STORY).strength(ReasoningStrength.WEAK).build(b.end().add("temperature", 1.3).add("max_tokens", 8192).end()));
 				System.out.println("Reasoner:===============");
 				printAndCollectContent(op.getReasoner());
 				System.out.println("Content:================");

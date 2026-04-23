@@ -22,6 +22,8 @@ import java.io.Serializable;
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.BotUserLogic;
+import com.khjxiaogu.TableGames.platform.DynamicListeners;
+import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.Permission;
 import com.khjxiaogu.TableGames.platform.QQId;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
@@ -99,6 +101,8 @@ public class MiraiBotUser extends MiraiUser implements Serializable,AbstractBotU
 	}
 	@Override
 	public void sendBotMessage(String msg) {
+
+		DynamicListeners.dispatch(getId(), MsgType.PUBLIC,new Text(msg).asMessage());
 		SlowUtils.runSlowly(()->super.group.sendMessage(nameCard+"：\n"+msg));
 	}
 	@Override
