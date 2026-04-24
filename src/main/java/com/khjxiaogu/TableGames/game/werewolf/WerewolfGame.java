@@ -1994,30 +1994,29 @@ public class WerewolfGame extends Game implements Serializable {
 			Villager p = ps.get(0);
 			lastVoteOut = p;
 			kill(p, DiedReason.Vote);
-			// muteAll(false);
-			while (tokill.size() > 0) {
-				List<Villager> lv = new ArrayList<>(tokill);
-				tokill.clear();
-				for (Villager pe : lv) {
-					logger.logDeath(pe, pe.getEffectiveDiedReason());
-					boolean canSkill = false;
-					if (pe.canDeathSkill(pe.getEffectiveDiedReason())) {
-						if (pe.shouldWaitDeathSkill()) {
-							pe.kill(pe.getEffectiveDiedReason());
-							continue;
-						}
-						pe.onDieSkill(pe.getEffectiveDiedReason());
+		}
+		while (tokill.size() > 0) {
+			List<Villager> lv = new ArrayList<>(tokill);
+			tokill.clear();
+			for (Villager pe : lv) {
+				logger.logDeath(pe, pe.getEffectiveDiedReason());
+				boolean canSkill = false;
+				if (pe.canDeathSkill(pe.getEffectiveDiedReason())) {
+					if (pe.shouldWaitDeathSkill()) {
+						pe.kill(pe.getEffectiveDiedReason());
+						continue;
 					}
-					pe.onSheriffSkill();
-					pe.isDead = true;
-					if (VictoryPending())
-						return;
-
-					pe.onDied(pe.getEffectiveDiedReason(), false);
-
-					// game.startWait(300000, WaitReason.DieWord);
-
+					pe.onDieSkill(pe.getEffectiveDiedReason());
 				}
+				pe.onSheriffSkill();
+				pe.isDead = true;
+				if (VictoryPending())
+					return;
+
+				pe.onDied(pe.getEffectiveDiedReason(), false);
+
+				// game.startWait(300000, WaitReason.DieWord);
+
 			}
 		}
 		tokill.clear();
