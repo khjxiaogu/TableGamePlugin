@@ -18,6 +18,7 @@ import com.khjxiaogu.aiwuxia.llm.AIOutput;
 import com.khjxiaogu.aiwuxia.llm.AIRequest;
 import com.khjxiaogu.aiwuxia.llm.LLMConnector;
 import com.khjxiaogu.aiwuxia.llm.ModelRouteException;
+import com.khjxiaogu.aiwuxia.llm.AIRequest.Builder;
 import com.khjxiaogu.aiwuxia.llm.AIRequest.ReasoningStrength;
 import com.khjxiaogu.aiwuxia.llm.AIRequest.TaskType;
 import com.khjxiaogu.aiwuxia.state.Role;
@@ -139,18 +140,18 @@ public class LLMBot extends GenericBot {
 					temperal=messageBacklog.toString()+"\n"+hint;
 					System.out.println(messageBacklog.toString());
 				}
-			JsonArrayBuilder<JsonObjectBuilder<JsonObject>> b = JsonBuilder.object().array("messages").object()
-					.add("role", "system").add("content", system+"你的身份是："+this.getPlayer().getMemberString()).end();
+			Builder b=AIRequest.builder("werewolf").taskType(TaskType.STORY).strength(ReasoningStrength.WEAK).temperature(1.3f).maxTokens(8192);
+			b.addHistoryItem(Role.SYSTEM, system+"你的身份是："+this.getPlayer().getMemberString());
 			Iterator<HistoryItem> it=history.validContextIterator();
 			while(it.hasNext()) {
 				HistoryItem hi=it.next();
-				b.object().add("role", hi.getRole().getRoleName()).add("content", hi.getContextContent().toString().trim()).end();
+				b.addHistoryItem(hi);
 			}
 			if(isTemperal)
-				b.object().add("role", Role.USER.getRoleName()).add("content", temperal).end();
+				b.addHistoryItem(Role.USER, temperal);
 			try {
 				System.out.println("Triggered AI:");
-				AIOutput op = LLMConnector.call(AIRequest.builder("werewolf").taskType(TaskType.STORY).strength(ReasoningStrength.WEAK).build(b.end().add("temperature", 1.3).add("max_tokens", 8192).end()));
+				AIOutput op = LLMConnector.call(b.build());
 				System.out.println("Reasoner:===============");
 				printAndCollectContent(op.getReasoner());
 				System.out.println("Content:================");

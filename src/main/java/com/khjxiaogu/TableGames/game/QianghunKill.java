@@ -76,7 +76,7 @@ public class QianghunKill extends Game {
 		getScheduler().executeLater(()->{
 			boolean isWon=false;
 			int row=1;
-			this.sendPublicMessage("第"+row+"轮");
+			
 			while(true) {
 				try {
 					Thread.sleep(1000);
@@ -85,19 +85,22 @@ public class QianghunKill extends Game {
 					Thread.currentThread().interrupt();
 					break;
 				}
+				StringBuilder sb=new StringBuilder();
+				
 				if(qhs.isEmpty()) {
 					isWon=true;
 					if(qhau.isEmpty())break;
 					row++;
-					this.sendPublicMessage("第"+row+"轮");
+					sb.append("第"+row+"轮\n");
 					qhs.addAll(qhau);
 					Collections.shuffle(qhs);
 				}
 				if(nqhs.isEmpty())break;
 				Player qh=qhs.remove(0);
 				Player nqh=nqhs.remove(0);
-				boolean win=Math.random()>0.2;
-				this.sendPublicMessage(qh.name+"与"+nqh.name+"决斗，"+(win?nqh.name:qh.name)+"赢了！");
+				boolean win=Math.random()>(qh.winrate/(qh.winrate+nqh.winrate));
+				sb.append(qh.name+"与"+nqh.name+"决斗，"+(win?nqh.name:qh.name)+"赢了！");
+				this.sendPublicMessage(sb.toString());
 				if(win) {
 					rank.merge(nqh, 1, (a,b)->a+b);
 					nqhs.add(nqh);
