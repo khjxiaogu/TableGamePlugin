@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.khjxiaogu.TableGames.platform.AbstractUser;
-import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.UserFunction;
 import com.khjxiaogu.TableGames.utils.Utils;
