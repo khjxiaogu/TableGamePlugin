@@ -18,8 +18,10 @@
 package com.khjxiaogu.TableGames.game.guessnumber;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -37,8 +39,8 @@ import com.khjxiaogu.TableGames.utils.Utils;
 /**
  * 无需预约的0~999猜数字游戏。
  * <p>
- * 游戏开始后群里所有人都可以直接发送数字参与，每人有独立的答案，
- * 猜中即得分并换上新答案，一段时间内无人猜中则游戏结束，猜中次数最多的人获胜。
+ * 游戏开始后群里所有人共用一个答案，直接发送数字即可参与，
+ * 谁先猜中谁就获胜并且游戏立刻结束；一段时间内无人猜中则公布答案并结束。
  */
 public class GuessNumberGame extends Game implements PreserveLess {
 	/**
@@ -49,10 +51,10 @@ public class GuessNumberGame extends Game implements PreserveLess {
 	public static final int MIN = 0;
 	/** 可猜的最大数字 */
 	public static final int MAX = 999;
-	/** 无人猜中的等待时间，超时即结束游戏 */
+	/** 无人猜中的等待时间，超时即结束游戏并公布答案 */
 	public static final long IDLE_TIMEOUT = 120000L;
-	/** 非法猜测的小额惩罚，与成语接龙保持一致 */
-	static final double PENALTY = 0.01;
+	/** 输家支付给赢家的积分，没有积分则不用支付 */
+	static final double LOSS = 0.1;
 
 	/** 用 UserIdentifier 作 key，避免不同事件里的用户包装对象不一致 */
 	Map<UserIdentifier, GuessNumberPlayer> user = new ConcurrentHashMap<>();
@@ -61,9 +63,21 @@ public class GuessNumberGame extends Game implements PreserveLess {
 	volatile boolean isAlive;
 	/** 是否被强制停止，强制停止后不再结算 */
 	volatile boolean stopped;
+	/** 是否已经有人猜中 */
+	volatile boolean finished;
 	/** 最后一次有效猜测的时间，超过该时间游戏结束 */
 	volatile long lastActive;
 	transient Thread gameThread;
+
+	/** 本局答案 */
+	int target;
+	/** 全员共用的可行区间 */
+	int low = MIN;
+	int high = MAX;
+	/** 本局所有玩家猜过的数字，不允许重复猜 */
+	Set<Integer> guessed = Collections.newSetFromMap(new ConcurrentHashMap<>());
+	/** 赢家 */
+	UserIdentifier winner;
 
 	public GuessNumberGame(AbstractRoom group, int cplayer) {
 		super(group, cplayer, 4);
@@ -76,6 +90,7 @@ public class GuessNumberGame extends Game implements PreserveLess {
 			if (started)
 				return;
 			started = true;
+			target = randomTarget();
 		}
 		gameThread = new Thread(this::gameMain, "GuessNumber-" + getGroup().getId().serialize());
 		gameThread.start();
@@ -103,7 +118,7 @@ public class GuessNumberGame extends Game implements PreserveLess {
 
 	@Override
 	public boolean addMember(AbstractUser mem) {
-		if (!started || mem == null)
+		if (!started || stopped || finished || mem == null)
 			return false;
 		join(mem);
 		mem.sendPublic("您已经加入猜数字游戏！发送 " + MIN + "~" + MAX + " 之间的数字来猜吧！");
@@ -117,18 +132,18 @@ public class GuessNumberGame extends Game implements PreserveLess {
 		isAlive = true;
 		sendPublicMessage("猜数字游戏开始！\n"
 				+ "本游戏无需预约，直接在群里发送 " + MIN + "~" + MAX + " 之间的数字就可以参与，也可以发送“猜 500”这样的格式。\n"
-				+ "每位玩家都有自己独立的答案，猜中就会换上新答案并且得1分。\n"
-				+ "同一轮里猜过的数字不能重复猜，猜错会告诉您偏大还是偏小。\n"
-				+ IDLE_TIMEOUT / 60000 + "分钟内没有人猜数字，游戏结束，猜中次数最多的玩家获胜！");
+				+ "所有玩家共用一个答案，谁先猜中谁就获胜，游戏立刻结束！猜错会告诉您偏大还是偏小。\n"
+				+ "获胜者会从其他每位参与者那里赢得 " + LOSS + " 积分。\n"
+				+ IDLE_TIMEOUT / 60000 + "分钟内没有人猜中，游戏自动结束并公布答案。");
 		this.getGroup().registerRoomListener(this, (u, msg, type) -> {
 			// 普通聊天是 PUBLIC，@机器人 或者 ##指令 是 AT
 			if (type == MsgType.PUBLIC || type == MsgType.AT)
 				handleGuess(u, msg.getText());
 		});
 		lastActive = TimeUtil.getTime() + IDLE_TIMEOUT;
-		while (!stopped) {
+		while (!stopped && !finished) {
 			try {
-				Thread.sleep(10000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				break;
 			}
@@ -166,131 +181,99 @@ public class GuessNumberGame extends Game implements PreserveLess {
 	}
 
 	private GuessNumberPlayer join(AbstractUser u) {
-		GuessNumberPlayer gp = user.computeIfAbsent(u.getId(), id -> new GuessNumberPlayer(u, randomTarget(-1)));
+		GuessNumberPlayer gp = user.computeIfAbsent(u.getId(), id -> new GuessNumberPlayer(u));
 		gp.setMember(u);
 		return gp;
 	}
 
-	private static int randomTarget(int previous) {
-		int target = ThreadLocalRandom.current().nextInt(MIN, MAX + 1);
-		if (target == previous)
-			target = target == MAX ? MIN : target + 1;
-		return target;
+	private static int randomTarget() {
+		return ThreadLocalRandom.current().nextInt(MIN, MAX + 1);
 	}
 
 	public synchronized void checkGuess(GuessNumberPlayer gp, int guess) {
-		if (!isAlive)
+		if (!isAlive || finished)
 			return;
 		if (guess < MIN || guess > MAX) {
 			gp.sendPublic("只能猜 " + MIN + "~" + MAX + " 之间的整数噢！");
 			return;
 		}
-		if (!gp.guessed.add(guess)) {
-			gp.sendPublic("数字 " + guess + " 您本轮已经猜过了！答案在 " + gp.low + "~" + gp.high + " 之间。");
+		if (!guessed.add(guess)) {
+			gp.sendPublic("数字 " + guess + " 已经猜过了！答案在 " + low + "~" + high + " 之间。");
 			return;
 		}
+		gp.guessCount++;
 		lastActive = TimeUtil.getTime() + IDLE_TIMEOUT;
-		if (guess == gp.target) {
-			gp.pt+=0.2;
-			gp.sendPublic("猜中了！答案就是 " + guess + "！您已经猜中 " + gp.pt + " 次。\n新一轮开始，请继续猜 "
-					+ MIN + "~" + MAX + " 的数字！");
-			gp.newRound(randomTarget(guess));
-		} else if (guess > gp.target) {
-			gp.high = Math.min(gp.high, guess - 1);
-			gp.sendPublic("大了！答案在 " + gp.low + "~" + gp.high + " 之间。");
-		} else {
-			gp.low = Math.max(gp.low, guess + 1);
-			gp.sendPublic("小了！答案在 " + gp.low + "~" + gp.high + " 之间。");
+		if (guess == target) {
+			// 猜中即获胜，游戏立刻结束
+			gp.pt++;
+			winner = gp.getId();
+			finished = true;
+			sendPublicMessage("恭喜 " + gp.getMemberString() + " 猜中了！答案就是 " + target + "！");
+			Thread thread = gameThread;
+			if (thread != null)
+				thread.interrupt();
+			return;
 		}
+		if (guess > target)
+			high = Math.min(high, guess - 1);
+		else
+			low = Math.max(low, guess + 1);
+		gp.sendPublic((guess > target ? "大了！" : "小了！") + "答案在 " + low + "~" + high + " 之间。");
 	}
 
 	private void finish() {
 		sendPublicMessage("游戏结束！");
 		if (user.isEmpty()) {
-			sendPublicMessage("本局没有玩家参与，欢迎下次再来！");
+			sendPublicMessage("本局没有玩家参与，答案是 " + target + "，欢迎下次再来！");
 			return;
 		}
 		List<GuessNumberPlayer> ranked = new ArrayList<>(user.values());
 		ranked.sort((a, b) -> {
 			int cmp = Integer.compare(b.pt, a.pt);
-			return cmp != 0 ? cmp : a.getId().serialize().compareTo(b.getId().serialize());
+			if (cmp != 0)
+				return cmp;
+			cmp = Integer.compare(b.guessCount, a.guessCount);
+			if (cmp != 0)
+				return cmp;
+			return a.getId().serialize().compareTo(b.getId().serialize());
 		});
-		int total = 0;
-		for (GuessNumberPlayer gp : ranked)
-			total += gp.pt;
-		cplayer = ranked.size();
-		distributeCredit(ranked, total);
-		StringBuilder sb = new StringBuilder("游戏结果：");
-		GuessNumberPlayer best = ranked.get(0);
-		if (best.pt > 0) {
-			StringBuilder names = new StringBuilder();
-			for (GuessNumberPlayer gp : ranked) {
-				if (gp.pt != best.pt)
-					break;
-				if (names.length() > 0)
-					names.append("、");
-				names.append(gp.getMemberString());
-			}
-			sb.append("\n本局猜中次数最多的是 ").append(names).append("，共猜中 ").append(best.pt).append(" 次！");
+		GuessNumberPlayer wp = winner == null ? null : user.get(winner);
+		if (wp != null) {
+			settleCredit(wp);
+			sendPublicMessage("本局获胜者是 " + wp.getMemberString() + "，一共猜了 " + wp.guessCount + " 次！");
+		} else {
+			sendPublicMessage("本局没有人猜中，答案是 " + target + "。");
 		}
+		StringBuilder sb = new StringBuilder("游戏结果：");
 		int rank = 1;
 		for (GuessNumberPlayer gp : ranked)
 			sb.append("\n").append(rank++).append(". ").append(gp.getMemberString()).append(" 猜中").append(gp.pt)
-					.append("次 ").append(PlayerCredit.normalizedb(gp.ptchange)).append("分");
+					.append("次 猜测").append(gp.guessCount).append("次 ")
+					.append(PlayerCredit.normalizedb(gp.ptchange)).append("分");
 		sendPublicMessage(sb.toString());
 	}
 
 	/**
-	 * 按猜中次数的均值把积分从低于均值的人转移给高于均值的人，与成语接龙的结算方式一致。
+	 * 赢家从其他每位参与者处赢得 LOSS 积分，参与者没有积分则不扣。
 	 */
-	private void distributeCredit(List<GuessNumberPlayer> players, int total) {
-		int count = players.size();
-		// 参与度不够时不做积分结算
-		if (GlobalMain.credit == null || count == 0 || total < 4 * count)
+	private void settleCredit(GuessNumberPlayer winner) {
+		if (GlobalMain.credit == null)
 			return;
-		double avg = (double) total / count;
-		double maxpt = 0;
-		double minpt = 0;
-		List<GuessNumberPlayer> max = new ArrayList<>();
-		List<GuessNumberPlayer> min = new ArrayList<>();
-		for (GuessNumberPlayer gp : players) {
-			if (gp.pt < avg) {
-				minpt += avg - gp.pt;
-				min.add(gp);
-			} else {
-				maxpt += gp.pt - avg;
-				max.add(gp);
-			}
-		}
-		double pt = 0.5 + (double) total / count * 0.01;
-		double tpm = 0.25 * count + (maxpt + minpt) / count * 0.1;
-		for (GuessNumberPlayer gp : min) {
+		double gain = 0;
+		for (GuessNumberPlayer gp : user.values()) {
+			if (gp == winner)
+				continue;
 			PlayerCredit pc = GlobalMain.credit.get(gp.getId());
-			double ppm;
-			if (minpt > 0)
-				ppm = tpm * ((avg - gp.pt) / minpt);
-			else
-				ppm = tpm / min.size();
-			if (pc.getPT() >= ppm) {
-				if (pc.withdrawPT(PlayerCredit.normalizedb(ppm)) >= 0)
-					pt += ppm;
-			} else if (pc.getPT() > 0) {
-				ppm = pc.getPT();
-				pc.withdrawPT(ppm);
-				pt += ppm;
-			} else {
-				ppm = 0;
+			double pay = Math.min(LOSS, pc.getPT());
+			if (pay > 0 && pc.withdrawPT(PlayerCredit.normalizedb(pay)) >= 0) {
+				gain += pay;
+				gp.ptchange = -pay;
 			}
-			gp.ptchange = -ppm;
 		}
-		for (GuessNumberPlayer gp : max) {
-			double ppm;
-			if (maxpt > 0)
-				ppm = pt * ((gp.pt - avg) / maxpt);
-			else
-				ppm = pt / max.size();
-			GlobalMain.credit.get(gp.getId()).givePT(PlayerCredit.normalizedb(ppm));
-			gp.ptchange = ppm;
+		gain = PlayerCredit.normalizedb(gain);
+		if (gain > 0) {
+			GlobalMain.credit.get(winner.getId()).givePT(gain);
+			winner.ptchange = gain;
 		}
 	}
 
