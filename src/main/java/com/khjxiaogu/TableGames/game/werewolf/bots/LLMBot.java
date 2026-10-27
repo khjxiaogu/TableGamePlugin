@@ -152,7 +152,7 @@ public class LLMBot extends GenericBot {
 				System.out.println("Reasoner:===============");
 				FileUtil.printAndCollectContent(op.getReasoner());
 				System.out.println("Content:================");
-				String content=printAndCollectContent(op.getContent());
+				String content=printAndCollectContent(op.getContentReader());
 				
 				if(isPublic) {
 					StringBuilder sb=new StringBuilder();
