@@ -37,13 +37,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.khjxiaogu.TableGames.data.application.PlayerDatabase.GameData;
-import com.khjxiaogu.TableGames.game.werewolf.bots.DeadBot;
 import com.khjxiaogu.TableGames.game.werewolf.bots.GenericBot;
 import com.khjxiaogu.TableGames.game.werewolf.bots.LLMBot;
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.AbstractRoom;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
-import com.khjxiaogu.TableGames.platform.BotUser;
 import com.khjxiaogu.TableGames.platform.GlobalMain;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
 import com.khjxiaogu.TableGames.platform.message.IMessage;
@@ -1213,7 +1211,7 @@ public class WerewolfGame extends Game implements Serializable {
 		Villager p = getPlayerByNum(id);
 		GameUtils.RemoveMember(p.getId());
 		try {
-			int n = playerlist.indexOf(p);
+			//int n = playerlist.indexOf(p);
 
 			String nc = o == null ? "机器人" : o.getNameCard();
 			try {
@@ -1275,11 +1273,9 @@ public class WerewolfGame extends Game implements Serializable {
 	}
 
 	public Villager getPlayerById(UserIdentifier id) {
-		int i = 0;
 		for (Villager p : playerlist) {
 			if (p.getId().equals(id))
 				return p;
-			i++;
 		}
 		return null;
 	}
@@ -2000,7 +1996,7 @@ public class WerewolfGame extends Game implements Serializable {
 			tokill.clear();
 			for (Villager pe : lv) {
 				logger.logDeath(pe, pe.getEffectiveDiedReason());
-				boolean canSkill = false;
+				//boolean canSkill = false;
 				if (pe.canDeathSkill(pe.getEffectiveDiedReason())) {
 					if (pe.shouldWaitDeathSkill()) {
 						pe.kill(pe.getEffectiveDiedReason());

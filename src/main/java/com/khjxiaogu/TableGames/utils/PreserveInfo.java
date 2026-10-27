@@ -114,7 +114,7 @@ public abstract class PreserveInfo<T extends Game>{
 	}
 	private void decreaseTimer() {
 		if(topreserve.isEmpty())return;
-		long crntime=new Date().getTime()-40*60*1000;
+		//long crntime=new Date().getTime()-40*60*1000;
 		/*if(td==null)
 			topreserve.entrySet().removeIf(ent->{
 				if(ent.getValue()<=crntime) {

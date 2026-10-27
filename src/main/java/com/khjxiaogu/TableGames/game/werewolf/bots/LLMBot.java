@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.google.gson.JsonObject;
 import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame;
 import com.khjxiaogu.TableGames.platform.AbstractBotUser;
 import com.khjxiaogu.TableGames.platform.UserIdentifier;
@@ -17,16 +16,13 @@ import com.khjxiaogu.TableGames.utils.Utils;
 import com.khjxiaogu.aiwuxia.llm.AIOutput;
 import com.khjxiaogu.aiwuxia.llm.AIRequest;
 import com.khjxiaogu.aiwuxia.llm.LLMConnector;
-import com.khjxiaogu.aiwuxia.llm.ModelRouteException;
 import com.khjxiaogu.aiwuxia.llm.AIRequest.Builder;
 import com.khjxiaogu.aiwuxia.llm.AIRequest.ReasoningStrength;
 import com.khjxiaogu.aiwuxia.llm.AIRequest.TaskType;
 import com.khjxiaogu.aiwuxia.state.Role;
 import com.khjxiaogu.aiwuxia.state.history.HistoryItem;
 import com.khjxiaogu.aiwuxia.state.history.MemoryHistory;
-import com.khjxiaogu.aiwuxia.utils.JsonBuilder;
-import com.khjxiaogu.aiwuxia.utils.JsonBuilder.JsonArrayBuilder;
-import com.khjxiaogu.aiwuxia.utils.JsonBuilder.JsonObjectBuilder;
+import com.khjxiaogu.aiwuxia.utils.FileUtil;
 
 public class LLMBot extends GenericBot {
 	/**
@@ -154,7 +150,7 @@ public class LLMBot extends GenericBot {
 				System.out.println("Triggered AI:");
 				AIOutput op = LLMConnector.call(b.build());
 				System.out.println("Reasoner:===============");
-				printAndCollectContent(op.getReasoner());
+				FileUtil.printAndCollectContent(op.getReasoner());
 				System.out.println("Content:================");
 				String content=printAndCollectContent(op.getContent());
 				

@@ -26,7 +26,6 @@ import com.khjxiaogu.TableGames.game.werewolf.WerewolfGame.WaitReason;
 import com.khjxiaogu.TableGames.platform.AbstractUser;
 import com.khjxiaogu.TableGames.platform.MsgType;
 import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
-import com.khjxiaogu.TableGames.platform.mirai.message.MiraiMessageCompound;
 import com.khjxiaogu.TableGames.utils.Utils;
 
 public class Werewolf extends Villager {

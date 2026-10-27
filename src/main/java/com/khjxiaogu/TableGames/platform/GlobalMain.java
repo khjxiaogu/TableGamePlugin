@@ -61,6 +61,7 @@ import com.khjxiaogu.TableGames.game.clue.ClueGame;
 import com.khjxiaogu.TableGames.game.clue.CluePreserve;
 import com.khjxiaogu.TableGames.game.fastclue.FastClueGame;
 import com.khjxiaogu.TableGames.game.fastclue.FastCluePreserve;
+import com.khjxiaogu.TableGames.game.guessnumber.GuessNumberGame;
 import com.khjxiaogu.TableGames.game.idiomsolitare.IdiomSolitare;
 import com.khjxiaogu.TableGames.game.idiomsolitare.SolitarePreserve;
 import com.khjxiaogu.TableGames.game.kalah.ComputerKalahBoard;
@@ -1016,6 +1017,15 @@ public class GlobalMain {
 			}
 			IdiomSolitare is = GameUtils.createGame(IdiomSolitare::new, event.getRoom(), 1);
 			is.startEmpty();
+		});
+		addCmd("猜数字", "开始0~999猜数字游戏", (event, args) -> {
+			Game g = GameUtils.getGames().get(event.getRoom());
+			if (g != null && g.isAlive()) {
+				event.getRoom().sendMessage("因为有其他的游戏正在运行，无法开始。");
+				return;
+			}
+			GuessNumberGame gn = GameUtils.createGame(GuessNumberGame::new, event.getRoom(), 1);
+			gn.startEmpty();
 		});
 		makeGame("枪魂杀", QianghunKillPreserve.class, new DefaultGameCreater<>(QianghunKill.class));
 		makeGame("狼人杀", WerewolfPreserve.class, new DefaultGameCreater<>(WerewolfGame.class));

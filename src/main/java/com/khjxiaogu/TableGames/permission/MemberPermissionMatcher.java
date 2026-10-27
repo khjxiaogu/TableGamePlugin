@@ -20,9 +20,6 @@ package com.khjxiaogu.TableGames.permission;
 import java.util.Arrays;
 import java.util.List;
 
-import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.contact.Member;
-
 public class MemberPermissionMatcher implements PermissionMatcher {
 	PermissionResult result;
 	WildcardPermission perm;

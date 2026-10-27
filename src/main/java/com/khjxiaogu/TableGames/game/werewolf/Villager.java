@@ -40,8 +40,6 @@ import com.khjxiaogu.TableGames.platform.message.IMessageCompound;
 import com.khjxiaogu.TableGames.platform.message.MessageCompound;
 import com.khjxiaogu.TableGames.utils.Utils;
 
-import okhttp3.internal.Util;
-
 public class Villager extends UserFunction implements Serializable {
 	/**
 	 *
