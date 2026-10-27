@@ -63,9 +63,9 @@ public class QianghunKill extends Game {
 	@Override
 	public void forceStart() {
 		if(qhau.isEmpty())
-			qhau.add(new Player("枪魂",0.26));
+			qhau.add(new Player("枪魂",0.3));
 		if(nqhau.isEmpty())
-			nqhau.add(new Player("淡泊天高",0.329));
+			nqhau.add(new Player("淡泊天高",0.58));
 		List<Player> qhs=new ArrayList<>(qhau);
 		List<Player> nqhs=new ArrayList<>(nqhau);
 		Collections.shuffle(nqhs);
@@ -144,7 +144,7 @@ public class QianghunKill extends Game {
 		String memstr=a.getMemberString();
 		String idstr=a.getId().getId();
 		WerewolfPlayerData v=GlobalMain.db.getDatas("狼人杀", WerewolfPlayerData.class).get(a.getId());
-		double wr=0.4;
+		double wr=0.55;
 		if(v!=null)
 			wr=v.alive * 1d / (v.alive+v.death);
 		if(memstr.contains("枪魂")||memstr.contains("木仓云鬼")||(idstr.startsWith("2019")&&idstr.endsWith("7996"))||(idstr.startsWith("3256")&&idstr.endsWith("9126"))) {

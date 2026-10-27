@@ -118,6 +118,7 @@ public class GlobalMain {
 		GlobalMain.bindings = new BindingDatabase(dataFolder);
 		GlobalMain.db = new PlayerDatabase(dataFolder);
 		GlobalMain.credit = new PlayerCreditData(dataFolder);
+		CreditTrade.loadCdkTrades(dataFolder);
 		UserIdentifierSerializer.addRawSerializer(e -> QQId.of(Long.parseLong(e)));
 		UserIdentifierSerializer.addRawSerializer(e -> SBId.load(e));
 		MarkovHelper.loadConfig(dataFolder);
@@ -810,15 +811,35 @@ public class GlobalMain {
 			event.getRoom().sendMessage(CreditTrade.getList());
 		});
 		addCmd("购买", "<序号>购买物品", (event, args) -> {
-			int is = Integer.parseInt(args[1]);
-			if (is > CreditTrade.trades.size() + 1 || is < 1) {
+			int is;
+			try {
+				is = Integer.parseInt(args[1]);
+			} catch (Exception ex) {
 				event.getRoom().sendMessage(event.getSender().getAt().asMessage().append("非法商品序号"));
 				return;
 			}
-			if (CreditTrade.trades.get(is - 1).execute(event.getSender().getId())) {
+			if (is > CreditTrade.trades.size() || is < 1) {
+				event.getRoom().sendMessage(event.getSender().getAt().asMessage().append("非法商品序号"));
+				return;
+			}
+			CreditTrade trade = CreditTrade.trades.get(is - 1);
+			CreditTrade.TradeResult result = trade.execute(event.getSender().getId());
+			if (!result.success) {
+				event.getRoom().sendMessage(event.getSender().getAt().asMessage().append(result.message));
+				return;
+			}
+			if (result.cdk == null) {
 				event.getRoom().sendMessage(event.getSender().getAt().asMessage().append("购买成功"));
+				return;
+			}
+			String cdkMsg = "购买成功！\n商品：" + trade.getDisplay() + "\nCDK：" + result.cdk
+					+ "\n请妥善保管，不要泄露给他人。";
+			if (event.getSender().isFriend()) {
+				GlobalMain.dispatchexec.execute(() -> event.getSender().sendPrivate(cdkMsg));
+				event.getRoom().sendMessage(event.getSender().getAt().asMessage().append("购买成功，CDK已私聊发送，请注意查收。"));
 			} else {
-				event.getRoom().sendMessage(event.getSender().getAt().asMessage().append("购买失败"));
+				event.getRoom().sendMessage(event.getSender().getAt().asMessage()
+						.append(cdkMsg + "\n（未添加机器人为好友，CDK已直接发送到群内，请尽快使用）"));
 			}
 		});
 		addPCmd("给积分", "<账号> <积分>给予玩家积分", (event, args) -> {
@@ -864,6 +885,7 @@ public class GlobalMain {
 			int cnt = args.length > 3 ? Integer.parseInt(args[3]) : 1;
 			if ((crp = GlobalMain.credit.get(UserIdentifierSerializer.read(args[1])).withdrawItem(args[2], cnt)) < 0) {
 				event.getRoom().sendMessage("扣除失败，" + args[2] + "还差" + -crp + "个");
+				return;
 			}
 			event.getRoom().sendMessage("扣除成功，还剩" + crp + "个" + args[2]);
 		});

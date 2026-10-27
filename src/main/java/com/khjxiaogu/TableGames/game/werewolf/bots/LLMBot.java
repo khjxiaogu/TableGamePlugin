@@ -97,7 +97,7 @@ public class LLMBot extends GenericBot {
 			+ "- 如果你是狼人，除非确实必要，否则不要自爆，不要因为猜疑可能暴露就自爆，需要有确凿的胜利可能才自爆，因为自爆会让所有人知道你的狼人身份。"
 			+ "- 如果公屏提示xx玩家燃起来了，意味着场上必然存在纵火者且纵火者玩家选择对被烧起来的玩家使用技能。"
 			+ "- 如果公屏提示熊咆哮了/没有咆哮，意味着游戏必然存在熊，但如果熊死了依然会显示没有咆哮。";
-	static ExecutorService exc=Executors.newFixedThreadPool(1);
+	static ExecutorService exc=Executors.newFixedThreadPool(4);
 	transient boolean hasTriggered=false;
 	transient boolean isPublic;
 	transient Object triggerLock=new Object();
@@ -124,6 +124,7 @@ public class LLMBot extends GenericBot {
 			if(hasTriggered)return;
 			hasTriggered=true;
 		}
+		System.out.println("Triggered Operation:");
 		exc.submit(()->{
 			synchronized(triggerLock) {
 				hasTriggered=false;
