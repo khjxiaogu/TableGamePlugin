@@ -173,7 +173,8 @@ public class GuessNumberGame extends Game implements PreserveLess {
 			attempt = true;
 		}
 		if (!body.matches("[0-9]{1,3}")) {
-			if (attempt)
+			// 带了猜测前缀，或者是一串纯数字（比如 1500），都当作想猜数字，给个提示
+			if (attempt || body.matches("[0-9]+"))
 				u.sendPublic("请发送 " + MIN + "~" + MAX + " 之间的整数来猜数字噢！");
 			return;
 		}
